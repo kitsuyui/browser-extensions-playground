@@ -1,0 +1,56 @@
+name: test
+on:
+  # pull-request events are not triggered when a PR is merged
+  # push events are not triggered when a PR created from a fork repository
+  # So we need both to run tests on every PR and after merging
+  pull_request:
+  push:
+    branches:
+      - main
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        # https://nodejs.org/en/about/previous-releases
+        node-version: [20.x, 22.x, 24.x]
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4.2.0
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: |
+          pnpm install
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Check module isolation
+        run: pnpm check-module-isolation
+
+      - name: Build
+        run: pnpm build
+      
+      - name: Validate package exports
+        run: pnpm validate
+
+      - name: Test
+        run: pnpm test
+
+      - name: Typedoc build
+        run: pnpm typedoc
