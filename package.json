@@ -1,0 +1,36 @@
+{
+  "name": "@kitsuyui/browser-extensions-playground",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "author": "Yui Kitsu <kitsuyui@kitsuyui.com>",
+  "description": "A playground for browser extension experiments",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev": "pnpm --parallel dev",
+    "format": "biome check --write ./",
+    "lint": "biome check ./",
+    "check-module-isolation": "find packages -type d -name src -print -exec pnpm ts-module-isolation -- {} +",
+    "test": "vitest run --coverage",
+    "validate": "pnpm -r validate",
+    "typecheck": "tsc --strict -p tsconfig.json --noEmit --skipLibCheck --downlevelIteration",
+    "typedoc": "typedoc --treatValidationWarningsAsErrors --treatWarningsAsErrors",
+    "typedoc:server": "python3 -m http.server --directory build/typedocs"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.1",
+    "@biomejs/biome": "^2.3.2",
+    "@swc/core": "^1.13.5",
+    "@vitest/coverage-v8": "4.0.18",
+    "ts-module-isolation": "^1.0.2",
+    "tsdown": "^0.20.0",
+    "typedoc": "^0.28.14",
+    "typescript": "^5.9.3",
+    "validate-package-exports": "^0.18.0",
+    "vitest": "^4.0.4"
+  },
+  "packageManager": "pnpm@10.30.1"
+}
