@@ -54,16 +54,18 @@ export function createOpenAIStableUsageSnapshot(
 }
 
 export function createQuotaOpenAITools(baseUrl = LOCAL_SERVER_HTTP_ORIGIN) {
-  return {
-    async getLatestSnapshot(): Promise<ProviderSnapshot | null> {
-      const url = new URL(`${baseUrl}/api/deterministic/latest`)
-      url.searchParams.set('provider', 'openai')
+  const getLatestSnapshot = async (): Promise<ProviderSnapshot | null> => {
+    const url = new URL(`${baseUrl}/api/deterministic/latest`)
+    url.searchParams.set('provider', 'openai')
 
-      const response = await fetch(url)
-      return (await response.json()) as ProviderSnapshot | null
-    },
+    const response = await fetch(url)
+    return (await response.json()) as ProviderSnapshot | null
+  }
+
+  return {
+    getLatestSnapshot,
     async getStableUsageSnapshot() {
-      return createOpenAIStableUsageSnapshot(await this.getLatestSnapshot())
+      return createOpenAIStableUsageSnapshot(await getLatestSnapshot())
     },
   }
 }
