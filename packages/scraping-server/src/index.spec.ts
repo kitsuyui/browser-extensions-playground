@@ -252,4 +252,71 @@ describe('createScrapingServer', () => {
       error: 'providerManifest.id must match snapshot.provider.',
     })
   })
+
+  it('returns 400 when providerManifest is missing or malformed', async () => {
+    const { listening } = await createServerForTest()
+    const response = await fetch(`${listening.url}/api/deterministic/ingest`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        snapshot: {
+          provider: 'openai',
+        },
+      }),
+    })
+
+    expect(response.status).toBe(400)
+    expect(await response.json()).toMatchObject({
+      error: 'providerManifest must be an object.',
+    })
+  })
+
+  it('lists snapshot providers even before a manifest has been stored', async () => {
+    const { tempDir, listening } = await createServerForTest()
+    const fallbackStoreServer = createScrapingServer({
+      host: '127.0.0.1',
+      port: 0,
+      storeFile: path.join(tempDir, 'fallback.sqlite'),
+    })
+
+    servers.push({
+      tempDir,
+      server: fallbackStoreServer,
+      listening: await fallbackStoreServer.listen(),
+    })
+
+    const fallbackStoreFile = path.join(tempDir, 'fallback.sqlite')
+    const prisma = new (await import('@prisma/client')).PrismaClient({
+      datasources: {
+        db: {
+          url: `file:${fallbackStoreFile}`,
+        },
+      },
+    })
+
+    await prisma.deterministicSnapshotRecord.create({
+      data: {
+        provider: 'openai',
+        snapshotJson: JSON.stringify({
+          provider: 'openai',
+          capturedAt: new Date().toISOString(),
+          source: 'dom',
+          confidence: 'medium',
+          rawVersion: 'legacy',
+          metrics: [],
+        }),
+      },
+    })
+    await prisma.$disconnect()
+
+    const statusResponse = await fetch(
+      `${servers.at(-1)?.listening.url ?? listening.url}/api/status`
+    )
+
+    expect(await statusResponse.json()).toMatchObject({
+      deterministicProviders: ['openai'],
+    })
+  })
 })

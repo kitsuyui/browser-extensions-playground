@@ -94,24 +94,26 @@ export class PrismaScrapedDataStore {
     providerManifest: ProviderManifest,
     snapshot: ProviderSnapshot
   ): Promise<DeterministicSnapshotRecord> {
-    await this.prisma.providerManifestRecord.upsert({
-      where: {
-        provider: providerManifest.id,
-      },
-      update: {
-        manifestJson: JSON.stringify(providerManifest),
-      },
-      create: {
-        provider: providerManifest.id,
-        manifestJson: JSON.stringify(providerManifest),
-      },
-    })
+    const record = await this.prisma.$transaction(async (tx) => {
+      await tx.providerManifestRecord.upsert({
+        where: {
+          provider: providerManifest.id,
+        },
+        update: {
+          manifestJson: JSON.stringify(providerManifest),
+        },
+        create: {
+          provider: providerManifest.id,
+          manifestJson: JSON.stringify(providerManifest),
+        },
+      })
 
-    const record = await this.prisma.deterministicSnapshotRecord.create({
-      data: {
-        provider: snapshot.provider,
-        snapshotJson: JSON.stringify(snapshot),
-      },
+      return tx.deterministicSnapshotRecord.create({
+        data: {
+          provider: snapshot.provider,
+          snapshotJson: JSON.stringify(snapshot),
+        },
+      })
     })
 
     return {
@@ -177,7 +179,7 @@ export class PrismaScrapedDataStore {
   }
 
   async listProviderIds(): Promise<readonly ProviderId[]> {
-    const rows = await this.prisma.providerManifestRecord.findMany({
+    const manifestRows = await this.prisma.providerManifestRecord.findMany({
       select: {
         provider: true,
       },
@@ -186,7 +188,27 @@ export class PrismaScrapedDataStore {
       },
     })
 
-    return rows.map((row: { provider: ProviderId }) => row.provider)
+    const manifestProviders = manifestRows.map(
+      (row: { provider: ProviderId }) => row.provider
+    )
+
+    if (manifestProviders.length > 0) {
+      return manifestProviders
+    }
+
+    const snapshotRows = await this.prisma.deterministicSnapshotRecord.findMany(
+      {
+        distinct: ['provider'],
+        select: {
+          provider: true,
+        },
+        orderBy: {
+          provider: 'asc',
+        },
+      }
+    )
+
+    return snapshotRows.map((row: { provider: ProviderId }) => row.provider)
   }
 
   async listProviderManifests(): Promise<readonly ProviderManifest[]> {
@@ -258,13 +280,46 @@ function toProviderDescription(
 function validateDeterministicIngest(
   body: DeterministicIngestRequest
 ): DeterministicIngestRequest {
-  if (body.providerManifest.id !== body.snapshot.provider) {
+  if (typeof body !== 'object' || body === null) {
+    throw new InvalidDeterministicIngestError(
+      'Deterministic ingest body must be an object.'
+    )
+  }
+
+  const { providerManifest, snapshot } = body as Record<string, unknown>
+
+  if (typeof providerManifest !== 'object' || providerManifest === null) {
+    throw new InvalidDeterministicIngestError(
+      'providerManifest must be an object.'
+    )
+  }
+
+  if (typeof snapshot !== 'object' || snapshot === null) {
+    throw new InvalidDeterministicIngestError('snapshot must be an object.')
+  }
+
+  const { id } = providerManifest as Record<string, unknown>
+  const { provider } = snapshot as Record<string, unknown>
+
+  if (typeof id !== 'string') {
+    throw new InvalidDeterministicIngestError(
+      'providerManifest.id must be a string.'
+    )
+  }
+
+  if (typeof provider !== 'string') {
+    throw new InvalidDeterministicIngestError(
+      'snapshot.provider must be a string.'
+    )
+  }
+
+  if (id !== provider) {
     throw new InvalidDeterministicIngestError(
       'providerManifest.id must match snapshot.provider.'
     )
   }
 
-  return body
+  return body as DeterministicIngestRequest
 }
 
 async function readJsonBody<T>(request: IncomingMessage): Promise<T> {

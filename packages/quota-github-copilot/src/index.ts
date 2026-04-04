@@ -70,7 +70,7 @@ function createSnapshotMetrics(pageText: string): readonly SnapshotMetric[] {
   const resetsAt = resetMatch?.groups?.reset?.trim() || undefined
   const usedPercent = parseNumber(usageMatch?.groups?.usedPercent)
 
-  if (typeof usedPercent === 'number') {
+  if (Number.isFinite(usedPercent)) {
     metrics.push({
       key: 'premium_requests_used_percent',
       label: 'Premium used',

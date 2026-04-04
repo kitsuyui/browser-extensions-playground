@@ -16,11 +16,11 @@ describe('createQuotaGithubCopilotTools', () => {
           rawVersion: 'github-copilot-dom-v1',
           metrics: [
             {
-              key: 'premium_requests_used',
-              label: 'Premium requests used',
+              key: 'premium_requests_used_percent',
+              label: 'Premium used',
               remaining: 12,
-              limit: 300,
-              unit: 'requests',
+              limit: 100,
+              unit: 'percent',
             },
           ],
         })
