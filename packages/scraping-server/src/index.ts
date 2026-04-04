@@ -153,7 +153,7 @@ export class PrismaScrapedDataStore {
       },
     })
 
-    return rows.map((row) => row.provider)
+    return rows.map((row: { provider: ProviderId }) => row.provider)
   }
 
   async close(): Promise<void> {

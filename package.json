@@ -18,7 +18,7 @@
     "check-module-isolation": "find packages -type d -name src -print -exec pnpm ts-module-isolation -- {} +",
     "test": "pnpm prisma:generate && vitest run --coverage",
     "validate": "pnpm -r validate",
-    "typecheck": "tsc --strict -p tsconfig.json --noEmit --skipLibCheck --downlevelIteration",
+    "typecheck": "pnpm prisma:generate && tsc --strict -p tsconfig.json --noEmit --skipLibCheck --downlevelIteration",
     "typedoc": "typedoc --treatValidationWarningsAsErrors --treatWarningsAsErrors",
     "typedoc:server": "python3 -m http.server --directory build/typedocs"
   },
