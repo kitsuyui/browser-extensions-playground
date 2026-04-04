@@ -17,6 +17,7 @@ import { ZodError } from 'zod'
 import {
   DEFAULT_SERVER_HOST,
   DEFAULT_SERVER_PORT,
+  type DeterministicHistoryQuery,
   type DeterministicIngestRequest,
   type DeterministicSnapshotRecord,
   type DevClientInfo,
@@ -29,6 +30,7 @@ import {
   type ScrapingServerStatus,
 } from './protocol'
 import {
+  parseDeterministicHistoryQuery,
   parseDeterministicIngestRequest,
   parseDevCommandRequest,
   parseDevtoolsInboundMessage,
@@ -64,6 +66,13 @@ class InvalidDevCommandRequestError extends Error {
   constructor(message: string) {
     super(message)
     this.name = 'InvalidDevCommandRequestError'
+  }
+}
+
+class InvalidDeterministicHistoryQueryError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'InvalidDeterministicHistoryQueryError'
   }
 }
 
@@ -189,6 +198,37 @@ export class PrismaScrapedDataStore {
     }
 
     return Object.fromEntries(latest.entries())
+  }
+
+  async getHistory(
+    query: DeterministicHistoryQuery
+  ): Promise<readonly DeterministicSnapshotRecord[]> {
+    const records = await this.prisma.deterministicSnapshotRecord.findMany({
+      where: {
+        provider: query.provider,
+        receivedAt:
+          query.from || query.to
+            ? {
+                gte: query.from ? new Date(query.from) : undefined,
+                lte: query.to ? new Date(query.to) : undefined,
+              }
+            : undefined,
+      },
+      orderBy: [
+        {
+          receivedAt: 'asc',
+        },
+        {
+          id: 'asc',
+        },
+      ],
+      take: query.limit,
+    })
+
+    return records.map((record) => ({
+      snapshot: JSON.parse(record.snapshotJson) as ProviderSnapshot,
+      receivedAt: record.receivedAt.toISOString(),
+    }))
   }
 
   async listProviderIds(): Promise<readonly ProviderId[]> {
@@ -320,6 +360,22 @@ function validateDevCommandRequest(body: unknown): DevCommandRequest {
   }
 }
 
+function validateDeterministicHistoryQuery(
+  query: Record<string, string | undefined>
+): DeterministicHistoryQuery {
+  try {
+    return parseDeterministicHistoryQuery(query)
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new InvalidDeterministicHistoryQueryError(
+        error.issues.at(0)?.message ?? 'History query is invalid.'
+      )
+    }
+
+    throw error
+  }
+}
+
 function parseDevtoolsMessage(buffer: RawData) {
   let rawMessage: unknown
 
@@ -440,6 +496,21 @@ export function createScrapingServer(options: {
       }
 
       if (
+        request.method === 'GET' &&
+        url.pathname === '/api/deterministic/history'
+      ) {
+        const query = validateDeterministicHistoryQuery({
+          provider: url.searchParams.get('provider') ?? undefined,
+          from: url.searchParams.get('from') ?? undefined,
+          to: url.searchParams.get('to') ?? undefined,
+          limit: url.searchParams.get('limit') ?? undefined,
+        })
+
+        writeJson(response, 200, await store.getHistory(query))
+        return
+      }
+
+      if (
         request.method === 'POST' &&
         url.pathname === '/api/deterministic/ingest'
       ) {
@@ -526,7 +597,8 @@ export function createScrapingServer(options: {
         response,
         error instanceof InvalidJsonBodyError ||
           error instanceof InvalidDeterministicIngestError ||
-          error instanceof InvalidDevCommandRequestError
+          error instanceof InvalidDevCommandRequestError ||
+          error instanceof InvalidDeterministicHistoryQueryError
           ? 400
           : 500,
         {

@@ -21,6 +21,13 @@ export type DeterministicSnapshotRecord = {
   readonly receivedAt: string
 }
 
+export type DeterministicHistoryQuery = {
+  readonly provider?: ProviderId
+  readonly from?: string
+  readonly to?: string
+  readonly limit?: number
+}
+
 export type DeterministicIngestRequest = {
   readonly providerManifest: ProviderManifest
   readonly snapshot: ProviderSnapshot

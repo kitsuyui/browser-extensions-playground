@@ -43,6 +43,22 @@ const TOOLS = [
     },
   },
   {
+    name: 'get_history',
+    description:
+      'Read deterministic snapshot history rows with optional provider and time-window filters.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        provider: { type: 'string' },
+        from: { type: 'string', format: 'date-time' },
+        to: { type: 'string', format: 'date-time' },
+        limit: { type: 'integer', minimum: 1, maximum: 10000 },
+        serverUrl: { type: 'string' },
+      },
+      additionalProperties: false,
+    },
+  },
+  {
     name: 'describe_provider',
     description:
       'Read the provider-published description of snapshot raw versions and metric meanings.',
@@ -77,6 +93,13 @@ export async function callScrapedDataTool(
       return tools.listProviders()
     case 'get_snapshot':
       return tools.getLatestSnapshot(args?.provider as ProviderId | undefined)
+    case 'get_history':
+      return tools.getSnapshotHistory({
+        provider: args?.provider as ProviderId | undefined,
+        from: args?.from as string | undefined,
+        to: args?.to as string | undefined,
+        limit: typeof args?.limit === 'number' ? args.limit : undefined,
+      })
     case 'describe_provider':
       return tools.describeProvider(args?.provider as ProviderId)
     default:

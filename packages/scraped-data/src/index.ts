@@ -3,6 +3,8 @@ import type {
   ProviderSnapshot,
 } from '@kitsuyui/browser-extensions-scraping-platform'
 import {
+  type DeterministicHistoryQuery,
+  type DeterministicSnapshotRecord,
   LOCAL_SERVER_HTTP_ORIGIN,
   type ProviderDescription,
   type RegisteredProviderInfo,
@@ -46,6 +48,30 @@ export function createScrapedDataTools(baseUrl = LOCAL_SERVER_HTTP_ORIGIN) {
         | ProviderSnapshot
         | Record<string, ProviderSnapshot>
         | null
+    },
+    async getSnapshotHistory(
+      query: DeterministicHistoryQuery = {}
+    ): Promise<readonly DeterministicSnapshotRecord[]> {
+      const url = new URL(`${baseUrl}/api/deterministic/history`)
+
+      if (query.provider) {
+        url.searchParams.set('provider', query.provider)
+      }
+
+      if (query.from) {
+        url.searchParams.set('from', query.from)
+      }
+
+      if (query.to) {
+        url.searchParams.set('to', query.to)
+      }
+
+      if (typeof query.limit === 'number') {
+        url.searchParams.set('limit', String(query.limit))
+      }
+
+      const response = await fetch(url)
+      return (await response.json()) as readonly DeterministicSnapshotRecord[]
     },
   }
 }

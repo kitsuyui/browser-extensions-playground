@@ -76,6 +76,24 @@ describe('createScrapedDataTools', () => {
         )
       }
 
+      if (url.includes('/api/deterministic/history?provider=openai&limit=2')) {
+        return new Response(
+          JSON.stringify([
+            {
+              receivedAt: '2026-04-04T12:00:00.000Z',
+              snapshot: {
+                provider: 'openai',
+                capturedAt: '2026-04-04T11:59:59.000Z',
+                source: 'network',
+                confidence: 'high',
+                rawVersion: 'openai-wham-usage-v1',
+                metrics: [],
+              },
+            },
+          ])
+        )
+      }
+
       return new Response(JSON.stringify(null))
     }) as typeof fetch
   })
@@ -114,6 +132,20 @@ describe('createScrapedDataTools', () => {
       provider: 'openai',
       metrics: [],
     })
+
+    await expect(
+      tools.getSnapshotHistory({
+        provider: 'openai',
+        limit: 2,
+      })
+    ).resolves.toMatchObject([
+      {
+        receivedAt: '2026-04-04T12:00:00.000Z',
+        snapshot: {
+          provider: 'openai',
+        },
+      },
+    ])
   })
 
   it('exposes the same operations through MCP tool handlers', async () => {
@@ -148,5 +180,17 @@ describe('createScrapedDataTools', () => {
         ],
       },
     })
+    await expect(
+      callScrapedDataTool('get_history', {
+        provider: 'openai',
+        limit: 2,
+      })
+    ).resolves.toMatchObject([
+      {
+        snapshot: {
+          provider: 'openai',
+        },
+      },
+    ])
   })
 })
