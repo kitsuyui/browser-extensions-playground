@@ -9,9 +9,9 @@ Playground for browser scraping extensions and scraped data tooling.
 This workspace centers on a single local scraping server.
 
 - [packages/scraping-server](./packages/scraping-server/README.md): unified HTTP and WebSocket server
-- [packages/scraping-platform](./packages/scraping-platform): provider manifests and shared scraping helpers
+- [packages/scraping-platform](./packages/scraping-platform/README.md): provider manifests and shared scraping helpers
 - [packages/extension-dev](./packages/extension-dev/README.md): dangerous developer extension for remote browser control
-- [packages/example-com](./packages/example-com): deterministic example.com extension used for automated end-to-end testing
+- [packages/example-com](./packages/example-com/README.md): deterministic example.com extension used for automated end-to-end testing
 - [packages/scraped-data](./packages/scraped-data/README.md): generic read-only accessors over server API
 - [packages/scraping-devtools](./packages/scraping-devtools/README.md): devtools accessors over server API
 - [packages/quota-openai](./packages/quota-openai/README.md): OpenAI quota extension
