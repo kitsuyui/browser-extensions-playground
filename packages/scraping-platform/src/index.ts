@@ -40,6 +40,10 @@ export function collectDomProbeMatches(
   })
 }
 
+function getPageText(doc: Document): string {
+  return (doc.body?.innerText ?? '').trim().slice(0, 20_000)
+}
+
 export function createDomCaptureFromDocument(
   provider: ProviderExtractor,
   doc: Document,
@@ -49,7 +53,7 @@ export function createDomCaptureFromDocument(
     provider: provider.manifest.id,
     url: doc.location.href,
     title: doc.title,
-    pageText: doc.body?.innerText?.trim().slice(0, 20_000) ?? '',
+    pageText: getPageText(doc),
     probeMatches: collectDomProbeMatches(doc, provider.manifest.debugSelectors),
     capturedAt,
   })

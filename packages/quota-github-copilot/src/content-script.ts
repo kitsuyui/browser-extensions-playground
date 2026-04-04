@@ -14,6 +14,10 @@ const OBSERVER_TIMEOUT_MS = 20_000
 
 let hasSentSnapshot = false
 
+function getPageText(): string {
+  return (document.body?.innerText ?? '').trim().slice(0, 20_000)
+}
+
 async function emitSnapshot(): Promise<boolean> {
   if (hasSentSnapshot) {
     return true
@@ -21,7 +25,7 @@ async function emitSnapshot(): Promise<boolean> {
 
   const snapshot = extractSnapshot({
     url: window.location.href,
-    pageText: document.body?.innerText?.trim().slice(0, 20_000) ?? '',
+    pageText: getPageText(),
   })
 
   if (!snapshot) {
