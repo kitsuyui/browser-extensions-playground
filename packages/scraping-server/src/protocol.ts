@@ -22,6 +22,7 @@ export type DeterministicSnapshotRecord = {
 }
 
 export type DeterministicIngestRequest = {
+  readonly providerManifest: ProviderManifest
   readonly snapshot: ProviderSnapshot
 }
 

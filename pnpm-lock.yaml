@@ -67,6 +67,8 @@ importers:
 
   packages/quota-anthropic: {}
 
+  packages/quota-github-copilot: {}
+
   packages/quota-openai: {}
 
   packages/scraped-data:
@@ -87,17 +89,7 @@ importers:
         specifier: workspace:*
         version: link:../scraping-server
 
-  packages/scraping-platform:
-    dependencies:
-      '@kitsuyui/browser-extensions-example-com':
-        specifier: workspace:*
-        version: link:../example-com
-      '@kitsuyui/browser-extensions-quota-anthropic':
-        specifier: workspace:*
-        version: link:../quota-anthropic
-      '@kitsuyui/browser-extensions-quota-openai':
-        specifier: workspace:*
-        version: link:../quota-openai
+  packages/scraping-platform: {}
 
   packages/scraping-server:
     dependencies:
@@ -110,6 +102,9 @@ importers:
       ws:
         specifier: ^8.20.0
         version: 8.20.0
+      zod:
+        specifier: ^4.1.12
+        version: 4.3.6
     devDependencies:
       prisma:
         specifier: ^6.16.3
@@ -2057,6 +2052,9 @@ packages:
     engines: {node: '>= 14.6'}
     hasBin: true
 
+  zod@4.3.6:
+    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+
 snapshots:
 
   '@babel/generator@8.0.0-rc.2':
@@ -3786,3 +3784,5 @@ snapshots:
   yallist@5.0.0: {}
 
   yaml@2.8.2: {}
+
+  zod@4.3.6: {}

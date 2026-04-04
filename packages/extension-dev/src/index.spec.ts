@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { createExtensionManifest } from './index'
+import { SUPPORTED_PROVIDER_MATCH_PATTERNS } from './providers'
 import { createPopupHtml } from './runtime'
 
 describe('createExtensionManifest', () => {
@@ -8,8 +9,8 @@ describe('createExtensionManifest', () => {
     expect(createExtensionManifest().host_permissions).toContain(
       'http://127.0.0.1/*'
     )
-    expect(createExtensionManifest().host_permissions).toContain(
-      'https://example.com/*'
+    expect(createExtensionManifest().host_permissions).toEqual(
+      expect.arrayContaining(SUPPORTED_PROVIDER_MATCH_PATTERNS)
     )
     expect(createExtensionManifest().permissions).toContain('tabs')
   })

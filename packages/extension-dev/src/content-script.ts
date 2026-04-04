@@ -1,12 +1,26 @@
+import { providerExtractor as exampleComProviderExtractor } from '../../example-com/src/index'
+import { providerExtractor as anthropicProviderExtractor } from '../../quota-anthropic/src/index'
+import { providerExtractor as githubCopilotProviderExtractor } from '../../quota-github-copilot/src/index'
+import { providerExtractor as openAiProviderExtractor } from '../../quota-openai/src/index'
 import {
+  collectDomProbeMatches,
+  createDomCapture,
   createExtensionCaptureFromDocument,
-  findProviderForUrl,
+  type ProviderExtractor,
 } from '../../scraping-platform/src/index'
 
 import type {
   DevCommand,
   DevCommandResult,
 } from '../../scraping-server/src/protocol'
+import { inferProviderId } from './providers'
+
+const KNOWN_PROVIDER_EXTRACTORS: readonly ProviderExtractor[] = [
+  openAiProviderExtractor,
+  anthropicProviderExtractor,
+  githubCopilotProviderExtractor,
+  exampleComProviderExtractor,
+]
 
 declare const chrome:
   | {
@@ -94,6 +108,63 @@ function createResult(
   }
 }
 
+function getPageText(doc: Document): string {
+  return (doc.body?.innerText ?? '').trim().slice(0, 20_000)
+}
+
+function findKnownProviderExtractor(url: string): ProviderExtractor | null {
+  return (
+    KNOWN_PROVIDER_EXTRACTORS.find((providerExtractor) =>
+      providerExtractor.manifest.matches.some((pattern) =>
+        url.startsWith(pattern.replace('*', ''))
+      )
+    ) ?? null
+  )
+}
+
+function createGenericCaptureFromDocument(): {
+  readonly snapshot: ReturnType<
+    typeof createExtensionCaptureFromDocument
+  >['snapshot']
+  readonly domCapture: ReturnType<typeof createDomCapture>
+} {
+  const capturedAt = new Date().toISOString()
+  const providerExtractor = findKnownProviderExtractor(window.location.href)
+
+  if (providerExtractor) {
+    return createExtensionCaptureFromDocument(
+      providerExtractor,
+      document,
+      capturedAt
+    )
+  }
+
+  const provider = inferProviderId(window.location.href)
+
+  return {
+    snapshot: null,
+    domCapture: createDomCapture({
+      provider,
+      url: window.location.href,
+      title: document.title,
+      capturedAt,
+      pageText: getPageText(document),
+      probeMatches: collectDomProbeMatches(document, [
+        {
+          key: 'main',
+          label: 'Main content',
+          selector: 'main, [role="main"], body',
+        },
+        {
+          key: 'headline',
+          label: 'Headline',
+          selector: 'h1, h2, [data-testid]',
+        },
+      ]),
+    }),
+  }
+}
+
 chrome?.runtime?.onMessage?.addListener((message, _sender, sendResponse) => {
   const commandId = message.commandId
 
@@ -105,21 +176,10 @@ chrome?.runtime?.onMessage?.addListener((message, _sender, sendResponse) => {
     return
   }
 
-  const provider = findProviderForUrl(window.location.href)
-
-  if (!provider) {
-    sendResponse(
-      createResult(commandId, false, {
-        error: 'No supported provider matched the current page.',
-      })
-    )
-    return
-  }
-
   if (message.command.type === 'capture-page') {
     sendResponse(
       createResult(commandId, true, {
-        result: createExtensionCaptureFromDocument(provider, document),
+        result: createGenericCaptureFromDocument(),
       })
     )
     return

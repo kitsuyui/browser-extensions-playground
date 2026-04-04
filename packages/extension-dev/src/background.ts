@@ -1,9 +1,12 @@
-import { listProviderHostPermissions } from '../../scraping-platform/src/index'
 import {
   type DevCommandEnvelope,
   type DevCommandResult,
   LOCAL_SERVER_DEVTOOLS_WS_URL,
 } from '../../scraping-server/src/protocol'
+import {
+  isSupportedProviderUrl,
+  SUPPORTED_PROVIDER_MATCH_PATTERNS,
+} from './providers'
 
 declare const chrome:
   | {
@@ -61,13 +64,7 @@ let heartbeatTimer: ReturnType<typeof setInterval> | null = null
 const DEVTOOLS_EXTENSION_ENABLED_KEY = 'devtoolsExtensionEnabled'
 
 function isProviderTab(url: string | undefined): boolean {
-  if (!url) {
-    return false
-  }
-
-  return listProviderHostPermissions().some((pattern) =>
-    url.startsWith(pattern.replace('*', ''))
-  )
+  return isSupportedProviderUrl(url)
 }
 
 async function persistState(items: Record<string, unknown>): Promise<void> {
@@ -148,7 +145,7 @@ function scheduleReconnect(): void {
 async function pickTargetTabId(): Promise<number | null> {
   const tabs =
     (await chrome?.tabs?.query?.({
-      url: listProviderHostPermissions(),
+      url: SUPPORTED_PROVIDER_MATCH_PATTERNS,
     })) ?? []
 
   const activeTab = tabs.find((tab) => tab.active && isProviderTab(tab.url))

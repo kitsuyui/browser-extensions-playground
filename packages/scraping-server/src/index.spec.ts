@@ -2,6 +2,7 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 
+import { providerManifest as openAiProviderManifest } from '@kitsuyui/browser-extensions-quota-openai'
 import type { ProviderSnapshot } from '@kitsuyui/browser-extensions-scraping-platform'
 import { afterEach, describe, expect, it } from 'vitest'
 import { WebSocket } from 'ws'
@@ -60,7 +61,10 @@ describe('createScrapingServer', () => {
         headers: {
           'content-type': 'application/json',
         },
-        body: JSON.stringify({ snapshot }),
+        body: JSON.stringify({
+          providerManifest: openAiProviderManifest,
+          snapshot,
+        }),
       }
     )
 
@@ -185,7 +189,7 @@ describe('createScrapingServer', () => {
       headers: {
         'content-type': 'application/json',
       },
-      body: '{"snapshot":',
+      body: '{"providerManifest":',
     })
 
     expect(response.status).toBe(400)
@@ -216,5 +220,172 @@ describe('createScrapingServer', () => {
     expect(healthResponse.status).toBe(200)
 
     client.close()
+  })
+
+  it('returns 400 when providerManifest.id and snapshot.provider do not match', async () => {
+    const { listening } = await createServerForTest()
+    const snapshot: ProviderSnapshot = {
+      provider: 'openai',
+      capturedAt: new Date().toISOString(),
+      source: 'dom',
+      confidence: 'medium',
+      rawVersion: 'test',
+      metrics: [],
+    }
+
+    const response = await fetch(`${listening.url}/api/deterministic/ingest`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        providerManifest: {
+          ...openAiProviderManifest,
+          id: 'anthropic',
+        },
+        snapshot,
+      }),
+    })
+
+    expect(response.status).toBe(400)
+    expect(await response.json()).toMatchObject({
+      error: 'providerManifest.id must match snapshot.provider.',
+    })
+  })
+
+  it('returns 400 when providerManifest is missing or malformed', async () => {
+    const { listening } = await createServerForTest()
+    const response = await fetch(`${listening.url}/api/deterministic/ingest`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        snapshot: {
+          provider: 'openai',
+        },
+      }),
+    })
+
+    expect(response.status).toBe(400)
+    expect(await response.json()).toEqual(
+      expect.objectContaining({
+        error: expect.any(String),
+      })
+    )
+  })
+
+  it('returns 400 when providerManifest shape is incomplete', async () => {
+    const { listening } = await createServerForTest()
+    const response = await fetch(`${listening.url}/api/deterministic/ingest`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        providerManifest: {
+          id: 'openai',
+          displayName: 'OpenAI',
+          matches: ['https://chatgpt.com/*'],
+          capabilities: ['usage'],
+          debugSelectors: ['.not-a-probe'],
+        },
+        snapshot: {
+          provider: 'openai',
+        },
+      }),
+    })
+
+    expect(response.status).toBe(400)
+    expect(await response.json()).toEqual(
+      expect.objectContaining({
+        error: expect.any(String),
+      })
+    )
+  })
+
+  it('returns 400 when /api/dev/commands receives an invalid command shape', async () => {
+    const { listening } = await createServerForTest()
+    const response = await fetch(`${listening.url}/api/dev/commands`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        command: {
+          type: 'fetch-json',
+          url: 42,
+        },
+      }),
+    })
+
+    expect(response.status).toBe(400)
+    expect(await response.json()).toEqual(
+      expect.objectContaining({
+        error: expect.any(String),
+      })
+    )
+  })
+
+  it('lists the union of manifest-backed and legacy snapshot-only providers', async () => {
+    const { listening } = await createServerForTest()
+    const fallbackTempDir = await mkdtemp(
+      path.join(os.tmpdir(), 'scraping-server-')
+    )
+    const fallbackStoreServer = createScrapingServer({
+      host: '127.0.0.1',
+      port: 0,
+      storeFile: path.join(fallbackTempDir, 'fallback.sqlite'),
+    })
+
+    servers.push({
+      tempDir: fallbackTempDir,
+      server: fallbackStoreServer,
+      listening: await fallbackStoreServer.listen(),
+    })
+
+    const fallbackStoreFile = path.join(fallbackTempDir, 'fallback.sqlite')
+    const prisma = new (await import('@prisma/client')).PrismaClient({
+      datasources: {
+        db: {
+          url: `file:${fallbackStoreFile}`,
+        },
+      },
+    })
+
+    await prisma.deterministicSnapshotRecord.create({
+      data: {
+        provider: 'openai',
+        snapshotJson: JSON.stringify({
+          provider: 'openai',
+          capturedAt: new Date().toISOString(),
+          source: 'dom',
+          confidence: 'medium',
+          rawVersion: 'legacy',
+          metrics: [],
+        }),
+      },
+    })
+    await prisma.providerManifestRecord.create({
+      data: {
+        provider: 'github-copilot',
+        manifestJson: JSON.stringify({
+          id: 'github-copilot',
+          displayName: 'GitHub Copilot',
+          matches: ['https://github.com/settings/copilot/*'],
+          capabilities: ['usage'],
+          debugSelectors: [],
+        }),
+      },
+    })
+    await prisma.$disconnect()
+
+    const statusResponse = await fetch(
+      `${servers.at(-1)?.listening.url ?? listening.url}/api/status`
+    )
+
+    expect(await statusResponse.json()).toMatchObject({
+      deterministicProviders: ['github-copilot', 'openai'],
+    })
   })
 })

@@ -34,6 +34,10 @@ const aliasEntries = [
     '@kitsuyui/browser-extensions-quota-anthropic',
     './packages/quota-anthropic/src/index.ts',
   ],
+  [
+    '@kitsuyui/browser-extensions-quota-github-copilot',
+    './packages/quota-github-copilot/src/index.ts',
+  ],
   ['@kitsuyui/browser-extensions-hello', './packages/hello/src/index.ts'],
 ] as const
 

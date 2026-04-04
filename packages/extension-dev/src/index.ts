@@ -1,5 +1,5 @@
-import { listProviderHostPermissions } from '../../scraping-platform/src/index'
 import { LOCAL_SERVER_HTTP_MATCH_PATTERN } from '../../scraping-server/src/protocol'
+import { SUPPORTED_PROVIDER_MATCH_PATTERNS } from './providers'
 
 export function createExtensionManifest() {
   return {
@@ -10,7 +10,7 @@ export function createExtensionManifest() {
       'Dangerous developer extension for remote browser inspection and scripted control.',
     permissions: ['storage', 'tabs'],
     host_permissions: [
-      ...listProviderHostPermissions(),
+      ...SUPPORTED_PROVIDER_MATCH_PATTERNS,
       LOCAL_SERVER_HTTP_MATCH_PATTERN,
     ],
     background: {
@@ -19,7 +19,7 @@ export function createExtensionManifest() {
     },
     content_scripts: [
       {
-        matches: listProviderHostPermissions(),
+        matches: SUPPORTED_PROVIDER_MATCH_PATTERNS,
         js: ['content-script.js'],
         run_at: 'document_idle' as const,
       },

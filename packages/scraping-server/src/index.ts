@@ -6,14 +6,14 @@ import {
   type ServerResponse,
 } from 'node:http'
 import { dirname, resolve } from 'node:path'
-import {
-  describeProvider,
-  listProviders,
-  type ProviderId,
-  type ProviderSnapshot,
+import type {
+  ProviderId,
+  ProviderManifest,
+  ProviderSnapshot,
 } from '@kitsuyui/browser-extensions-scraping-platform'
 import { PrismaClient } from '@prisma/client'
 import { type RawData, type WebSocket, WebSocketServer } from 'ws'
+import { ZodError } from 'zod'
 import {
   DEFAULT_SERVER_HOST,
   DEFAULT_SERVER_PORT,
@@ -28,6 +28,11 @@ import {
   type RiskLevel,
   type ScrapingServerStatus,
 } from './protocol'
+import {
+  parseDeterministicIngestRequest,
+  parseDevCommandRequest,
+  parseDevtoolsInboundMessage,
+} from './validation'
 
 export * from './protocol'
 
@@ -45,6 +50,20 @@ class InvalidJsonBodyError extends Error {
   constructor() {
     super('Request body must be valid JSON.')
     this.name = 'InvalidJsonBodyError'
+  }
+}
+
+class InvalidDeterministicIngestError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'InvalidDeterministicIngestError'
+  }
+}
+
+class InvalidDevCommandRequestError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'InvalidDevCommandRequestError'
   }
 }
 
@@ -75,16 +94,39 @@ export class PrismaScrapedDataStore {
       CREATE INDEX IF NOT EXISTS "DeterministicSnapshotRecord_provider_receivedAt_idx"
       ON "DeterministicSnapshotRecord" ("provider", "receivedAt")
     `)
+    await this.prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "ProviderManifestRecord" (
+        "provider" TEXT NOT NULL PRIMARY KEY,
+        "manifestJson" TEXT NOT NULL,
+        "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `)
   }
 
   async submitDeterministicSnapshot(
+    providerManifest: ProviderManifest,
     snapshot: ProviderSnapshot
   ): Promise<DeterministicSnapshotRecord> {
-    const record = await this.prisma.deterministicSnapshotRecord.create({
-      data: {
-        provider: snapshot.provider,
-        snapshotJson: JSON.stringify(snapshot),
-      },
+    const record = await this.prisma.$transaction(async (tx) => {
+      await tx.providerManifestRecord.upsert({
+        where: {
+          provider: providerManifest.id,
+        },
+        update: {
+          manifestJson: JSON.stringify(providerManifest),
+        },
+        create: {
+          provider: providerManifest.id,
+          manifestJson: JSON.stringify(providerManifest),
+        },
+      })
+
+      return tx.deterministicSnapshotRecord.create({
+        data: {
+          provider: snapshot.provider,
+          snapshotJson: JSON.stringify(snapshot),
+        },
+      })
     })
 
     return {
@@ -149,9 +191,8 @@ export class PrismaScrapedDataStore {
     return Object.fromEntries(latest.entries())
   }
 
-  async listProviders(): Promise<readonly ProviderId[]> {
-    const rows = await this.prisma.deterministicSnapshotRecord.findMany({
-      distinct: ['provider'],
+  async listProviderIds(): Promise<readonly ProviderId[]> {
+    const manifestRows = await this.prisma.providerManifestRecord.findMany({
       select: {
         provider: true,
       },
@@ -160,7 +201,48 @@ export class PrismaScrapedDataStore {
       },
     })
 
-    return rows.map((row: { provider: ProviderId }) => row.provider)
+    const manifestProviders = manifestRows.map(
+      (row: { provider: ProviderId }) => row.provider
+    )
+    const snapshotRows = await this.prisma.deterministicSnapshotRecord.findMany(
+      {
+        distinct: ['provider'],
+        select: {
+          provider: true,
+        },
+        orderBy: {
+          provider: 'asc',
+        },
+      }
+    )
+
+    const snapshotProviders = snapshotRows.map(
+      (row: { provider: ProviderId }) => row.provider
+    )
+
+    return [...new Set([...manifestProviders, ...snapshotProviders])].sort()
+  }
+
+  async listProviderManifests(): Promise<readonly ProviderManifest[]> {
+    const rows = await this.prisma.providerManifestRecord.findMany({
+      orderBy: {
+        provider: 'asc',
+      },
+    })
+
+    return rows.map((row) => JSON.parse(row.manifestJson) as ProviderManifest)
+  }
+
+  async getProviderManifest(
+    provider: ProviderId
+  ): Promise<ProviderManifest | null> {
+    const row = await this.prisma.providerManifestRecord.findUnique({
+      where: {
+        provider,
+      },
+    })
+
+    return row ? (JSON.parse(row.manifestJson) as ProviderManifest) : null
   }
 
   async close(): Promise<void> {
@@ -191,32 +273,66 @@ function createStatus(
   }
 }
 
-function listRegisteredProviders(): readonly RegisteredProviderInfo[] {
-  return listProviders().map(({ id, displayName, matches, capabilities }) => ({
-    id,
-    displayName,
-    matches,
-    capabilities,
-  }))
+function toRegisteredProviderInfo(
+  provider: ProviderManifest
+): RegisteredProviderInfo {
+  const { id, displayName, matches, capabilities } = provider
+
+  return { id, displayName, matches, capabilities }
 }
 
-function describeRegisteredProvider(
-  providerId: ProviderId
-): ProviderDescription | null {
-  const provider = describeProvider(providerId)
+function toProviderDescription(
+  provider: ProviderManifest
+): ProviderDescription {
+  const { id, displayName, matches, capabilities, snapshotSchema } = provider
 
-  if (!provider) {
+  return { id, displayName, matches, capabilities, snapshotSchema }
+}
+
+function validateDeterministicIngest(
+  body: unknown
+): DeterministicIngestRequest {
+  try {
+    return parseDeterministicIngestRequest(body)
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new InvalidDeterministicIngestError(
+        error.issues.at(0)?.message ??
+          'Deterministic ingest request is invalid.'
+      )
+    }
+
+    throw error
+  }
+}
+
+function validateDevCommandRequest(body: unknown): DevCommandRequest {
+  try {
+    return parseDevCommandRequest(body)
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new InvalidDevCommandRequestError(
+        error.issues.at(0)?.message ?? 'Dev command request is invalid.'
+      )
+    }
+
+    throw error
+  }
+}
+
+function parseDevtoolsMessage(buffer: RawData) {
+  let rawMessage: unknown
+
+  try {
+    rawMessage = JSON.parse(buffer.toString())
+  } catch {
     return null
   }
 
-  const { id, displayName, matches, capabilities, snapshotSchema } = provider
-
-  return {
-    id,
-    displayName,
-    matches,
-    capabilities,
-    snapshotSchema,
+  try {
+    return parseDevtoolsInboundMessage(rawMessage)
+  } catch {
+    return null
   }
 }
 
@@ -269,13 +385,17 @@ export function createScrapingServer(options: {
         writeJson(
           response,
           200,
-          createStatus(await store.listProviders(), devClients)
+          createStatus(await store.listProviderIds(), devClients)
         )
         return
       }
 
       if (request.method === 'GET' && url.pathname === '/api/providers') {
-        writeJson(response, 200, listRegisteredProviders())
+        writeJson(
+          response,
+          200,
+          (await store.listProviderManifests()).map(toRegisteredProviderInfo)
+        )
         return
       }
 
@@ -287,7 +407,7 @@ export function createScrapingServer(options: {
         const providerId = decodeURIComponent(
           url.pathname.slice('/api/providers/'.length)
         )
-        const provider = describeRegisteredProvider(providerId)
+        const provider = await store.getProviderManifest(providerId)
 
         if (!provider) {
           writeJson(response, 404, {
@@ -296,7 +416,7 @@ export function createScrapingServer(options: {
           return
         }
 
-        writeJson(response, 200, provider)
+        writeJson(response, 200, toProviderDescription(provider))
         return
       }
 
@@ -323,8 +443,13 @@ export function createScrapingServer(options: {
         request.method === 'POST' &&
         url.pathname === '/api/deterministic/ingest'
       ) {
-        const body = await readJsonBody<DeterministicIngestRequest>(request)
-        const record = await store.submitDeterministicSnapshot(body.snapshot)
+        const body = validateDeterministicIngest(
+          await readJsonBody<DeterministicIngestRequest>(request)
+        )
+        const record = await store.submitDeterministicSnapshot(
+          body.providerManifest,
+          body.snapshot
+        )
         writeJson(response, 201, record)
         return
       }
@@ -341,7 +466,9 @@ export function createScrapingServer(options: {
       }
 
       if (request.method === 'POST' && url.pathname === '/api/dev/commands') {
-        const body = await readJsonBody<DevCommandRequest>(request)
+        const body = validateDevCommandRequest(
+          await readJsonBody<DevCommandRequest>(request)
+        )
         const target =
           (body.targetClientId ? devClients.get(body.targetClientId) : null) ??
           devClients.values().next().value
@@ -395,10 +522,18 @@ export function createScrapingServer(options: {
         error: `No route for ${request.method ?? 'GET'} ${url.pathname}`,
       })
     } catch (error) {
-      writeJson(response, error instanceof InvalidJsonBodyError ? 400 : 500, {
-        error:
-          error instanceof Error ? error.message : 'Internal server error.',
-      })
+      writeJson(
+        response,
+        error instanceof InvalidJsonBodyError ||
+          error instanceof InvalidDeterministicIngestError ||
+          error instanceof InvalidDevCommandRequestError
+          ? 400
+          : 500,
+        {
+          error:
+            error instanceof Error ? error.message : 'Internal server error.',
+        }
+      )
       return
     }
   })
@@ -411,19 +546,9 @@ export function createScrapingServer(options: {
     let clientId: string | null = null
 
     socket.on('message', (buffer: RawData) => {
-      let message:
-        | {
-            readonly type?: string
-            readonly extensionName?: string
-            readonly extensionVersion?: string
-          }
-        | ({
-            readonly type: 'command-result'
-          } & DevCommandResult)
+      const message = parseDevtoolsMessage(buffer)
 
-      try {
-        message = JSON.parse(buffer.toString()) as typeof message
-      } catch {
+      if (!message) {
         return
       }
 
