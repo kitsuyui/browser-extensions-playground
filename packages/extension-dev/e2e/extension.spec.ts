@@ -9,6 +9,6 @@ test('opens the popup page', async ({ page, extensionId }) => {
   await page.goto(`chrome-extension://${extensionId}/popup.html`)
 
   await expect(page.getByText(/Server:/)).toBeVisible()
-  await expect(page.getByText(/Remote browser control/)).toBeVisible()
-  await expect(page.getByText('Last command result')).toBeVisible()
+  await expect(page.getByText(/Remote control enabled/)).toBeVisible()
+  await expect(page.getByText('Debug')).toBeVisible()
 })

@@ -11,7 +11,9 @@ async function main(): Promise<void> {
   const tools = createScrapingDevtoolsTools(baseUrl)
 
   if (command === 'list-providers') {
-    process.stdout.write(`${JSON.stringify(tools.listProviders(), null, 2)}\n`)
+    process.stdout.write(
+      `${JSON.stringify(await tools.listProviders(), null, 2)}\n`
+    )
     return
   }
 

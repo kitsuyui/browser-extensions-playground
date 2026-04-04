@@ -41,6 +41,13 @@ type PendingCommand = {
   readonly timeoutId: ReturnType<typeof setTimeout>
 }
 
+class InvalidJsonBodyError extends Error {
+  constructor() {
+    super('Request body must be valid JSON.')
+    this.name = 'InvalidJsonBodyError'
+  }
+}
+
 export class PrismaScrapedDataStore {
   private readonly prisma: PrismaClient
 
@@ -220,7 +227,11 @@ async function readJsonBody<T>(request: IncomingMessage): Promise<T> {
     chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
   }
 
-  return JSON.parse(Buffer.concat(chunks).toString('utf8')) as T
+  try {
+    return JSON.parse(Buffer.concat(chunks).toString('utf8')) as T
+  } catch {
+    throw new InvalidJsonBodyError()
+  }
 }
 
 function writeJson(
@@ -246,138 +257,150 @@ export function createScrapingServer(options: {
   const pendingCommands = new Map<string, PendingCommand>()
 
   const httpServer = createServer(async (request, response) => {
-    const url = new URL(request.url ?? '/', `http://${host}:${port}`)
+    try {
+      const url = new URL(request.url ?? '/', `http://${host}:${port}`)
 
-    if (request.method === 'GET' && url.pathname === '/health') {
-      writeJson(response, 200, { ok: true })
-      return
-    }
-
-    if (request.method === 'GET' && url.pathname === '/api/status') {
-      writeJson(
-        response,
-        200,
-        createStatus(await store.listProviders(), devClients)
-      )
-      return
-    }
-
-    if (request.method === 'GET' && url.pathname === '/api/providers') {
-      writeJson(response, 200, listRegisteredProviders())
-      return
-    }
-
-    if (
-      request.method === 'GET' &&
-      url.pathname.startsWith('/api/providers/') &&
-      url.pathname.length > '/api/providers/'.length
-    ) {
-      const providerId = decodeURIComponent(
-        url.pathname.slice('/api/providers/'.length)
-      )
-      const provider = describeRegisteredProvider(providerId)
-
-      if (!provider) {
-        writeJson(response, 404, {
-          error: `Unknown provider: ${providerId}`,
-        })
+      if (request.method === 'GET' && url.pathname === '/health') {
+        writeJson(response, 200, { ok: true })
         return
       }
 
-      writeJson(response, 200, provider)
-      return
-    }
-
-    if (
-      request.method === 'GET' &&
-      url.pathname === '/api/deterministic/latest'
-    ) {
-      const provider = url.searchParams.get('provider')
-
-      if (provider) {
+      if (request.method === 'GET' && url.pathname === '/api/status') {
         writeJson(
           response,
           200,
-          (await store.getLatest(provider))?.snapshot ?? null
+          createStatus(await store.listProviders(), devClients)
         )
         return
       }
 
-      writeJson(response, 200, await store.getLatestAll())
-      return
-    }
-
-    if (
-      request.method === 'POST' &&
-      url.pathname === '/api/deterministic/ingest'
-    ) {
-      const body = await readJsonBody<DeterministicIngestRequest>(request)
-      const record = await store.submitDeterministicSnapshot(body.snapshot)
-      writeJson(response, 201, record)
-      return
-    }
-
-    if (request.method === 'GET' && url.pathname === '/api/dev/clients') {
-      writeJson(
-        response,
-        200,
-        [...devClients.values()].map(({ socket: _socket, ...client }) => client)
-      )
-      return
-    }
-
-    if (request.method === 'POST' && url.pathname === '/api/dev/commands') {
-      const body = await readJsonBody<DevCommandRequest>(request)
-      const target =
-        (body.targetClientId ? devClients.get(body.targetClientId) : null) ??
-        devClients.values().next().value
-
-      if (!target) {
-        writeJson(response, 409, {
-          error: 'No devtool websocket clients are connected.',
-        })
+      if (request.method === 'GET' && url.pathname === '/api/providers') {
+        writeJson(response, 200, listRegisteredProviders())
         return
       }
 
-      const commandId = randomUUID()
-      const envelope: DevCommandEnvelope = {
-        commandId,
-        command: body.command,
+      if (
+        request.method === 'GET' &&
+        url.pathname.startsWith('/api/providers/') &&
+        url.pathname.length > '/api/providers/'.length
+      ) {
+        const providerId = decodeURIComponent(
+          url.pathname.slice('/api/providers/'.length)
+        )
+        const provider = describeRegisteredProvider(providerId)
+
+        if (!provider) {
+          writeJson(response, 404, {
+            error: `Unknown provider: ${providerId}`,
+          })
+          return
+        }
+
+        writeJson(response, 200, provider)
+        return
       }
 
-      const result = await new Promise<DevCommandResult>(
-        (resolveResult, rejectResult) => {
-          const timeoutId = setTimeout(() => {
-            pendingCommands.delete(commandId)
-            rejectResult(new Error('Timed out waiting for dev command result.'))
-          }, 10_000)
+      if (
+        request.method === 'GET' &&
+        url.pathname === '/api/deterministic/latest'
+      ) {
+        const provider = url.searchParams.get('provider')
 
-          pendingCommands.set(commandId, {
-            resolve: resolveResult,
-            reject: rejectResult,
-            timeoutId,
-          })
-
-          target.socket.send(
-            JSON.stringify({
-              type: 'run-command',
-              ...envelope,
-            })
+        if (provider) {
+          writeJson(
+            response,
+            200,
+            (await store.getLatest(provider))?.snapshot ?? null
           )
+          return
         }
-      ).catch((error) => ({
-        commandId,
-        ok: false,
-        error: error instanceof Error ? error.message : 'unknown error',
-      }))
 
-      writeJson(response, result.ok ? 200 : 500, result)
+        writeJson(response, 200, await store.getLatestAll())
+        return
+      }
+
+      if (
+        request.method === 'POST' &&
+        url.pathname === '/api/deterministic/ingest'
+      ) {
+        const body = await readJsonBody<DeterministicIngestRequest>(request)
+        const record = await store.submitDeterministicSnapshot(body.snapshot)
+        writeJson(response, 201, record)
+        return
+      }
+
+      if (request.method === 'GET' && url.pathname === '/api/dev/clients') {
+        writeJson(
+          response,
+          200,
+          [...devClients.values()].map(
+            ({ socket: _socket, ...client }) => client
+          )
+        )
+        return
+      }
+
+      if (request.method === 'POST' && url.pathname === '/api/dev/commands') {
+        const body = await readJsonBody<DevCommandRequest>(request)
+        const target =
+          (body.targetClientId ? devClients.get(body.targetClientId) : null) ??
+          devClients.values().next().value
+
+        if (!target) {
+          writeJson(response, 409, {
+            error: 'No devtool websocket clients are connected.',
+          })
+          return
+        }
+
+        const commandId = randomUUID()
+        const envelope: DevCommandEnvelope = {
+          commandId,
+          command: body.command,
+        }
+
+        const result = await new Promise<DevCommandResult>(
+          (resolveResult, rejectResult) => {
+            const timeoutId = setTimeout(() => {
+              pendingCommands.delete(commandId)
+              rejectResult(
+                new Error('Timed out waiting for dev command result.')
+              )
+            }, 10_000)
+
+            pendingCommands.set(commandId, {
+              resolve: resolveResult,
+              reject: rejectResult,
+              timeoutId,
+            })
+
+            target.socket.send(
+              JSON.stringify({
+                type: 'run-command',
+                ...envelope,
+              })
+            )
+          }
+        ).catch((error) => ({
+          commandId,
+          ok: false,
+          error: error instanceof Error ? error.message : 'unknown error',
+        }))
+
+        writeJson(response, result.ok ? 200 : 500, result)
+        return
+      }
+
+      writeJson(response, 404, {
+        error: `No route for ${request.method ?? 'GET'} ${url.pathname}`,
+      })
+    } catch (error) {
+      writeJson(response, error instanceof InvalidJsonBodyError ? 400 : 500, {
+        error:
+          error instanceof Error ? error.message : 'Internal server error.',
+      })
       return
     }
-
-    writeJson(response, 404, {
-      error: `No route for ${request.method ?? 'GET'} ${url.pathname}`,
-    })
   })
 
   const webSocketServer = new WebSocketServer({
@@ -388,7 +411,7 @@ export function createScrapingServer(options: {
     let clientId: string | null = null
 
     socket.on('message', (buffer: RawData) => {
-      const message = JSON.parse(buffer.toString()) as
+      let message:
         | {
             readonly type?: string
             readonly extensionName?: string
@@ -397,6 +420,12 @@ export function createScrapingServer(options: {
         | ({
             readonly type: 'command-result'
           } & DevCommandResult)
+
+      try {
+        message = JSON.parse(buffer.toString()) as typeof message
+      } catch {
+        return
+      }
 
       if (message.type === 'heartbeat') {
         return

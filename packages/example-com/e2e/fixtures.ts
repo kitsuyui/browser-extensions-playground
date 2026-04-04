@@ -9,6 +9,7 @@ import {
   chromium,
   type Page,
   expect as playwrightExpect,
+  type Worker,
 } from '@playwright/test'
 
 import { createScrapingDevtoolsTools } from '../../scraping-devtools/src/index'
@@ -52,6 +53,60 @@ async function waitForNewDevClient(
   throw new Error(
     'Timed out waiting for a newly connected Scraping Devtools client.'
   )
+}
+
+async function findExtensionWorkerByName(
+  context: BrowserContext,
+  extensionName: string
+): Promise<Worker> {
+  const timeoutAt = Date.now() + 10_000
+
+  while (Date.now() < timeoutAt) {
+    for (const worker of context.serviceWorkers()) {
+      const manifestName = await worker
+        .evaluate(
+          () =>
+            (
+              globalThis as typeof globalThis & {
+                chrome: { runtime: { getManifest: () => { name: string } } }
+              }
+            ).chrome.runtime.getManifest().name
+        )
+        .catch(() => null)
+
+      if (manifestName === extensionName) {
+        return worker
+      }
+    }
+
+    await new Promise((resolve) => globalThis.setTimeout(resolve, 100))
+  }
+
+  throw new Error(`Timed out waiting for extension worker: ${extensionName}`)
+}
+
+async function enableDevtoolsExtension(context: BrowserContext): Promise<void> {
+  const worker = await findExtensionWorkerByName(context, 'Scraping Devtools')
+
+  await worker.evaluate(async () => {
+    await new Promise<void>((resolve) => {
+      ;(
+        globalThis as typeof globalThis & {
+          chrome: {
+            runtime: {
+              sendMessage: (message: unknown, callback: () => void) => void
+            }
+          }
+        }
+      ).chrome.runtime.sendMessage(
+        {
+          type: 'extension-dev:set-enabled',
+          enabled: true,
+        },
+        () => resolve()
+      )
+    })
+  })
 }
 
 export const test = base.extend<{
@@ -117,6 +172,8 @@ export const test = base.extend<{
         `--load-extension=${extensionDevPath},${exampleComPath}`,
       ],
     })
+
+    await enableDevtoolsExtension(context)
 
     await use(context)
     await context.close()

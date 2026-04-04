@@ -177,4 +177,44 @@ describe('createScrapingServer', () => {
 
     client.close()
   })
+
+  it('returns 400 for invalid JSON bodies without crashing the server', async () => {
+    const { listening } = await createServerForTest()
+    const response = await fetch(`${listening.url}/api/deterministic/ingest`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: '{"snapshot":',
+    })
+
+    expect(response.status).toBe(400)
+    expect(await response.json()).toMatchObject({
+      error: 'Request body must be valid JSON.',
+    })
+
+    const healthResponse = await fetch(`${listening.url}/health`)
+    expect(healthResponse.status).toBe(200)
+  })
+
+  it('ignores malformed websocket frames and keeps the server available', async () => {
+    const { listening } = await createServerForTest()
+    const client = new WebSocket(
+      `${listening.url.replace('http://', 'ws://')}/ws/dev`
+    )
+
+    await new Promise<void>((resolvePromise) => {
+      client.once('open', () => {
+        client.send('not-json')
+        resolvePromise()
+      })
+    })
+
+    await new Promise((resolvePromise) => setTimeout(resolvePromise, 50))
+
+    const healthResponse = await fetch(`${listening.url}/health`)
+    expect(healthResponse.status).toBe(200)
+
+    client.close()
+  })
 })
