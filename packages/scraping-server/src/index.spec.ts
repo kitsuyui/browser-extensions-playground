@@ -273,21 +273,52 @@ describe('createScrapingServer', () => {
     })
   })
 
+  it('returns 400 when providerManifest shape is incomplete', async () => {
+    const { listening } = await createServerForTest()
+    const response = await fetch(`${listening.url}/api/deterministic/ingest`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        providerManifest: {
+          id: 'openai',
+          displayName: 'OpenAI',
+          matches: ['https://chatgpt.com/*'],
+          capabilities: ['usage'],
+          debugSelectors: ['.not-a-probe'],
+        },
+        snapshot: {
+          provider: 'openai',
+        },
+      }),
+    })
+
+    expect(response.status).toBe(400)
+    expect(await response.json()).toMatchObject({
+      error:
+        'providerManifest.debugSelectors must be an array of selector objects.',
+    })
+  })
+
   it('lists the union of manifest-backed and legacy snapshot-only providers', async () => {
-    const { tempDir, listening } = await createServerForTest()
+    const { listening } = await createServerForTest()
+    const fallbackTempDir = await mkdtemp(
+      path.join(os.tmpdir(), 'scraping-server-')
+    )
     const fallbackStoreServer = createScrapingServer({
       host: '127.0.0.1',
       port: 0,
-      storeFile: path.join(tempDir, 'fallback.sqlite'),
+      storeFile: path.join(fallbackTempDir, 'fallback.sqlite'),
     })
 
     servers.push({
-      tempDir,
+      tempDir: fallbackTempDir,
       server: fallbackStoreServer,
       listening: await fallbackStoreServer.listen(),
     })
 
-    const fallbackStoreFile = path.join(tempDir, 'fallback.sqlite')
+    const fallbackStoreFile = path.join(fallbackTempDir, 'fallback.sqlite')
     const prisma = new (await import('@prisma/client')).PrismaClient({
       datasources: {
         db: {

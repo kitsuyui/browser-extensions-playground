@@ -276,6 +276,26 @@ function toProviderDescription(
   return { id, displayName, matches, capabilities, snapshotSchema }
 }
 
+function isStringArray(value: unknown): value is readonly string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === 'string')
+}
+
+function isDebugSelectorArray(
+  value: unknown
+): value is ProviderManifest['debugSelectors'] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (probe) =>
+        typeof probe === 'object' &&
+        probe !== null &&
+        typeof (probe as Record<string, unknown>).key === 'string' &&
+        typeof (probe as Record<string, unknown>).label === 'string' &&
+        typeof (probe as Record<string, unknown>).selector === 'string'
+    )
+  )
+}
+
 function validateDeterministicIngest(
   body: DeterministicIngestRequest
 ): DeterministicIngestRequest {
@@ -298,6 +318,8 @@ function validateDeterministicIngest(
   }
 
   const { id } = providerManifest as Record<string, unknown>
+  const { displayName, matches, capabilities, debugSelectors } =
+    providerManifest as Record<string, unknown>
   const { provider } = snapshot as Record<string, unknown>
 
   if (typeof id !== 'string') {
@@ -315,6 +337,30 @@ function validateDeterministicIngest(
   if (id !== provider) {
     throw new InvalidDeterministicIngestError(
       'providerManifest.id must match snapshot.provider.'
+    )
+  }
+
+  if (typeof displayName !== 'string') {
+    throw new InvalidDeterministicIngestError(
+      'providerManifest.displayName must be a string.'
+    )
+  }
+
+  if (!isStringArray(matches)) {
+    throw new InvalidDeterministicIngestError(
+      'providerManifest.matches must be an array of strings.'
+    )
+  }
+
+  if (!isStringArray(capabilities)) {
+    throw new InvalidDeterministicIngestError(
+      'providerManifest.capabilities must be an array of strings.'
+    )
+  }
+
+  if (!isDebugSelectorArray(debugSelectors)) {
+    throw new InvalidDeterministicIngestError(
+      'providerManifest.debugSelectors must be an array of selector objects.'
     )
   }
 
