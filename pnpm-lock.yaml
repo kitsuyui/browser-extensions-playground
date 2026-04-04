@@ -67,6 +67,8 @@ importers:
 
   packages/quota-anthropic: {}
 
+  packages/quota-github-copilot: {}
+
   packages/quota-openai: {}
 
   packages/scraped-data:
@@ -87,17 +89,7 @@ importers:
         specifier: workspace:*
         version: link:../scraping-server
 
-  packages/scraping-platform:
-    dependencies:
-      '@kitsuyui/browser-extensions-example-com':
-        specifier: workspace:*
-        version: link:../example-com
-      '@kitsuyui/browser-extensions-quota-anthropic':
-        specifier: workspace:*
-        version: link:../quota-anthropic
-      '@kitsuyui/browser-extensions-quota-openai':
-        specifier: workspace:*
-        version: link:../quota-openai
+  packages/scraping-platform: {}
 
   packages/scraping-server:
     dependencies:
