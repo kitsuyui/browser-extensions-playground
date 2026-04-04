@@ -191,11 +191,6 @@ export class PrismaScrapedDataStore {
     const manifestProviders = manifestRows.map(
       (row: { provider: ProviderId }) => row.provider
     )
-
-    if (manifestProviders.length > 0) {
-      return manifestProviders
-    }
-
     const snapshotRows = await this.prisma.deterministicSnapshotRecord.findMany(
       {
         distinct: ['provider'],
@@ -208,7 +203,11 @@ export class PrismaScrapedDataStore {
       }
     )
 
-    return snapshotRows.map((row: { provider: ProviderId }) => row.provider)
+    const snapshotProviders = snapshotRows.map(
+      (row: { provider: ProviderId }) => row.provider
+    )
+
+    return [...new Set([...manifestProviders, ...snapshotProviders])].sort()
   }
 
   async listProviderManifests(): Promise<readonly ProviderManifest[]> {

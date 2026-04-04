@@ -273,7 +273,7 @@ describe('createScrapingServer', () => {
     })
   })
 
-  it('lists snapshot providers even before a manifest has been stored', async () => {
+  it('lists the union of manifest-backed and legacy snapshot-only providers', async () => {
     const { tempDir, listening } = await createServerForTest()
     const fallbackStoreServer = createScrapingServer({
       host: '127.0.0.1',
@@ -309,6 +309,18 @@ describe('createScrapingServer', () => {
         }),
       },
     })
+    await prisma.providerManifestRecord.create({
+      data: {
+        provider: 'github-copilot',
+        manifestJson: JSON.stringify({
+          id: 'github-copilot',
+          displayName: 'GitHub Copilot',
+          matches: ['https://github.com/settings/copilot/*'],
+          capabilities: ['usage'],
+          debugSelectors: [],
+        }),
+      },
+    })
     await prisma.$disconnect()
 
     const statusResponse = await fetch(
@@ -316,7 +328,7 @@ describe('createScrapingServer', () => {
     )
 
     expect(await statusResponse.json()).toMatchObject({
-      deterministicProviders: ['openai'],
+      deterministicProviders: ['github-copilot', 'openai'],
     })
   })
 })
