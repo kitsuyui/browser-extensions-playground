@@ -13,15 +13,24 @@ Unified local HTTP and WebSocket server for browser scraping workflows.
 
 The deterministic store is backed by SQLite.
 
-- default local path example: `.tmp/scraping-server/deterministic.sqlite`
+- default local path from the repository root: `.tmp/scraping-server/deterministic.sqlite`
 - access layer: Prisma
 - retention model: append-only history plus latest-by-provider queries
 
 ## Start
 
+From this package directory:
+
 ```sh
 pnpm build
 pnpm start -- --store-file ../../.tmp/scraping-server/deterministic.sqlite
+```
+
+From the repository root:
+
+```sh
+pnpm --filter @kitsuyui/browser-extensions-scraping-server build
+pnpm --filter @kitsuyui/browser-extensions-scraping-server start -- --store-file .tmp/scraping-server/deterministic.sqlite
 ```
 
 ## HTTP API
