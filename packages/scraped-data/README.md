@@ -23,7 +23,7 @@ Common commands:
 ```sh
 pnpm inspect -- status
 pnpm inspect -- providers
-pnpm inspect -- latest openai
+pnpm inspect -- snapshot openai
 pnpm inspect -- history openai http://127.0.0.1:3929
 ```
 
