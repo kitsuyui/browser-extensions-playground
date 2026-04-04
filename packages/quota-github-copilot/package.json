@@ -1,14 +1,15 @@
 {
-  "name": "@kitsuyui/browser-extensions-scraping-platform",
+  "name": "@kitsuyui/browser-extensions-quota-github-copilot",
   "private": true,
   "type": "module",
   "version": "0.0.0",
   "license": "MIT",
   "author": "Yui Kitsu <kitsuyui@kitsuyui.com>",
-  "description": "Shared scraping types and helpers for browser extensions",
+  "description": "GitHub Copilot quota extension with deterministic scraping behavior",
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown && node ./scripts/build-extension.mjs",
     "dev": "tsdown --no-clean --watch",
+    "inspect": "node ./dist/cli.js",
     "test": "vitest run",
     "validate": "validate-package-exports --check"
   },
@@ -33,6 +34,5 @@
   "files": [
     "dist",
     "package.json"
-  ],
-  "dependencies": {}
+  ]
 }

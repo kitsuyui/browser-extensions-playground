@@ -104,6 +104,7 @@ async function isExtensionEnabled(): Promise<boolean> {
 
 async function ingestSnapshot(
   serverUrl: string,
+  providerManifest: ProviderManifest,
   snapshot: ProviderSnapshot
 ): Promise<void> {
   const response = await fetch(`${serverUrl}/api/deterministic/ingest`, {
@@ -112,6 +113,7 @@ async function ingestSnapshot(
       'content-type': 'application/json',
     },
     body: JSON.stringify({
+      providerManifest,
       snapshot,
     } satisfies DeterministicIngestRequest),
   })
@@ -149,7 +151,7 @@ async function reloadMatchingTabs(
 }
 
 export function registerDeterministicExtensionBackground(options: {
-  readonly providerManifest: Pick<ProviderManifest, 'id' | 'matches'>
+  readonly providerManifest: ProviderManifest
   readonly serverUrl?: string
   readonly periodicCaptureIntervalMinutes?: number
 }) {
@@ -215,7 +217,7 @@ export function registerDeterministicExtensionBackground(options: {
       await persistSnapshot(snapshot)
 
       try {
-        await ingestSnapshot(serverUrl, snapshot)
+        await ingestSnapshot(serverUrl, options.providerManifest, snapshot)
         await persistSyncStatus({
           status: 'success',
           updatedAt: new Date().toISOString(),

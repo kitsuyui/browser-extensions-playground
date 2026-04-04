@@ -5,50 +5,8 @@ import {
   collectDomProbeMatches,
   createExtensionCaptureFromDocument,
   createProviderSnapshot,
-  describeProvider,
-  extractSnapshotFromPage,
-  findProviderForUrl,
   isProviderSnapshot,
-  listProviderHostPermissions,
-  listProviders,
 } from './index'
-
-describe('providerRegistry', () => {
-  it('lists registered providers', () => {
-    expect(listProviders().map((provider) => provider.id)).toEqual([
-      'example-com',
-      'openai',
-      'anthropic',
-    ])
-  })
-
-  it('lists provider host permissions', () => {
-    expect(listProviderHostPermissions()).toContain('https://chatgpt.com/*')
-  })
-
-  it('describes providers via the registry without provider-specific logic', () => {
-    expect(describeProvider('openai')).toEqual(
-      expect.objectContaining({
-        id: 'openai',
-        snapshotSchema: expect.objectContaining({
-          metrics: expect.arrayContaining([
-            expect.objectContaining({
-              key: 'codex_5h',
-            }),
-          ]),
-        }),
-      })
-    )
-  })
-})
-
-describe('findProviderForUrl', () => {
-  it('finds the matching provider', () => {
-    expect(findProviderForUrl('https://claude.ai/chats/123')?.manifest.id).toBe(
-      'anthropic'
-    )
-  })
-})
 
 describe('provider snapshot helpers', () => {
   it('fills capturedAt when omitted', () => {
@@ -74,17 +32,6 @@ describe('provider snapshot helpers', () => {
         metrics: [],
       })
     ).toBe(true)
-  })
-})
-
-describe('extractSnapshotFromPage', () => {
-  it('uses the provider registry to extract a snapshot', () => {
-    const snapshot = extractSnapshotFromPage({
-      url: 'https://chatgpt.com/codex/settings/usage',
-      pageText: '5時間の使用制限 10% 残り リセット：21:04',
-    })
-
-    expect(snapshot?.provider).toBe('openai')
   })
 })
 

@@ -1,12 +1,13 @@
 import {
-  createExtensionCaptureFromDocument,
-  findProviderForUrl,
+  collectDomProbeMatches,
+  createDomCapture,
 } from '../../scraping-platform/src/index'
 
 import type {
   DevCommand,
   DevCommandResult,
 } from '../../scraping-server/src/protocol'
+import { inferProviderId } from './providers'
 
 declare const chrome:
   | {
@@ -94,6 +95,37 @@ function createResult(
   }
 }
 
+function createGenericCaptureFromDocument(): {
+  readonly snapshot: null
+  readonly domCapture: ReturnType<typeof createDomCapture>
+} {
+  const capturedAt = new Date().toISOString()
+  const provider = inferProviderId(window.location.href)
+
+  return {
+    snapshot: null,
+    domCapture: createDomCapture({
+      provider,
+      url: window.location.href,
+      title: document.title,
+      capturedAt,
+      pageText: document.body?.innerText?.trim().slice(0, 20_000) ?? '',
+      probeMatches: collectDomProbeMatches(document, [
+        {
+          key: 'main',
+          label: 'Main content',
+          selector: 'main, [role="main"], body',
+        },
+        {
+          key: 'headline',
+          label: 'Headline',
+          selector: 'h1, h2, [data-testid]',
+        },
+      ]),
+    }),
+  }
+}
+
 chrome?.runtime?.onMessage?.addListener((message, _sender, sendResponse) => {
   const commandId = message.commandId
 
@@ -105,21 +137,10 @@ chrome?.runtime?.onMessage?.addListener((message, _sender, sendResponse) => {
     return
   }
 
-  const provider = findProviderForUrl(window.location.href)
-
-  if (!provider) {
-    sendResponse(
-      createResult(commandId, false, {
-        error: 'No supported provider matched the current page.',
-      })
-    )
-    return
-  }
-
   if (message.command.type === 'capture-page') {
     sendResponse(
       createResult(commandId, true, {
-        result: createExtensionCaptureFromDocument(provider, document),
+        result: createGenericCaptureFromDocument(),
       })
     )
     return

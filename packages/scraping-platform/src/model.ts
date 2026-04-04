@@ -2,6 +2,7 @@ export type ProviderId = string
 
 export type MetricUnit =
   | 'messages'
+  | 'requests'
   | 'tokens'
   | 'credits'
   | 'percent'

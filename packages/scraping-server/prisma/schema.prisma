@@ -15,3 +15,9 @@ model DeterministicSnapshotRecord {
 
   @@index([provider, receivedAt])
 }
+
+model ProviderManifestRecord {
+  provider     String   @id
+  manifestJson String
+  updatedAt    DateTime @updatedAt
+}

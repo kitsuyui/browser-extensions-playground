@@ -2,6 +2,7 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 
+import { providerManifest as openAiProviderManifest } from '@kitsuyui/browser-extensions-quota-openai'
 import type { ProviderSnapshot } from '@kitsuyui/browser-extensions-scraping-platform'
 import { afterEach, describe, expect, it } from 'vitest'
 import { WebSocket } from 'ws'
@@ -60,7 +61,10 @@ describe('createScrapingServer', () => {
         headers: {
           'content-type': 'application/json',
         },
-        body: JSON.stringify({ snapshot }),
+        body: JSON.stringify({
+          providerManifest: openAiProviderManifest,
+          snapshot,
+        }),
       }
     )
 
@@ -185,7 +189,7 @@ describe('createScrapingServer', () => {
       headers: {
         'content-type': 'application/json',
       },
-      body: '{"snapshot":',
+      body: '{"providerManifest":',
     })
 
     expect(response.status).toBe(400)
@@ -216,5 +220,36 @@ describe('createScrapingServer', () => {
     expect(healthResponse.status).toBe(200)
 
     client.close()
+  })
+
+  it('returns 400 when providerManifest.id and snapshot.provider do not match', async () => {
+    const { listening } = await createServerForTest()
+    const snapshot: ProviderSnapshot = {
+      provider: 'openai',
+      capturedAt: new Date().toISOString(),
+      source: 'dom',
+      confidence: 'medium',
+      rawVersion: 'test',
+      metrics: [],
+    }
+
+    const response = await fetch(`${listening.url}/api/deterministic/ingest`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        providerManifest: {
+          ...openAiProviderManifest,
+          id: 'anthropic',
+        },
+        snapshot,
+      }),
+    })
+
+    expect(response.status).toBe(400)
+    expect(await response.json()).toMatchObject({
+      error: 'providerManifest.id must match snapshot.provider.',
+    })
   })
 })

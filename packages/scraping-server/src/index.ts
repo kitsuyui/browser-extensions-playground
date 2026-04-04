@@ -6,11 +6,10 @@ import {
   type ServerResponse,
 } from 'node:http'
 import { dirname, resolve } from 'node:path'
-import {
-  describeProvider,
-  listProviders,
-  type ProviderId,
-  type ProviderSnapshot,
+import type {
+  ProviderId,
+  ProviderManifest,
+  ProviderSnapshot,
 } from '@kitsuyui/browser-extensions-scraping-platform'
 import { PrismaClient } from '@prisma/client'
 import { type RawData, type WebSocket, WebSocketServer } from 'ws'
@@ -48,6 +47,13 @@ class InvalidJsonBodyError extends Error {
   }
 }
 
+class InvalidDeterministicIngestError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'InvalidDeterministicIngestError'
+  }
+}
+
 export class PrismaScrapedDataStore {
   private readonly prisma: PrismaClient
 
@@ -75,11 +81,32 @@ export class PrismaScrapedDataStore {
       CREATE INDEX IF NOT EXISTS "DeterministicSnapshotRecord_provider_receivedAt_idx"
       ON "DeterministicSnapshotRecord" ("provider", "receivedAt")
     `)
+    await this.prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "ProviderManifestRecord" (
+        "provider" TEXT NOT NULL PRIMARY KEY,
+        "manifestJson" TEXT NOT NULL,
+        "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `)
   }
 
   async submitDeterministicSnapshot(
+    providerManifest: ProviderManifest,
     snapshot: ProviderSnapshot
   ): Promise<DeterministicSnapshotRecord> {
+    await this.prisma.providerManifestRecord.upsert({
+      where: {
+        provider: providerManifest.id,
+      },
+      update: {
+        manifestJson: JSON.stringify(providerManifest),
+      },
+      create: {
+        provider: providerManifest.id,
+        manifestJson: JSON.stringify(providerManifest),
+      },
+    })
+
     const record = await this.prisma.deterministicSnapshotRecord.create({
       data: {
         provider: snapshot.provider,
@@ -149,9 +176,8 @@ export class PrismaScrapedDataStore {
     return Object.fromEntries(latest.entries())
   }
 
-  async listProviders(): Promise<readonly ProviderId[]> {
-    const rows = await this.prisma.deterministicSnapshotRecord.findMany({
-      distinct: ['provider'],
+  async listProviderIds(): Promise<readonly ProviderId[]> {
+    const rows = await this.prisma.providerManifestRecord.findMany({
       select: {
         provider: true,
       },
@@ -161,6 +187,28 @@ export class PrismaScrapedDataStore {
     })
 
     return rows.map((row: { provider: ProviderId }) => row.provider)
+  }
+
+  async listProviderManifests(): Promise<readonly ProviderManifest[]> {
+    const rows = await this.prisma.providerManifestRecord.findMany({
+      orderBy: {
+        provider: 'asc',
+      },
+    })
+
+    return rows.map((row) => JSON.parse(row.manifestJson) as ProviderManifest)
+  }
+
+  async getProviderManifest(
+    provider: ProviderId
+  ): Promise<ProviderManifest | null> {
+    const row = await this.prisma.providerManifestRecord.findUnique({
+      where: {
+        provider,
+      },
+    })
+
+    return row ? (JSON.parse(row.manifestJson) as ProviderManifest) : null
   }
 
   async close(): Promise<void> {
@@ -191,33 +239,32 @@ function createStatus(
   }
 }
 
-function listRegisteredProviders(): readonly RegisteredProviderInfo[] {
-  return listProviders().map(({ id, displayName, matches, capabilities }) => ({
-    id,
-    displayName,
-    matches,
-    capabilities,
-  }))
+function toRegisteredProviderInfo(
+  provider: ProviderManifest
+): RegisteredProviderInfo {
+  const { id, displayName, matches, capabilities } = provider
+
+  return { id, displayName, matches, capabilities }
 }
 
-function describeRegisteredProvider(
-  providerId: ProviderId
-): ProviderDescription | null {
-  const provider = describeProvider(providerId)
-
-  if (!provider) {
-    return null
-  }
-
+function toProviderDescription(
+  provider: ProviderManifest
+): ProviderDescription {
   const { id, displayName, matches, capabilities, snapshotSchema } = provider
 
-  return {
-    id,
-    displayName,
-    matches,
-    capabilities,
-    snapshotSchema,
+  return { id, displayName, matches, capabilities, snapshotSchema }
+}
+
+function validateDeterministicIngest(
+  body: DeterministicIngestRequest
+): DeterministicIngestRequest {
+  if (body.providerManifest.id !== body.snapshot.provider) {
+    throw new InvalidDeterministicIngestError(
+      'providerManifest.id must match snapshot.provider.'
+    )
   }
+
+  return body
 }
 
 async function readJsonBody<T>(request: IncomingMessage): Promise<T> {
@@ -269,13 +316,17 @@ export function createScrapingServer(options: {
         writeJson(
           response,
           200,
-          createStatus(await store.listProviders(), devClients)
+          createStatus(await store.listProviderIds(), devClients)
         )
         return
       }
 
       if (request.method === 'GET' && url.pathname === '/api/providers') {
-        writeJson(response, 200, listRegisteredProviders())
+        writeJson(
+          response,
+          200,
+          (await store.listProviderManifests()).map(toRegisteredProviderInfo)
+        )
         return
       }
 
@@ -287,7 +338,7 @@ export function createScrapingServer(options: {
         const providerId = decodeURIComponent(
           url.pathname.slice('/api/providers/'.length)
         )
-        const provider = describeRegisteredProvider(providerId)
+        const provider = await store.getProviderManifest(providerId)
 
         if (!provider) {
           writeJson(response, 404, {
@@ -296,7 +347,7 @@ export function createScrapingServer(options: {
           return
         }
 
-        writeJson(response, 200, provider)
+        writeJson(response, 200, toProviderDescription(provider))
         return
       }
 
@@ -323,8 +374,13 @@ export function createScrapingServer(options: {
         request.method === 'POST' &&
         url.pathname === '/api/deterministic/ingest'
       ) {
-        const body = await readJsonBody<DeterministicIngestRequest>(request)
-        const record = await store.submitDeterministicSnapshot(body.snapshot)
+        const body = validateDeterministicIngest(
+          await readJsonBody<DeterministicIngestRequest>(request)
+        )
+        const record = await store.submitDeterministicSnapshot(
+          body.providerManifest,
+          body.snapshot
+        )
         writeJson(response, 201, record)
         return
       }
@@ -395,10 +451,17 @@ export function createScrapingServer(options: {
         error: `No route for ${request.method ?? 'GET'} ${url.pathname}`,
       })
     } catch (error) {
-      writeJson(response, error instanceof InvalidJsonBodyError ? 400 : 500, {
-        error:
-          error instanceof Error ? error.message : 'Internal server error.',
-      })
+      writeJson(
+        response,
+        error instanceof InvalidJsonBodyError ||
+          error instanceof InvalidDeterministicIngestError
+          ? 400
+          : 500,
+        {
+          error:
+            error instanceof Error ? error.message : 'Internal server error.',
+        }
+      )
       return
     }
   })
