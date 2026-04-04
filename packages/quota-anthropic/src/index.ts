@@ -30,8 +30,7 @@ export type AnthropicUsageResponse = {
   readonly extra_usage: AnthropicExtraUsage | null
 }
 
-const anthropicLabelPattern =
-  /(?<label>usage|daily|weekly|使用量|日次|週次)/giu
+const anthropicLabelPattern = /(?<label>usage|daily|weekly|使用量|日次|週次)/giu
 
 const anthropicRatioPattern =
   /(?<remaining>\d+(?:,\d{3})*)(?:\s*(?:\/\s*|of\s*)(?<limit>\d+(?:,\d{3})*))?/iu
@@ -78,25 +77,29 @@ export const providerManifest: ProviderManifest = {
         key: 'extra_usage_credits',
         label: 'Extra usage',
         unit: 'credits',
-        description: 'Consumed or remaining extra-usage credits from the monthly cap.',
+        description:
+          'Consumed or remaining extra-usage credits from the monthly cap.',
       },
       {
         key: 'usage',
         label: 'usage',
         unit: 'messages',
-        description: 'DOM fallback count parsed from generic usage message ratios.',
+        description:
+          'DOM fallback count parsed from generic usage message ratios.',
       },
       {
         key: 'daily',
         label: 'daily',
         unit: 'messages',
-        description: 'DOM fallback daily message ratio parsed from rendered text.',
+        description:
+          'DOM fallback daily message ratio parsed from rendered text.',
       },
       {
         key: 'weekly',
         label: 'weekly',
         unit: 'messages',
-        description: 'DOM fallback weekly message ratio parsed from rendered text.',
+        description:
+          'DOM fallback weekly message ratio parsed from rendered text.',
       },
     ],
   },
@@ -140,7 +143,9 @@ export function isAnthropicUsageResponse(
   return (
     (candidate.five_hour === null || isUsageBucket(candidate.five_hour)) &&
     (candidate.seven_day === null || isUsageBucket(candidate.seven_day)) &&
-    ('extra_usage' in candidate || 'five_hour' in candidate || 'seven_day' in candidate)
+    ('extra_usage' in candidate ||
+      'five_hour' in candidate ||
+      'seven_day' in candidate)
   )
 }
 

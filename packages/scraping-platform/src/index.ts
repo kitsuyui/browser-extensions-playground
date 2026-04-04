@@ -10,6 +10,7 @@ import {
   type ExtensionCapture,
   type ExtractionContext,
   type ProviderExtractor,
+  type ProviderId,
   type ProviderManifest,
   type ProviderSnapshot,
 } from './model'
@@ -27,10 +28,12 @@ export function listProviders(): readonly ProviderManifest[] {
   return providerRegistry.map(({ manifest }) => manifest)
 }
 
-export function describeProvider(providerId: ProviderId): ProviderManifest | null {
+export function describeProvider(
+  providerId: ProviderId
+): ProviderManifest | null {
   return (
-    providerRegistry.find(({ manifest }) => manifest.id === providerId)?.manifest ??
-    null
+    providerRegistry.find(({ manifest }) => manifest.id === providerId)
+      ?.manifest ?? null
   )
 }
 

@@ -6,14 +6,13 @@ import {
   type ServerResponse,
 } from 'node:http'
 import { dirname, resolve } from 'node:path'
-
-import { PrismaClient } from '@prisma/client'
 import {
   describeProvider,
   listProviders,
   type ProviderId,
   type ProviderSnapshot,
 } from '@kitsuyui/browser-extensions-scraping-platform'
+import { PrismaClient } from '@prisma/client'
 import { type RawData, type WebSocket, WebSocketServer } from 'ws'
 import {
   DEFAULT_SERVER_HOST,
@@ -87,7 +86,9 @@ export class PrismaScrapedDataStore {
     }
   }
 
-  async getLatest(provider: ProviderId): Promise<DeterministicSnapshotRecord | null> {
+  async getLatest(
+    provider: ProviderId
+  ): Promise<DeterministicSnapshotRecord | null> {
     const record = await this.prisma.deterministicSnapshotRecord.findFirst({
       where: {
         provider,
@@ -294,7 +295,11 @@ export function createScrapingServer(options: {
       const provider = url.searchParams.get('provider')
 
       if (provider) {
-        writeJson(response, 200, (await store.getLatest(provider))?.snapshot ?? null)
+        writeJson(
+          response,
+          200,
+          (await store.getLatest(provider))?.snapshot ?? null
+        )
         return
       }
 

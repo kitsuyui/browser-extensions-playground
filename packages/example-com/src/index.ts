@@ -27,7 +27,8 @@ export const providerManifest: ProviderManifest = {
         key: 'example_domain_present',
         label: 'Example Domain present',
         unit: 'unknown',
-        description: '1 when the page contains the canonical Example Domain text.',
+        description:
+          '1 when the page contains the canonical Example Domain text.',
       },
       {
         key: 'body_text_length',

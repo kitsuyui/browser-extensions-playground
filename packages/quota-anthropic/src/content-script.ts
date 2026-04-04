@@ -96,7 +96,9 @@ async function extractSnapshotFromUsageApi() {
 
   for (const organizationId of organizationIds) {
     try {
-      const usage = await fetchJson(`/api/organizations/${organizationId}/usage`)
+      const usage = await fetchJson(
+        `/api/organizations/${organizationId}/usage`
+      )
 
       if (!isAnthropicUsageResponse(usage)) {
         continue
@@ -109,9 +111,7 @@ async function extractSnapshotFromUsageApi() {
       if (snapshot) {
         return snapshot
       }
-    } catch {
-      continue
-    }
+    } catch {}
   }
 
   return null

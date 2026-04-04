@@ -45,14 +45,6 @@ export type OpenAIWhamUsageResponse = {
   readonly credits?: OpenAIWhamCredits | null
 }
 
-type OpenAIStableUsageKey =
-  | 'codex_5h'
-  | 'codex_weekly'
-  | 'spark_5h'
-  | 'spark_weekly'
-  | 'code_review'
-  | 'credits_remaining'
-
 const usageMetricDefinitions = [
   {
     key: 'codex_5h',
@@ -134,7 +126,8 @@ export const providerManifest: ProviderManifest = {
         key: 'codex_5h',
         label: 'Codex 5h',
         unit: 'percent',
-        description: 'Percent used in the primary 5-hour Codex rate-limit window.',
+        description:
+          'Percent used in the primary 5-hour Codex rate-limit window.',
       },
       {
         key: 'codex_weekly',
@@ -167,7 +160,8 @@ export const providerManifest: ProviderManifest = {
         key: 'credits_remaining',
         label: 'Credits remaining',
         unit: 'credits',
-        description: 'Remaining paid credits balance when the account is metered.',
+        description:
+          'Remaining paid credits balance when the account is metered.',
       },
     ],
   },
@@ -354,7 +348,9 @@ export function extractSnapshotFromWhamUsageResponse(
       remaining: usage.rate_limit.secondary_window.used_percent,
       limit: 100,
       unit: 'percent',
-      resetsAt: toIsoFromUnixSeconds(usage.rate_limit.secondary_window.reset_at),
+      resetsAt: toIsoFromUnixSeconds(
+        usage.rate_limit.secondary_window.reset_at
+      ),
     })
   }
 

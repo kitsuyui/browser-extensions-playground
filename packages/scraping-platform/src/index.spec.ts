@@ -3,9 +3,9 @@ import { describe, expect, it } from 'vitest'
 
 import {
   collectDomProbeMatches,
-  describeProvider,
   createExtensionCaptureFromDocument,
   createProviderSnapshot,
+  describeProvider,
   extractSnapshotFromPage,
   findProviderForUrl,
   isProviderSnapshot,

@@ -45,7 +45,9 @@ function runDangerousScript(source: string): unknown {
   return execute(document, window)
 }
 
-async function fetchJsonFromPage(command: Extract<DevCommand, { type: 'fetch-json' }>): Promise<unknown> {
+async function fetchJsonFromPage(
+  command: Extract<DevCommand, { type: 'fetch-json' }>
+): Promise<unknown> {
   const response = await fetch(command.url, {
     method: command.method ?? 'GET',
     headers: command.headers,
@@ -62,12 +64,17 @@ async function fetchJsonFromPage(command: Extract<DevCommand, { type: 'fetch-jso
     json = null
   }
 
+  const headers: Record<string, string> = {}
+  response.headers.forEach((value, key) => {
+    headers[key] = value
+  })
+
   return {
     ok: response.ok,
     status: response.status,
     statusText: response.statusText,
     url: response.url,
-    headers: Object.fromEntries(response.headers.entries()),
+    headers,
     body: json ?? text,
   }
 }
@@ -88,10 +95,12 @@ function createResult(
 }
 
 chrome?.runtime?.onMessage?.addListener((message, _sender, sendResponse) => {
+  const commandId = message.commandId
+
   if (
     message.type !== 'scraping-devtools:run-command' ||
     !message.command ||
-    !message.commandId
+    !commandId
   ) {
     return
   }
@@ -100,7 +109,7 @@ chrome?.runtime?.onMessage?.addListener((message, _sender, sendResponse) => {
 
   if (!provider) {
     sendResponse(
-      createResult(message.commandId, false, {
+      createResult(commandId, false, {
         error: 'No supported provider matched the current page.',
       })
     )
@@ -109,7 +118,7 @@ chrome?.runtime?.onMessage?.addListener((message, _sender, sendResponse) => {
 
   if (message.command.type === 'capture-page') {
     sendResponse(
-      createResult(message.commandId, true, {
+      createResult(commandId, true, {
         result: createExtensionCaptureFromDocument(provider, document),
       })
     )
@@ -120,13 +129,13 @@ chrome?.runtime?.onMessage?.addListener((message, _sender, sendResponse) => {
     try {
       const result = runDangerousScript(message.command.source)
       sendResponse(
-        createResult(message.commandId, true, {
+        createResult(commandId, true, {
           result: serializeValue(result),
         })
       )
     } catch (error) {
       sendResponse(
-        createResult(message.commandId, false, {
+        createResult(commandId, false, {
           error: error instanceof Error ? error.message : 'unknown error',
         })
       )
@@ -137,14 +146,14 @@ chrome?.runtime?.onMessage?.addListener((message, _sender, sendResponse) => {
     void fetchJsonFromPage(message.command)
       .then((result) => {
         sendResponse(
-          createResult(message.commandId, true, {
+          createResult(commandId, true, {
             result: serializeValue(result),
           })
         )
       })
       .catch((error) => {
         sendResponse(
-          createResult(message.commandId, false, {
+          createResult(commandId, false, {
             error: error instanceof Error ? error.message : 'unknown error',
           })
         )

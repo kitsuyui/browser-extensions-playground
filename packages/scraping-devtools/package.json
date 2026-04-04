@@ -9,8 +9,8 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --no-clean --watch",
-    "inspect": "node ./dist/cli.js",
-    "mcp": "node ./dist/mcp.js",
+    "inspect": "node ./dist/cli.mjs",
+    "mcp": "node ./dist/mcp.mjs",
     "test": "vitest run",
     "validate": "validate-package-exports --check"
   },
@@ -25,16 +25,16 @@
         "default": "./dist/index.cjs"
       },
       "import": {
-        "type": "./dist/index.d.ts",
-        "default": "./dist/index.js"
+        "type": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
       }
     }
   },
-  "main": "dist/index.js",
+  "main": "dist/index.mjs",
   "bin": {
-    "scraping-devtools-mcp": "./dist/mcp.js"
+    "scraping-devtools-mcp": "./dist/mcp.mjs"
   },
-  "types": "dist/index.d.ts",
+  "types": "dist/index.d.mts",
   "files": [
     "dist",
     "package.json"

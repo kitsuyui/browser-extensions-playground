@@ -1,8 +1,8 @@
 import {
   extractSnapshot,
   extractSnapshotFromWhamUsageResponse,
-  providerManifest,
   type OpenAIWhamUsageResponse,
+  providerManifest,
 } from './index'
 
 declare const chrome:
@@ -44,6 +44,21 @@ type WhamHookState = {
   }[]
 }
 
+function toWhamHookMeta(value: unknown): WhamHookMeta | undefined {
+  if (typeof value !== 'object' || value === null) {
+    return undefined
+  }
+
+  const candidate = value as Record<string, unknown>
+
+  return {
+    url: typeof candidate.url === 'string' ? candidate.url : undefined,
+    status: typeof candidate.status === 'number' ? candidate.status : undefined,
+    transport:
+      typeof candidate.transport === 'string' ? candidate.transport : undefined,
+  }
+}
+
 function injectWhamUsageHook(): void {
   const script = document.createElement('script')
   script.src = chrome?.runtime?.getURL?.('page-hook.js') ?? ''
@@ -54,7 +69,9 @@ function injectWhamUsageHook(): void {
   })
 }
 
-async function emitSnapshot(snapshot: ReturnType<typeof extractSnapshot>): Promise<void> {
+async function emitSnapshot(
+  snapshot: ReturnType<typeof extractSnapshot>
+): Promise<void> {
   if (!snapshot) {
     return
   }
@@ -83,8 +100,9 @@ function registerWhamUsageListener(): void {
       return
     }
 
-    const payload = (event.data as { payload?: OpenAIWhamUsageResponse }).payload
-    const meta = (event.data as { meta?: unknown }).meta
+    const payload = (event.data as { payload?: OpenAIWhamUsageResponse })
+      .payload
+    const meta = toWhamHookMeta((event.data as { meta?: unknown }).meta)
     const updatedAt = new Date().toISOString()
 
     void (async () => {
@@ -107,7 +125,7 @@ function registerWhamUsageListener(): void {
             ...previousEvents,
             {
               updatedAt,
-              meta: (meta as WhamHookMeta | undefined) ?? undefined,
+              meta,
             },
           ].slice(-MAX_HOOK_EVENTS),
         } satisfies WhamHookState,

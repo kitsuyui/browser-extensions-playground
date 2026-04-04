@@ -1,4 +1,4 @@
-(function () {
+;(() => {
   const messageType = 'quota-openai:wham-usage'
   const whamPathPrefix = '/backend-api/wham/'
   const originalFetch = window.fetch
@@ -42,11 +42,39 @@
     return response
   }
 
-  XMLHttpRequest.prototype.open = function (method, url, ...rest) {
-    ;(this as XMLHttpRequest & { __quotaOpenAiUrl?: unknown }).__quotaOpenAiUrl =
-      url
-    return originalOpen.call(this, method, url, ...rest)
-  }
+  XMLHttpRequest.prototype.open = function (
+    this: XMLHttpRequest,
+    method: string,
+    url: string | URL,
+    async?: boolean,
+    username?: string | null,
+    password?: string | null
+  ) {
+    ;(
+      this as XMLHttpRequest & { __quotaOpenAiUrl?: unknown }
+    ).__quotaOpenAiUrl = url
+
+    if (async === undefined) {
+      return (
+        originalOpen as (
+          this: XMLHttpRequest,
+          method: string,
+          url: string | URL
+        ) => void
+      ).call(this, method, url)
+    }
+
+    return (
+      originalOpen as (
+        this: XMLHttpRequest,
+        method: string,
+        url: string | URL,
+        async: boolean,
+        username?: string | null,
+        password?: string | null
+      ) => void
+    ).call(this, method, url, async, username, password)
+  } as XMLHttpRequest['open']
 
   XMLHttpRequest.prototype.send = function (...args) {
     this.addEventListener('load', () => {

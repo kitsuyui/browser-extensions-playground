@@ -1,6 +1,4 @@
-import {
-  DETERMINISTIC_EXTENSION_ENABLED_KEY,
-} from '../../scraping-platform/src/deterministic-extension'
+import { DETERMINISTIC_EXTENSION_ENABLED_KEY } from '../../scraping-platform/src/deterministic-extension'
 
 declare const chrome:
   | {
@@ -59,7 +57,8 @@ async function loadState(): Promise<{
 
   return {
     latestSnapshot: (record?.latestSnapshot as Snapshot | undefined) ?? null,
-    syncStatus: (record?.syncStatus as Record<string, unknown> | undefined) ?? null,
+    syncStatus:
+      (record?.syncStatus as Record<string, unknown> | undefined) ?? null,
     enabled: record?.[DETERMINISTIC_EXTENSION_ENABLED_KEY] !== false,
     hookState:
       (record?.openAiWhamUsageHookState as HookState | undefined) ?? null,
