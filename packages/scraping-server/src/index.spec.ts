@@ -268,9 +268,11 @@ describe('createScrapingServer', () => {
     })
 
     expect(response.status).toBe(400)
-    expect(await response.json()).toMatchObject({
-      error: 'providerManifest must be an object.',
-    })
+    expect(await response.json()).toEqual(
+      expect.objectContaining({
+        error: expect.any(String),
+      })
+    )
   })
 
   it('returns 400 when providerManifest shape is incomplete', async () => {
@@ -295,10 +297,34 @@ describe('createScrapingServer', () => {
     })
 
     expect(response.status).toBe(400)
-    expect(await response.json()).toMatchObject({
-      error:
-        'providerManifest.debugSelectors must be an array of selector objects.',
+    expect(await response.json()).toEqual(
+      expect.objectContaining({
+        error: expect.any(String),
+      })
+    )
+  })
+
+  it('returns 400 when /api/dev/commands receives an invalid command shape', async () => {
+    const { listening } = await createServerForTest()
+    const response = await fetch(`${listening.url}/api/dev/commands`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        command: {
+          type: 'fetch-json',
+          url: 42,
+        },
+      }),
     })
+
+    expect(response.status).toBe(400)
+    expect(await response.json()).toEqual(
+      expect.objectContaining({
+        error: expect.any(String),
+      })
+    )
   })
 
   it('lists the union of manifest-backed and legacy snapshot-only providers', async () => {

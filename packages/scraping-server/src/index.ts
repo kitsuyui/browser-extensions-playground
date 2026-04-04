@@ -13,6 +13,7 @@ import type {
 } from '@kitsuyui/browser-extensions-scraping-platform'
 import { PrismaClient } from '@prisma/client'
 import { type RawData, type WebSocket, WebSocketServer } from 'ws'
+import { ZodError } from 'zod'
 import {
   DEFAULT_SERVER_HOST,
   DEFAULT_SERVER_PORT,
@@ -27,6 +28,11 @@ import {
   type RiskLevel,
   type ScrapingServerStatus,
 } from './protocol'
+import {
+  parseDeterministicIngestRequest,
+  parseDevCommandRequest,
+  parseDevtoolsInboundMessage,
+} from './validation'
 
 export * from './protocol'
 
@@ -51,6 +57,13 @@ class InvalidDeterministicIngestError extends Error {
   constructor(message: string) {
     super(message)
     this.name = 'InvalidDeterministicIngestError'
+  }
+}
+
+class InvalidDevCommandRequestError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'InvalidDevCommandRequestError'
   }
 }
 
@@ -276,95 +289,51 @@ function toProviderDescription(
   return { id, displayName, matches, capabilities, snapshotSchema }
 }
 
-function isStringArray(value: unknown): value is readonly string[] {
-  return Array.isArray(value) && value.every((item) => typeof item === 'string')
-}
-
-function isDebugSelectorArray(
-  value: unknown
-): value is ProviderManifest['debugSelectors'] {
-  return (
-    Array.isArray(value) &&
-    value.every(
-      (probe) =>
-        typeof probe === 'object' &&
-        probe !== null &&
-        typeof (probe as Record<string, unknown>).key === 'string' &&
-        typeof (probe as Record<string, unknown>).label === 'string' &&
-        typeof (probe as Record<string, unknown>).selector === 'string'
-    )
-  )
-}
-
 function validateDeterministicIngest(
-  body: DeterministicIngestRequest
+  body: unknown
 ): DeterministicIngestRequest {
-  if (typeof body !== 'object' || body === null) {
-    throw new InvalidDeterministicIngestError(
-      'Deterministic ingest body must be an object.'
-    )
+  try {
+    return parseDeterministicIngestRequest(body)
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new InvalidDeterministicIngestError(
+        error.issues.at(0)?.message ??
+          'Deterministic ingest request is invalid.'
+      )
+    }
+
+    throw error
+  }
+}
+
+function validateDevCommandRequest(body: unknown): DevCommandRequest {
+  try {
+    return parseDevCommandRequest(body)
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new InvalidDevCommandRequestError(
+        error.issues.at(0)?.message ?? 'Dev command request is invalid.'
+      )
+    }
+
+    throw error
+  }
+}
+
+function parseDevtoolsMessage(buffer: RawData) {
+  let rawMessage: unknown
+
+  try {
+    rawMessage = JSON.parse(buffer.toString())
+  } catch {
+    return null
   }
 
-  const { providerManifest, snapshot } = body as Record<string, unknown>
-
-  if (typeof providerManifest !== 'object' || providerManifest === null) {
-    throw new InvalidDeterministicIngestError(
-      'providerManifest must be an object.'
-    )
+  try {
+    return parseDevtoolsInboundMessage(rawMessage)
+  } catch {
+    return null
   }
-
-  if (typeof snapshot !== 'object' || snapshot === null) {
-    throw new InvalidDeterministicIngestError('snapshot must be an object.')
-  }
-
-  const { id } = providerManifest as Record<string, unknown>
-  const { displayName, matches, capabilities, debugSelectors } =
-    providerManifest as Record<string, unknown>
-  const { provider } = snapshot as Record<string, unknown>
-
-  if (typeof id !== 'string') {
-    throw new InvalidDeterministicIngestError(
-      'providerManifest.id must be a string.'
-    )
-  }
-
-  if (typeof provider !== 'string') {
-    throw new InvalidDeterministicIngestError(
-      'snapshot.provider must be a string.'
-    )
-  }
-
-  if (id !== provider) {
-    throw new InvalidDeterministicIngestError(
-      'providerManifest.id must match snapshot.provider.'
-    )
-  }
-
-  if (typeof displayName !== 'string') {
-    throw new InvalidDeterministicIngestError(
-      'providerManifest.displayName must be a string.'
-    )
-  }
-
-  if (!isStringArray(matches)) {
-    throw new InvalidDeterministicIngestError(
-      'providerManifest.matches must be an array of strings.'
-    )
-  }
-
-  if (!isStringArray(capabilities)) {
-    throw new InvalidDeterministicIngestError(
-      'providerManifest.capabilities must be an array of strings.'
-    )
-  }
-
-  if (!isDebugSelectorArray(debugSelectors)) {
-    throw new InvalidDeterministicIngestError(
-      'providerManifest.debugSelectors must be an array of selector objects.'
-    )
-  }
-
-  return body as DeterministicIngestRequest
 }
 
 async function readJsonBody<T>(request: IncomingMessage): Promise<T> {
@@ -497,7 +466,9 @@ export function createScrapingServer(options: {
       }
 
       if (request.method === 'POST' && url.pathname === '/api/dev/commands') {
-        const body = await readJsonBody<DevCommandRequest>(request)
+        const body = validateDevCommandRequest(
+          await readJsonBody<DevCommandRequest>(request)
+        )
         const target =
           (body.targetClientId ? devClients.get(body.targetClientId) : null) ??
           devClients.values().next().value
@@ -554,7 +525,8 @@ export function createScrapingServer(options: {
       writeJson(
         response,
         error instanceof InvalidJsonBodyError ||
-          error instanceof InvalidDeterministicIngestError
+          error instanceof InvalidDeterministicIngestError ||
+          error instanceof InvalidDevCommandRequestError
           ? 400
           : 500,
         {
@@ -574,19 +546,9 @@ export function createScrapingServer(options: {
     let clientId: string | null = null
 
     socket.on('message', (buffer: RawData) => {
-      let message:
-        | {
-            readonly type?: string
-            readonly extensionName?: string
-            readonly extensionVersion?: string
-          }
-        | ({
-            readonly type: 'command-result'
-          } & DevCommandResult)
+      const message = parseDevtoolsMessage(buffer)
 
-      try {
-        message = JSON.parse(buffer.toString()) as typeof message
-      } catch {
+      if (!message) {
         return
       }
 
