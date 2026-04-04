@@ -1,0 +1,46 @@
+{
+  "name": "@kitsuyui/browser-extensions-scraping-server",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0",
+  "license": "MIT",
+  "author": "Yui Kitsu <kitsuyui@kitsuyui.com>",
+  "description": "Unified HTTP and WebSocket server for browser scraping workflows",
+  "scripts": {
+    "build": "prisma generate && tsdown",
+    "dev": "tsdown --no-clean --watch",
+    "start": "node ./dist/cli.mjs",
+    "test": "vitest run",
+    "validate": "validate-package-exports --check"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kitsuyui/browser-extensions-playground.git"
+  },
+  "exports": {
+    ".": {
+      "require": {
+        "type": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      },
+      "import": {
+        "type": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "dependencies": {
+    "@prisma/client": "^6.16.3",
+    "@kitsuyui/browser-extensions-scraping-platform": "workspace:*",
+    "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "prisma": "^6.16.3"
+  }
+}

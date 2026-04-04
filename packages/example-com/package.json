@@ -1,0 +1,38 @@
+{
+  "name": "@kitsuyui/browser-extensions-example-com",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0",
+  "license": "MIT",
+  "author": "Yui Kitsu <kitsuyui@kitsuyui.com>",
+  "description": "Example.com extension for deterministic scraping tests",
+  "scripts": {
+    "build": "tsdown && node ./scripts/build-extension.mjs",
+    "dev": "tsdown --no-clean --watch",
+    "inspect": "node ./dist/cli.js",
+    "test": "vitest run",
+    "validate": "validate-package-exports --check"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kitsuyui/browser-extensions-playground.git"
+  },
+  "exports": {
+    ".": {
+      "require": {
+        "type": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      },
+      "import": {
+        "type": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "package.json"
+  ]
+}
