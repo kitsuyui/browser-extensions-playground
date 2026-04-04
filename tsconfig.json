@@ -11,9 +11,32 @@
     "noFallthroughCasesInSwitch": true,
     "module": "esnext",
     "moduleResolution": "bundler",
-    "baseUrl": ".",
     "paths": {
-      "@kitsuyui/*": ["packages/*/src/index.ts"]
+      "@kitsuyui/browser-extensions-scraping-platform": [
+        "./packages/scraping-platform/src/index.ts"
+      ],
+      "@kitsuyui/browser-extensions-scraping-server": [
+        "./packages/scraping-server/src/index.ts"
+      ],
+      "@kitsuyui/browser-extensions-scraping-extension-devtools": [
+        "./packages/extension-dev/src/index.ts"
+      ],
+      "@kitsuyui/browser-extensions-example-com": [
+        "./packages/example-com/src/index.ts"
+      ],
+      "@kitsuyui/browser-extensions-hello": ["./packages/hello/src/index.ts"],
+      "@kitsuyui/browser-extensions-scraping-devtools": [
+        "./packages/scraping-devtools/src/index.ts"
+      ],
+      "@kitsuyui/browser-extensions-scraped-data": [
+        "./packages/scraped-data/src/index.ts"
+      ],
+      "@kitsuyui/browser-extensions-quota-anthropic": [
+        "./packages/quota-anthropic/src/index.ts"
+      ],
+      "@kitsuyui/browser-extensions-quota-openai": [
+        "./packages/quota-openai/src/index.ts"
+      ]
     },
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -22,6 +45,7 @@
   "exclude": [
     "**/*.spec.ts",
     "**/dist/**/*",
+    "coverage",
     "node_modules",
     "**/examples/**/*"
   ]

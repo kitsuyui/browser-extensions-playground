@@ -4,3 +4,6 @@ gibo dump macOS
 gibo dump Node
 echo packages/*/build/*
 echo build/
+echo .tmp/
+echo test-results/
+echo playwright-report/
