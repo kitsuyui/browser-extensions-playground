@@ -32,8 +32,23 @@ async function main(): Promise<void> {
     return
   }
 
+  if (command === 'history') {
+    const provider =
+      args[0] && !args[0].startsWith('http') ? args[0] : undefined
+    process.stdout.write(
+      `${JSON.stringify(
+        await tools.getSnapshotHistory({
+          provider,
+        }),
+        null,
+        2
+      )}\n`
+    )
+    return
+  }
+
   process.stdout.write(
-    'Usage:\n  node dist/cli.js status [server-url]\n  node dist/cli.js providers [server-url]\n  node dist/cli.js snapshot <provider> [server-url]\n'
+    'Usage:\n  node dist/cli.js status [server-url]\n  node dist/cli.js providers [server-url]\n  node dist/cli.js snapshot <provider> [server-url]\n  node dist/cli.js history [provider] [server-url]\n'
   )
 }
 

@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import type {
+  DeterministicHistoryQuery,
   DeterministicIngestRequest,
   DevCommandRequest,
   DevCommandResult,
@@ -129,6 +130,13 @@ const devtoolsInboundMessageSchema = z.discriminatedUnion('type', [
   devtoolsCommandResultMessageSchema,
 ])
 
+const deterministicHistoryQuerySchema = z.object({
+  provider: z.string().optional(),
+  from: z.string().datetime({ offset: true }).optional(),
+  to: z.string().datetime({ offset: true }).optional(),
+  limit: z.coerce.number().int().positive().max(10_000).optional(),
+})
+
 export function parseDeterministicIngestRequest(
   body: unknown
 ): DeterministicIngestRequest {
@@ -152,4 +160,10 @@ export function parseDevtoolsInboundMessage(body: unknown):
       readonly type: 'command-result'
     } & DevCommandResult) {
   return devtoolsInboundMessageSchema.parse(body)
+}
+
+export function parseDeterministicHistoryQuery(
+  query: Record<string, string | undefined>
+): DeterministicHistoryQuery {
+  return deterministicHistoryQuerySchema.parse(query)
 }

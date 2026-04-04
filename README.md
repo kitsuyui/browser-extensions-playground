@@ -9,7 +9,7 @@ Playground for browser scraping extensions and scraped data tooling.
 This workspace centers on a single local scraping server.
 
 - `packages/scraping-server`: unified HTTP and WebSocket server
-- `packages/scraping-platform`: provider registry and shared scraping helpers
+- `packages/scraping-platform`: provider manifests and shared scraping helpers
 - `packages/extension-dev`: dangerous developer extension for remote browser control
 - `packages/example-com`: deterministic example.com extension used for automated end-to-end testing
 - `packages/scraped-data`: generic read-only accessors over server API
@@ -31,12 +31,14 @@ This serves:
 - `GET /health`
 - `GET /api/status`
 - `GET /api/deterministic/latest`
+- `GET /api/deterministic/history`
 - `POST /api/deterministic/ingest`
 - `GET /api/dev/clients`
 - `POST /api/dev/commands`
 - `ws://127.0.0.1:3929/ws/dev`
 
 The deterministic store is backed by SQLite at `.tmp/scraping-server/deterministic.sqlite`.
+Historical snapshots are preserved there so downstream tools can analyze usage over time instead of reading only the latest row.
 The server uses Prisma as the storage access layer while keeping the HTTP API storage-backend agnostic.
 
 ## Devtools Extension
@@ -92,7 +94,7 @@ Each extension:
 
 - keeps a fixed behavior
 - is scoped to one provider only
-- stores its latest snapshot locally
+- stores its latest snapshot locally and submits every captured snapshot to the server history store
 - posts snapshots to the local server over HTTP
 - schedules periodic refreshes and reloads matching tabs to keep usage data current
 - surfaces a warning when devtool websocket clients are connected
@@ -121,6 +123,14 @@ cd packages/scraped-data
 pnpm build
 pnpm mcp
 ```
+
+The `scraped-data` MCP exposes:
+
+- `get_status`
+- `list_providers`
+- `get_snapshot`
+- `get_history`
+- `describe_provider`
 
 ## Deterministic OpenAI keys
 

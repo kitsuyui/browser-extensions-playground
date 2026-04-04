@@ -147,7 +147,7 @@ export const test = base.extend<{
     const server = createScrapingServer({
       host: '127.0.0.1',
       port: 3929,
-      storeFile: path.join(storeDir, 'deterministic.json'),
+      storeFile: path.join(storeDir, 'deterministic.sqlite'),
     })
     let startedServer = false
 

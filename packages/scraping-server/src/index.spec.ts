@@ -16,7 +16,7 @@ async function createServerForTest() {
   const server = createScrapingServer({
     host: '127.0.0.1',
     port: 0,
-    storeFile: path.join(tempDir, 'deterministic.json'),
+    storeFile: path.join(tempDir, 'deterministic.sqlite'),
   })
   const listening = await server.listen()
 
@@ -114,6 +114,60 @@ describe('createScrapingServer', () => {
         }),
       })
     )
+  })
+
+  it('returns deterministic history rows with provider and limit filters', async () => {
+    const { listening } = await createServerForTest()
+    const baseCapturedAt = new Date('2026-04-04T12:00:00.000Z')
+
+    for (let index = 0; index < 3; index += 1) {
+      const snapshot: ProviderSnapshot = {
+        provider: 'openai',
+        capturedAt: new Date(
+          baseCapturedAt.getTime() + index * 60_000
+        ).toISOString(),
+        source: 'dom',
+        confidence: 'medium',
+        rawVersion: `test-${index}`,
+        metrics: [],
+      }
+
+      const ingestResponse = await fetch(
+        `${listening.url}/api/deterministic/ingest`,
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            providerManifest: openAiProviderManifest,
+            snapshot,
+          }),
+        }
+      )
+
+      expect(ingestResponse.status).toBe(201)
+    }
+
+    const response = await fetch(
+      `${listening.url}/api/deterministic/history?provider=openai&limit=2`
+    )
+
+    expect(response.status).toBe(200)
+    expect(await response.json()).toMatchObject([
+      {
+        snapshot: {
+          provider: 'openai',
+          rawVersion: 'test-0',
+        },
+      },
+      {
+        snapshot: {
+          provider: 'openai',
+          rawVersion: 'test-1',
+        },
+      },
+    ])
   })
 
   it('surfaces dev websocket clients and command results', async () => {
@@ -318,6 +372,20 @@ describe('createScrapingServer', () => {
         },
       }),
     })
+
+    expect(response.status).toBe(400)
+    expect(await response.json()).toEqual(
+      expect.objectContaining({
+        error: expect.any(String),
+      })
+    )
+  })
+
+  it('returns 400 when deterministic history query is malformed', async () => {
+    const { listening } = await createServerForTest()
+    const response = await fetch(
+      `${listening.url}/api/deterministic/history?limit=0`
+    )
 
     expect(response.status).toBe(400)
     expect(await response.json()).toEqual(
