@@ -119,7 +119,31 @@ async function ingestSnapshot(
   })
 
   if (!response.ok) {
-    throw new Error(`deterministic ingest returned ${response.status}`)
+    let detail = ''
+
+    try {
+      const contentType = response.headers.get('content-type') ?? ''
+
+      if (contentType.includes('application/json')) {
+        const payload = (await response.json()) as { error?: unknown }
+
+        if (typeof payload.error === 'string' && payload.error.length > 0) {
+          detail = payload.error
+        }
+      } else {
+        const text = await response.text()
+
+        if (text.length > 0) {
+          detail = text
+        }
+      }
+    } catch {}
+
+    throw new Error(
+      detail.length > 0
+        ? `deterministic ingest returned ${response.status}: ${detail}`
+        : `deterministic ingest returned ${response.status}`
+    )
   }
 }
 
