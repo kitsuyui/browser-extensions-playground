@@ -77,6 +77,26 @@ describe('extractSnapshot', () => {
     ])
   })
 
+  it('extracts usage metrics from English session and 7-day label variants', () => {
+    const snapshot = extractSnapshot({
+      url: 'https://claude.ai/settings/usage',
+      pageText: 'Current session 4 / 20 7-day usage 15 / 50 extra account text',
+    })
+
+    expect(snapshot?.metrics).toMatchObject([
+      {
+        key: 'daily',
+        remaining: 4,
+        limit: 20,
+      },
+      {
+        key: 'weekly',
+        remaining: 15,
+        limit: 50,
+      },
+    ])
+  })
+
   it('creates a high-confidence snapshot from the Anthropic usage API', () => {
     const usage = {
       five_hour: {
@@ -140,6 +160,40 @@ describe('extractSnapshot', () => {
       })
     ).toBe(false)
   })
+
+  it('skips extra usage metrics when the API returns null numeric values', () => {
+    const usage = {
+      five_hour: {
+        utilization: 12,
+        resets_at: '2026-04-04T12:00:00.000Z',
+      },
+      seven_day: null,
+      extra_usage: {
+        is_enabled: true,
+        monthly_limit: null,
+        used_credits: null,
+        utilization: null,
+      },
+    }
+
+    expect(isAnthropicUsageResponse(usage)).toBe(true)
+
+    const snapshot = extractSnapshotFromUsageResponse(usage, {
+      capturedAt: '2026-04-04T11:38:20.000Z',
+    })
+
+    expect(snapshot).toMatchObject({
+      provider: 'anthropic',
+      metrics: [
+        {
+          key: 'five_hour',
+          remaining: 12,
+          limit: 100,
+        },
+      ],
+    })
+    expect(snapshot?.metrics).toHaveLength(1)
+  })
 })
 
 describe('createExtensionManifest', () => {
@@ -154,6 +208,21 @@ describe('createExtensionManifest', () => {
       'storage',
       'tabs',
     ])
+    expect(createExtensionManifest().icons).toEqual({
+      16: 'icon-16.png',
+      32: 'icon-32.png',
+      48: 'icon-48.png',
+      128: 'icon-128.png',
+    })
+    expect(createExtensionManifest().action).toEqual(
+      expect.objectContaining({
+        default_icon: {
+          16: 'icon-16.png',
+          32: 'icon-32.png',
+          48: 'icon-48.png',
+        },
+      })
+    )
   })
 })
 

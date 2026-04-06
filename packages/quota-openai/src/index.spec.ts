@@ -103,6 +103,57 @@ describe('extractSnapshot', () => {
     )
   })
 
+  it('extracts Codex usage from English ratio-based page text variants', () => {
+    const snapshot = extractSnapshot({
+      url: 'https://chatgpt.com/codex/settings/usage',
+      pageText:
+        '5-hour window 4 / 20 resets at 9:04 PM 7-day usage 19 of 20 reset at Apr 8, 10:42 PM GPT-5.3-Codex-Spark 5-hour usage 1 / 20 reset at Apr 5, 1:20 AM GPT-5.3-Codex-Spark 7-day window 7 / 20 reset at Apr 11, 8:20 PM Credits remaining 0',
+    })
+
+    expect(snapshot?.metrics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: 'codex_5h',
+          label: 'Codex 5h',
+          remaining: 20,
+          limit: 100,
+          unit: 'percent',
+          resetsAt: '9:04 PM',
+        }),
+        expect.objectContaining({
+          key: 'codex_weekly',
+          label: 'Codex weekly',
+          remaining: 95,
+          limit: 100,
+          unit: 'percent',
+          resetsAt: 'Apr 8, 10:42 PM',
+        }),
+        expect.objectContaining({
+          key: 'spark_5h',
+          label: 'Spark 5h',
+          remaining: 5,
+          limit: 100,
+          unit: 'percent',
+          resetsAt: 'Apr 5, 1:20 AM',
+        }),
+        expect.objectContaining({
+          key: 'spark_weekly',
+          label: 'Spark weekly',
+          remaining: 35,
+          limit: 100,
+          unit: 'percent',
+          resetsAt: 'Apr 11, 8:20 PM',
+        }),
+        expect.objectContaining({
+          key: 'credits_remaining',
+          label: 'Credits remaining',
+          remaining: 0,
+          unit: 'credits',
+        }),
+      ])
+    )
+  })
+
   it('returns null when the current Codex usage markers are absent', () => {
     expect(
       extractSnapshot({
@@ -255,6 +306,21 @@ describe('createExtensionManifest', () => {
         run_at: 'document_start',
       }),
     ])
+    expect(createExtensionManifest().icons).toEqual({
+      16: 'icon-16.png',
+      32: 'icon-32.png',
+      48: 'icon-48.png',
+      128: 'icon-128.png',
+    })
+    expect(createExtensionManifest().action).toEqual(
+      expect.objectContaining({
+        default_icon: {
+          16: 'icon-16.png',
+          32: 'icon-32.png',
+          48: 'icon-48.png',
+        },
+      })
+    )
     expect(createExtensionManifest().web_accessible_resources).toEqual([
       expect.objectContaining({
         resources: ['page-hook.js'],
@@ -270,7 +336,7 @@ describe('createPopupHtml', () => {
     expect(html).toContain('Quota OpenAI')
     expect(html).toContain('Codex 5h')
     expect(html).toContain('Codex weekly')
-    expect(html).toContain('Credits')
+    expect(html).toContain('Credits remaining')
     expect(html).toContain('Debug')
     expect(html).toContain('WHAM hook')
     expect(html).toContain('Capture enabled')

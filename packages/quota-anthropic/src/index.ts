@@ -14,8 +14,8 @@ type AnthropicUsageBucket = {
 
 type AnthropicExtraUsage = {
   readonly is_enabled: boolean
-  readonly monthly_limit: number
-  readonly used_credits: number
+  readonly monthly_limit: number | null
+  readonly used_credits: number | null
   readonly utilization: number | null
 }
 
@@ -30,7 +30,8 @@ export type AnthropicUsageResponse = {
   readonly extra_usage: AnthropicExtraUsage | null
 }
 
-const anthropicLabelPattern = /(?<label>usage|daily|weekly|使用量|日次|週次)/giu
+const anthropicLabelPattern =
+  /(?<label>current session|current usage|5-hour usage|5 hour usage|5-hour|5 hour|7-day usage|7 day usage|7-day|7 day|weekly quota|weekly limit|weekly|daily quota|daily limit|daily|usage|使用量|日次|週次)/giu
 
 const anthropicRatioPattern =
   /(?<remaining>\d+(?:,\d{3})*)(?:\s*(?:\/\s*|of\s*)(?<limit>\d+(?:,\d{3})*))?/iu
@@ -131,6 +132,24 @@ function isUsageBucket(value: unknown): value is AnthropicUsageBucket {
   )
 }
 
+function isExtraUsage(value: unknown): value is AnthropicExtraUsage {
+  if (typeof value !== 'object' || value === null) {
+    return false
+  }
+
+  const candidate = value as Partial<AnthropicExtraUsage>
+
+  return (
+    typeof candidate.is_enabled === 'boolean' &&
+    (typeof candidate.monthly_limit === 'number' ||
+      candidate.monthly_limit === null) &&
+    (typeof candidate.used_credits === 'number' ||
+      candidate.used_credits === null) &&
+    (typeof candidate.utilization === 'number' ||
+      candidate.utilization === null)
+  )
+}
+
 export function isAnthropicUsageResponse(
   value: unknown
 ): value is AnthropicUsageResponse {
@@ -143,6 +162,7 @@ export function isAnthropicUsageResponse(
   return (
     (candidate.five_hour === null || isUsageBucket(candidate.five_hour)) &&
     (candidate.seven_day === null || isUsageBucket(candidate.seven_day)) &&
+    (candidate.extra_usage === null || isExtraUsage(candidate.extra_usage)) &&
     ('extra_usage' in candidate ||
       'five_hour' in candidate ||
       'seven_day' in candidate)
@@ -152,6 +172,21 @@ export function isAnthropicUsageResponse(
 function createSnapshotMetrics(pageText: string): readonly SnapshotMetric[] {
   const withLabel = (label?: string): string => {
     const normalizedLabel = (label ?? 'usage').toLowerCase()
+
+    if (
+      normalizedLabel.includes('5-hour') ||
+      normalizedLabel.includes('5 hour') ||
+      normalizedLabel.includes('current')
+    ) {
+      return 'daily'
+    }
+
+    if (
+      normalizedLabel.includes('7-day') ||
+      normalizedLabel.includes('7 day')
+    ) {
+      return 'weekly'
+    }
 
     if (normalizedLabel.startsWith('day') || normalizedLabel.includes('日')) {
       return 'daily'
@@ -177,7 +212,7 @@ function createSnapshotMetrics(pageText: string): readonly SnapshotMetric[] {
 
     const nextMatch = labelMatches[index + 1]
     const segment = pageText.slice(
-      match.index,
+      match.index + match[0].length,
       nextMatch?.index ?? pageText.length
     )
     const firstRatioMatch = segment.match(anthropicRatioPattern)
@@ -268,13 +303,24 @@ export function extractSnapshotFromUsageResponse(
   }
 
   if (usage.extra_usage) {
-    metrics.push({
-      key: 'extra_usage_credits',
-      label: 'Extra usage',
-      remaining: usage.extra_usage.used_credits,
-      limit: usage.extra_usage.monthly_limit,
-      unit: 'credits',
-    })
+    const remaining =
+      typeof usage.extra_usage.used_credits === 'number'
+        ? usage.extra_usage.used_credits
+        : undefined
+    const limit =
+      typeof usage.extra_usage.monthly_limit === 'number'
+        ? usage.extra_usage.monthly_limit
+        : undefined
+
+    if (typeof remaining === 'number' || typeof limit === 'number') {
+      metrics.push({
+        key: 'extra_usage_credits',
+        label: 'Extra usage',
+        ...(typeof remaining === 'number' ? { remaining } : {}),
+        ...(typeof limit === 'number' ? { limit } : {}),
+        unit: 'credits',
+      })
+    }
   }
 
   if (metrics.length === 0) {
@@ -298,12 +344,30 @@ export const providerExtractor: ProviderExtractor = {
 }
 
 export function createExtensionManifest() {
-  return createDeterministicExtensionManifest({
+  const manifest = createDeterministicExtensionManifest({
     name: 'Quota Anthropic',
     description:
       'Deterministic Anthropic quota extension with fixed behavior and limited permissions.',
     matches: providerManifest.matches,
   })
+
+  return {
+    ...manifest,
+    icons: {
+      16: 'icon-16.png',
+      32: 'icon-32.png',
+      48: 'icon-48.png',
+      128: 'icon-128.png',
+    },
+    action: {
+      ...manifest.action,
+      default_icon: {
+        16: 'icon-16.png',
+        32: 'icon-32.png',
+        48: 'icon-48.png',
+      },
+    },
+  }
 }
 
 export * from './data'

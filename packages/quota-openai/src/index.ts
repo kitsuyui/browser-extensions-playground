@@ -49,12 +49,32 @@ const usageMetricDefinitions = [
   {
     key: 'codex_5h',
     label: 'Codex 5h',
-    aliases: ['5時間の使用制限', '5-hour limit', '5 hour limit'],
+    aliases: [
+      '5時間の使用制限',
+      '5-hour limit',
+      '5 hour limit',
+      '5-hour window',
+      '5 hour window',
+      '5-hour usage',
+      '5 hour usage',
+    ],
   },
   {
     key: 'codex_weekly',
     label: 'Codex weekly',
-    aliases: ['週あたりの使用制限', 'weekly limit', 'weekly usage limit'],
+    aliases: [
+      '週あたりの使用制限',
+      'weekly limit',
+      'weekly usage limit',
+      'weekly window',
+      'weekly usage',
+      '7-day limit',
+      '7 day limit',
+      '7-day window',
+      '7 day window',
+      '7-day usage',
+      '7 day usage',
+    ],
   },
   {
     key: 'spark_5h',
@@ -63,6 +83,10 @@ const usageMetricDefinitions = [
       'GPT-5.3-Codex-Spark 5時間の使用制限',
       'GPT-5.3-Codex-Spark 5-hour limit',
       'GPT-5.3-Codex-Spark 5 hour limit',
+      'GPT-5.3-Codex-Spark 5-hour window',
+      'GPT-5.3-Codex-Spark 5 hour window',
+      'GPT-5.3-Codex-Spark 5-hour usage',
+      'GPT-5.3-Codex-Spark 5 hour usage',
     ],
   },
   {
@@ -72,6 +96,14 @@ const usageMetricDefinitions = [
       'GPT-5.3-Codex-Spark 週あたりの使用制限',
       'GPT-5.3-Codex-Spark weekly limit',
       'GPT-5.3-Codex-Spark weekly usage limit',
+      'GPT-5.3-Codex-Spark weekly window',
+      'GPT-5.3-Codex-Spark weekly usage',
+      'GPT-5.3-Codex-Spark 7-day limit',
+      'GPT-5.3-Codex-Spark 7 day limit',
+      'GPT-5.3-Codex-Spark 7-day window',
+      'GPT-5.3-Codex-Spark 7 day window',
+      'GPT-5.3-Codex-Spark 7-day usage',
+      'GPT-5.3-Codex-Spark 7 day usage',
     ],
   },
   {
@@ -97,7 +129,33 @@ const usageMetricBoundaryPattern = new RegExp(
 const percentPattern =
   /(?<remaining>\d+)%\s*(?:remaining|left|used|残り)?(?:\s*(?:reset(?:s)?(?:\s+at)?|リセット)[:：]?\s*(?<reset>.*?))?$/isu
 
+const ratioPattern =
+  /(?<remaining>\d+(?:,\d{3})*)(?:\s*(?:\/|of)\s*)(?<limit>\d+(?:,\d{3})*)(?:\s*(?<tail>.*?))?$/isu
+
+const resetPattern =
+  /(?:reset(?:s)?(?:\s+at)?|リセット)[:：]?\s*(?<reset>.+)$/isu
+
 const creditPattern = /(?<remaining>\d+)/u
+
+function parseNumber(value: string): number {
+  return Number(value.replaceAll(',', ''))
+}
+
+function parseResetAt(value: string | undefined): string | undefined {
+  if (!value) {
+    return undefined
+  }
+
+  const resetMatch = value.match(resetPattern)
+
+  if (resetMatch?.groups?.reset) {
+    return resetMatch.groups.reset.trim()
+  }
+
+  const trimmedValue = value.trim()
+
+  return trimmedValue.length > 0 ? trimmedValue : undefined
+}
 
 export const providerManifest: ProviderManifest = {
   id: 'openai',
@@ -228,17 +286,38 @@ function createCodexUsageMetrics(pageText: string): readonly SnapshotMetric[] {
 
     const percentMatch = segment.match(percentPattern)
 
-    if (!percentMatch?.groups?.remaining) {
+    if (percentMatch?.groups?.remaining) {
+      metrics.push({
+        key: definition.key,
+        label: definition.label,
+        remaining: Number(percentMatch.groups.remaining),
+        limit: 100,
+        unit: 'percent',
+        resetsAt: parseResetAt(percentMatch.groups.reset),
+      })
+      continue
+    }
+
+    const ratioMatch = segment.match(ratioPattern)
+
+    if (!ratioMatch?.groups?.remaining || !ratioMatch.groups.limit) {
+      continue
+    }
+
+    const remaining = parseNumber(ratioMatch.groups.remaining)
+    const limit = parseNumber(ratioMatch.groups.limit)
+
+    if (limit <= 0) {
       continue
     }
 
     metrics.push({
       key: definition.key,
       label: definition.label,
-      remaining: Number(percentMatch.groups.remaining),
+      remaining: Math.round((remaining / limit) * 100),
       limit: 100,
       unit: 'percent',
-      resetsAt: percentMatch.groups.reset?.trim() || undefined,
+      resetsAt: parseResetAt(ratioMatch.groups.tail),
     })
   }
 
@@ -450,6 +529,20 @@ export function createExtensionManifest() {
 
   return {
     ...manifest,
+    icons: {
+      16: 'icon-16.png',
+      32: 'icon-32.png',
+      48: 'icon-48.png',
+      128: 'icon-128.png',
+    },
+    action: {
+      ...manifest.action,
+      default_icon: {
+        16: 'icon-16.png',
+        32: 'icon-32.png',
+        48: 'icon-48.png',
+      },
+    },
     content_scripts: manifest.content_scripts.map((entry) => ({
       ...entry,
       run_at: 'document_start' as const,
