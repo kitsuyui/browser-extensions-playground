@@ -4,19 +4,28 @@ import path from 'node:path'
 
 import { providerManifest as openAiProviderManifest } from '@kitsuyui/browser-extensions-quota-openai'
 import type { ProviderSnapshot } from '@kitsuyui/browser-extensions-scraping-platform'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { WebSocket } from 'ws'
 
 import { createScrapingServer } from './index'
 
 const servers: Array<Awaited<ReturnType<typeof createServerForTest>>> = []
 
-async function createServerForTest() {
+function createLoggerSpy() {
+  return {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  }
+}
+
+async function createServerForTest(logger = createLoggerSpy()) {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), 'scraping-server-'))
   const server = createScrapingServer({
     host: '127.0.0.1',
     port: 0,
     storeFile: path.join(tempDir, 'deterministic.sqlite'),
+    logger,
   })
   const listening = await server.listen()
 
@@ -24,6 +33,7 @@ async function createServerForTest() {
     tempDir,
     server,
     listening,
+    logger,
   }
   servers.push(resource)
   return resource
@@ -44,7 +54,7 @@ afterEach(async () => {
 
 describe('createScrapingServer', () => {
   it('ingests snapshots and exposes status', async () => {
-    const { listening } = await createServerForTest()
+    const { listening, logger } = await createServerForTest()
     const snapshot: ProviderSnapshot = {
       provider: 'openai',
       capturedAt: new Date().toISOString(),
@@ -69,6 +79,23 @@ describe('createScrapingServer', () => {
     )
 
     expect(ingestResponse.status).toBe(201)
+    expect(logger.info).toHaveBeenCalledWith(
+      '[scraping-server] snapshot ingested',
+      expect.objectContaining({
+        provider: 'openai',
+        rawVersion: 'test',
+        metricCount: 0,
+        source: 'dom',
+      })
+    )
+    expect(logger.info).toHaveBeenCalledWith(
+      '[scraping-server] request completed',
+      expect.objectContaining({
+        method: 'POST',
+        pathname: '/api/snapshots/ingest',
+        statusCode: 201,
+      })
+    )
 
     const latestResponse = await fetch(
       `${listening.url}/api/snapshots/latest?provider=openai`
@@ -401,10 +428,12 @@ describe('createScrapingServer', () => {
     const fallbackTempDir = await mkdtemp(
       path.join(os.tmpdir(), 'scraping-server-')
     )
+    const fallbackLogger = createLoggerSpy()
     const fallbackStoreServer = createScrapingServer({
       host: '127.0.0.1',
       port: 0,
       storeFile: path.join(fallbackTempDir, 'fallback.sqlite'),
+      logger: fallbackLogger,
     })
 
     servers.push({

@@ -38,6 +38,8 @@ import {
 
 export * from './protocol'
 
+type ScrapingServerLogger = Pick<Console, 'info' | 'warn' | 'error'>
+
 type DevClientConnection = DevClientInfo & {
   readonly socket: WebSocket
 }
@@ -417,27 +419,38 @@ function writeJson(
   response.end(JSON.stringify(body))
 }
 
+function createLogger(logger?: ScrapingServerLogger): ScrapingServerLogger {
+  return logger ?? console
+}
+
 export function createScrapingServer(options: {
   readonly host?: string
   readonly port?: number
   readonly storeFile: string
+  readonly logger?: ScrapingServerLogger
 }) {
   const host = options.host ?? DEFAULT_SERVER_HOST
   const port = options.port ?? DEFAULT_SERVER_PORT
   const store = new PrismaScrapedDataStore(resolve(options.storeFile))
   const devClients = new Map<string, DevClientConnection>()
   const pendingCommands = new Map<string, PendingCommand>()
+  const logger = createLogger(options.logger)
 
   const httpServer = createServer(async (request, response) => {
+    const startedAt = Date.now()
+    const method = request.method ?? 'GET'
+    let pathname = '/'
+
     try {
       const url = new URL(request.url ?? '/', `http://${host}:${port}`)
+      pathname = url.pathname
 
-      if (request.method === 'GET' && url.pathname === '/health') {
+      if (method === 'GET' && url.pathname === '/health') {
         writeJson(response, 200, { ok: true })
         return
       }
 
-      if (request.method === 'GET' && url.pathname === '/api/status') {
+      if (method === 'GET' && url.pathname === '/api/status') {
         writeJson(
           response,
           200,
@@ -446,7 +459,7 @@ export function createScrapingServer(options: {
         return
       }
 
-      if (request.method === 'GET' && url.pathname === '/api/providers') {
+      if (method === 'GET' && url.pathname === '/api/providers') {
         writeJson(
           response,
           200,
@@ -456,7 +469,7 @@ export function createScrapingServer(options: {
       }
 
       if (
-        request.method === 'GET' &&
+        method === 'GET' &&
         url.pathname.startsWith('/api/providers/') &&
         url.pathname.length > '/api/providers/'.length
       ) {
@@ -477,8 +490,7 @@ export function createScrapingServer(options: {
       }
 
       if (
-        (request.method === 'GET' &&
-          url.pathname === '/api/deterministic/latest') ||
+        (method === 'GET' && url.pathname === '/api/deterministic/latest') ||
         url.pathname === '/api/snapshots/latest'
       ) {
         const provider = url.searchParams.get('provider')
@@ -497,8 +509,7 @@ export function createScrapingServer(options: {
       }
 
       if (
-        (request.method === 'GET' &&
-          url.pathname === '/api/deterministic/history') ||
+        (method === 'GET' && url.pathname === '/api/deterministic/history') ||
         url.pathname === '/api/snapshots/history'
       ) {
         const query = validateDeterministicHistoryQuery({
@@ -513,8 +524,7 @@ export function createScrapingServer(options: {
       }
 
       if (
-        (request.method === 'POST' &&
-          url.pathname === '/api/deterministic/ingest') ||
+        (method === 'POST' && url.pathname === '/api/deterministic/ingest') ||
         url.pathname === '/api/snapshots/ingest'
       ) {
         const body = validateDeterministicIngest(
@@ -524,11 +534,17 @@ export function createScrapingServer(options: {
           body.providerManifest,
           body.snapshot
         )
+        logger.info('[scraping-server] snapshot ingested', {
+          provider: body.snapshot.provider,
+          rawVersion: body.snapshot.rawVersion,
+          metricCount: body.snapshot.metrics.length,
+          source: body.snapshot.source,
+        })
         writeJson(response, 201, record)
         return
       }
 
-      if (request.method === 'GET' && url.pathname === '/api/dev/clients') {
+      if (method === 'GET' && url.pathname === '/api/dev/clients') {
         writeJson(
           response,
           200,
@@ -539,7 +555,7 @@ export function createScrapingServer(options: {
         return
       }
 
-      if (request.method === 'POST' && url.pathname === '/api/dev/commands') {
+      if (method === 'POST' && url.pathname === '/api/dev/commands') {
         const body = validateDevCommandRequest(
           await readJsonBody<DevCommandRequest>(request)
         )
@@ -559,6 +575,12 @@ export function createScrapingServer(options: {
           commandId,
           command: body.command,
         }
+
+        logger.info('[scraping-server] dev command dispatched', {
+          commandId,
+          type: body.command.type,
+          targetClientId: target.clientId,
+        })
 
         const result = await new Promise<DevCommandResult>(
           (resolveResult, rejectResult) => {
@@ -588,6 +610,12 @@ export function createScrapingServer(options: {
           error: error instanceof Error ? error.message : 'unknown error',
         }))
 
+        logger.info('[scraping-server] dev command completed', {
+          commandId,
+          ok: result.ok,
+          error: result.error,
+        })
+
         writeJson(response, result.ok ? 200 : 500, result)
         return
       }
@@ -609,7 +637,21 @@ export function createScrapingServer(options: {
             error instanceof Error ? error.message : 'Internal server error.',
         }
       )
+      logger.error('[scraping-server] request failed', {
+        method,
+        pathname,
+        statusCode: response.statusCode,
+        error:
+          error instanceof Error ? error.message : 'Internal server error.',
+      })
       return
+    } finally {
+      logger.info('[scraping-server] request completed', {
+        method,
+        pathname,
+        statusCode: response.statusCode,
+        durationMs: Date.now() - startedAt,
+      })
     }
   })
 
@@ -624,6 +666,7 @@ export function createScrapingServer(options: {
       const message = parseDevtoolsMessage(buffer)
 
       if (!message) {
+        logger.warn('[scraping-server] ignored malformed devtools message')
         return
       }
 
@@ -641,6 +684,11 @@ export function createScrapingServer(options: {
           socket,
         }
         devClients.set(clientId, client)
+        logger.info('[scraping-server] devtools client connected', {
+          clientId,
+          extensionName: message.extensionName,
+          extensionVersion: message.extensionVersion,
+        })
         socket.send(
           JSON.stringify({
             type: 'welcome',
@@ -657,6 +705,12 @@ export function createScrapingServer(options: {
         const pending = pendingCommands.get(result.commandId)
 
         if (!pending) {
+          logger.warn(
+            '[scraping-server] dropped unexpected dev command result',
+            {
+              commandId: result.commandId,
+            }
+          )
           return
         }
 
@@ -669,6 +723,9 @@ export function createScrapingServer(options: {
     socket.on('close', () => {
       if (clientId) {
         devClients.delete(clientId)
+        logger.info('[scraping-server] devtools client disconnected', {
+          clientId,
+        })
       }
     })
   })
@@ -704,11 +761,20 @@ export function createScrapingServer(options: {
         throw new Error('Expected an address object after listen().')
       }
 
-      return {
+      const listening = {
         host,
         port: address.port,
         url: `http://${host}:${address.port}`,
       }
+
+      logger.info('[scraping-server] listening', {
+        host: listening.host,
+        port: listening.port,
+        url: listening.url,
+        storeFile: resolve(options.storeFile),
+      })
+
+      return listening
     },
     async close() {
       await store.close()
