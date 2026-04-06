@@ -134,7 +134,7 @@ export function createExtensionManifest() {
   const manifest = createDeterministicExtensionManifest({
     name: 'Quota GitHub Copilot',
     description:
-      'Deterministic GitHub Copilot quota extension with fixed behavior and limited permissions.',
+      'GitHub Copilot quota extension with stable snapshot capture and limited permissions.',
     matches: providerManifest.matches,
   })
 

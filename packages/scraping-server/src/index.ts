@@ -306,6 +306,7 @@ function createStatus(
     serverTime: new Date().toISOString(),
     riskLevel,
     warnings,
+    snapshotProviders: deterministicProviders,
     deterministicProviders,
     devClients: [...devClients.values()].map(
       ({ socket: _socket, ...client }) => client
@@ -337,8 +338,7 @@ function validateDeterministicIngest(
   } catch (error) {
     if (error instanceof ZodError) {
       throw new InvalidDeterministicIngestError(
-        error.issues.at(0)?.message ??
-          'Deterministic ingest request is invalid.'
+        error.issues.at(0)?.message ?? 'Snapshot ingest request is invalid.'
       )
     }
 
@@ -477,8 +477,9 @@ export function createScrapingServer(options: {
       }
 
       if (
-        request.method === 'GET' &&
-        url.pathname === '/api/deterministic/latest'
+        (request.method === 'GET' &&
+          url.pathname === '/api/deterministic/latest') ||
+        url.pathname === '/api/snapshots/latest'
       ) {
         const provider = url.searchParams.get('provider')
 
@@ -496,8 +497,9 @@ export function createScrapingServer(options: {
       }
 
       if (
-        request.method === 'GET' &&
-        url.pathname === '/api/deterministic/history'
+        (request.method === 'GET' &&
+          url.pathname === '/api/deterministic/history') ||
+        url.pathname === '/api/snapshots/history'
       ) {
         const query = validateDeterministicHistoryQuery({
           provider: url.searchParams.get('provider') ?? undefined,
@@ -511,8 +513,9 @@ export function createScrapingServer(options: {
       }
 
       if (
-        request.method === 'POST' &&
-        url.pathname === '/api/deterministic/ingest'
+        (request.method === 'POST' &&
+          url.pathname === '/api/deterministic/ingest') ||
+        url.pathname === '/api/snapshots/ingest'
       ) {
         const body = validateDeterministicIngest(
           await readJsonBody<DeterministicIngestRequest>(request)

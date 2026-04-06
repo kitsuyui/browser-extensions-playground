@@ -347,7 +347,7 @@ export function createExtensionManifest() {
   const manifest = createDeterministicExtensionManifest({
     name: 'Quota Anthropic',
     description:
-      'Deterministic Anthropic quota extension with fixed behavior and limited permissions.',
+      'Anthropic quota extension with stable snapshot capture and limited permissions.',
     matches: providerManifest.matches,
   })
 

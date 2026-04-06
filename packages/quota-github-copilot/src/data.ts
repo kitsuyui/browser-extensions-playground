@@ -6,7 +6,7 @@ export function createQuotaGithubCopilotTools(
 ) {
   return {
     async getLatestSnapshot(): Promise<ProviderSnapshot | null> {
-      const url = new URL(`${baseUrl}/api/deterministic/latest`)
+      const url = new URL(`${baseUrl}/api/snapshots/latest`)
       url.searchParams.set('provider', 'github-copilot')
 
       const response = await fetch(url)

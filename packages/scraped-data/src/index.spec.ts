@@ -15,6 +15,7 @@ describe('createScrapedDataTools', () => {
           JSON.stringify({
             riskLevel: 'normal',
             warnings: [],
+            snapshotProviders: ['openai'],
             deterministicProviders: ['openai'],
             devClients: [],
           })
@@ -63,7 +64,7 @@ describe('createScrapedDataTools', () => {
         )
       }
 
-      if (url.includes('/api/deterministic/latest?provider=openai')) {
+      if (url.includes('/api/snapshots/latest?provider=openai')) {
         return new Response(
           JSON.stringify({
             provider: 'openai',
@@ -76,7 +77,7 @@ describe('createScrapedDataTools', () => {
         )
       }
 
-      if (url.includes('/api/deterministic/history?provider=openai&limit=2')) {
+      if (url.includes('/api/snapshots/history?provider=openai&limit=2')) {
         return new Response(
           JSON.stringify([
             {
@@ -103,7 +104,7 @@ describe('createScrapedDataTools', () => {
     vi.restoreAllMocks()
   })
 
-  it('reads server status and deterministic snapshots', async () => {
+  it('reads server status and snapshots', async () => {
     const tools = createScrapedDataTools('http://127.0.0.1:3929')
 
     await expect(tools.getServerStatus()).resolves.toMatchObject({

@@ -1,6 +1,6 @@
 # quota-openai
 
-Deterministic quota extension for OpenAI usage pages.
+Quota extension for OpenAI usage pages with snapshot syncing.
 
 ## Target URLs
 

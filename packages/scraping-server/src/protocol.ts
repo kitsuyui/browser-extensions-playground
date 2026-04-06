@@ -54,7 +54,8 @@ export type ScrapingServerStatus = {
   readonly serverTime: string
   readonly riskLevel: RiskLevel
   readonly warnings: readonly string[]
-  readonly deterministicProviders: readonly ProviderId[]
+  readonly snapshotProviders: readonly ProviderId[]
+  readonly deterministicProviders?: readonly ProviderId[]
   readonly devClients: readonly DevClientInfo[]
 }
 

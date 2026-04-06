@@ -523,7 +523,7 @@ export function createExtensionManifest() {
   const manifest = createDeterministicExtensionManifest({
     name: 'Quota OpenAI',
     description:
-      'Deterministic OpenAI quota extension with fixed behavior and limited permissions.',
+      'OpenAI quota extension with stable snapshot capture and limited permissions.',
     matches: providerManifest.matches,
   })
 

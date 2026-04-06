@@ -5,7 +5,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "author": "Yui Kitsu <kitsuyui@kitsuyui.com>",
-  "description": "Example.com extension for deterministic scraping tests",
+  "description": "Example.com extension for snapshot scraping tests",
   "scripts": {
     "build": "tsdown && node ./scripts/build-extension.mjs",
     "dev": "tsdown --no-clean --watch",

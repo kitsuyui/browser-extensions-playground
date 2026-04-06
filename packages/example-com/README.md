@@ -1,10 +1,10 @@
 # example-com
 
-Deterministic example extension used for automated end-to-end testing.
+Example extension used for automated end-to-end snapshot testing.
 
 ## Responsibilities
 
-- provide a minimal deterministic provider for harness and e2e coverage
+- provide a minimal provider for harness and e2e snapshot coverage
 - exercise the same capture and ingest path as real provider extensions
 - keep test fixtures isolated from provider-specific production logic
 

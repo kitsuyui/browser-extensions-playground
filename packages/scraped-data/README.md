@@ -4,7 +4,7 @@ Read-only accessors over the local scraping server.
 
 ## Responsibilities
 
-- fetch latest deterministic snapshots
+- fetch latest recorded snapshots
 - fetch historical snapshot rows
 - list registered providers
 - surface provider-authored schema descriptions

@@ -43,7 +43,7 @@ afterEach(async () => {
 })
 
 describe('createScrapingServer', () => {
-  it('ingests deterministic snapshots and exposes status', async () => {
+  it('ingests snapshots and exposes status', async () => {
     const { listening } = await createServerForTest()
     const snapshot: ProviderSnapshot = {
       provider: 'openai',
@@ -55,7 +55,7 @@ describe('createScrapingServer', () => {
     }
 
     const ingestResponse = await fetch(
-      `${listening.url}/api/deterministic/ingest`,
+      `${listening.url}/api/snapshots/ingest`,
       {
         method: 'POST',
         headers: {
@@ -71,7 +71,7 @@ describe('createScrapingServer', () => {
     expect(ingestResponse.status).toBe(201)
 
     const latestResponse = await fetch(
-      `${listening.url}/api/deterministic/latest?provider=openai`
+      `${listening.url}/api/snapshots/latest?provider=openai`
     )
     expect(await latestResponse.json()).toMatchObject({
       provider: 'openai',
@@ -81,6 +81,7 @@ describe('createScrapingServer', () => {
     const statusResponse = await fetch(`${listening.url}/api/status`)
     expect(await statusResponse.json()).toMatchObject({
       riskLevel: 'normal',
+      snapshotProviders: ['openai'],
       deterministicProviders: ['openai'],
     })
 
@@ -116,7 +117,7 @@ describe('createScrapingServer', () => {
     )
   })
 
-  it('returns deterministic history rows with provider and limit filters', async () => {
+  it('returns snapshot history rows with provider and limit filters', async () => {
     const { listening } = await createServerForTest()
     const baseCapturedAt = new Date('2026-04-04T12:00:00.000Z')
 
@@ -133,7 +134,7 @@ describe('createScrapingServer', () => {
       }
 
       const ingestResponse = await fetch(
-        `${listening.url}/api/deterministic/ingest`,
+        `${listening.url}/api/snapshots/ingest`,
         {
           method: 'POST',
           headers: {
@@ -150,7 +151,7 @@ describe('createScrapingServer', () => {
     }
 
     const response = await fetch(
-      `${listening.url}/api/deterministic/history?provider=openai&limit=2`
+      `${listening.url}/api/snapshots/history?provider=openai&limit=2`
     )
 
     expect(response.status).toBe(200)
@@ -238,7 +239,7 @@ describe('createScrapingServer', () => {
 
   it('returns 400 for invalid JSON bodies without crashing the server', async () => {
     const { listening } = await createServerForTest()
-    const response = await fetch(`${listening.url}/api/deterministic/ingest`, {
+    const response = await fetch(`${listening.url}/api/snapshots/ingest`, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
@@ -287,7 +288,7 @@ describe('createScrapingServer', () => {
       metrics: [],
     }
 
-    const response = await fetch(`${listening.url}/api/deterministic/ingest`, {
+    const response = await fetch(`${listening.url}/api/snapshots/ingest`, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
@@ -309,7 +310,7 @@ describe('createScrapingServer', () => {
 
   it('returns 400 when providerManifest is missing or malformed', async () => {
     const { listening } = await createServerForTest()
-    const response = await fetch(`${listening.url}/api/deterministic/ingest`, {
+    const response = await fetch(`${listening.url}/api/snapshots/ingest`, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
@@ -331,7 +332,7 @@ describe('createScrapingServer', () => {
 
   it('returns 400 when providerManifest shape is incomplete', async () => {
     const { listening } = await createServerForTest()
-    const response = await fetch(`${listening.url}/api/deterministic/ingest`, {
+    const response = await fetch(`${listening.url}/api/snapshots/ingest`, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
@@ -381,10 +382,10 @@ describe('createScrapingServer', () => {
     )
   })
 
-  it('returns 400 when deterministic history query is malformed', async () => {
+  it('returns 400 when snapshot history query is malformed', async () => {
     const { listening } = await createServerForTest()
     const response = await fetch(
-      `${listening.url}/api/deterministic/history?limit=0`
+      `${listening.url}/api/snapshots/history?limit=0`
     )
 
     expect(response.status).toBe(400)
@@ -453,6 +454,7 @@ describe('createScrapingServer', () => {
     )
 
     expect(await statusResponse.json()).toMatchObject({
+      snapshotProviders: ['github-copilot', 'openai'],
       deterministicProviders: ['github-copilot', 'openai'],
     })
   })

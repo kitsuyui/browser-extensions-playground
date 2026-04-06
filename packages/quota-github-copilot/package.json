@@ -5,7 +5,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "author": "Yui Kitsu <kitsuyui@kitsuyui.com>",
-  "description": "GitHub Copilot quota extension with deterministic scraping behavior",
+  "description": "GitHub Copilot quota extension with stable snapshot syncing",
   "scripts": {
     "build": "tsdown && node ./scripts/build-extension.mjs",
     "dev": "tsdown --no-clean --watch",

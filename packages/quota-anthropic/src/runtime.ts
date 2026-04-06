@@ -183,7 +183,7 @@ export function createPopupHtml(): string {
           <summary>Debug</summary>
           <div class="metrics">
             <div class="metric-row">
-              <span class="label">Sync</span>
+              <span class="label">Snapshot sync</span>
               <span id="sync-summary" class="value">Waiting</span>
             </div>
             <div class="metric-row">

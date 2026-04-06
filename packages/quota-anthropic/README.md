@@ -1,6 +1,6 @@
 # quota-anthropic
 
-Deterministic quota extension for Anthropic usage pages.
+Quota extension for Anthropic usage pages with snapshot syncing.
 
 ## Target URLs
 

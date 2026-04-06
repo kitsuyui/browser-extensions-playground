@@ -107,7 +107,7 @@ async function ingestSnapshot(
   providerManifest: ProviderManifest,
   snapshot: ProviderSnapshot
 ): Promise<void> {
-  const response = await fetch(`${serverUrl}/api/deterministic/ingest`, {
+  const response = await fetch(`${serverUrl}/api/snapshots/ingest`, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
@@ -141,8 +141,8 @@ async function ingestSnapshot(
 
     throw new Error(
       detail.length > 0
-        ? `deterministic ingest returned ${response.status}: ${detail}`
-        : `deterministic ingest returned ${response.status}`
+        ? `snapshot sync returned ${response.status}: ${detail}`
+        : `snapshot sync returned ${response.status}`
     )
   }
 }

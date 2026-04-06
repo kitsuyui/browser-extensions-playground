@@ -14,7 +14,7 @@ export const providerManifest: ProviderManifest = {
   capabilities: ['usage'],
   snapshotSchema: {
     description:
-      'Example test provider used to validate deterministic scraping plumbing.',
+      'Example test provider used to validate snapshot capture plumbing.',
     rawVersions: [
       {
         rawVersion: 'example-com-dom-v1',
@@ -97,7 +97,7 @@ export function createExtensionManifest() {
   return createDeterministicExtensionManifest({
     name: 'Example.com Data',
     description:
-      'Deterministic example.com extension used for automated scraping tests.',
+      'Example.com extension used for automated snapshot scraping tests.',
     matches: providerManifest.matches,
   })
 }

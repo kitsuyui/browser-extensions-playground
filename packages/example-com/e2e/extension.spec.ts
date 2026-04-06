@@ -31,12 +31,12 @@ test('capture-page succeeds against example.com through the devtools channel', a
     })
 })
 
-test('deterministic example.com extension ingests a snapshot into the scraping server', async ({
+test('example.com extension ingests a snapshot into the scraping server', async ({
   page,
   serverUrl,
 }) => {
   const previousSnapshotResponse = await fetch(
-    `${serverUrl}/api/deterministic/latest?provider=example-com`
+    `${serverUrl}/api/snapshots/latest?provider=example-com`
   )
   const previousSnapshot = (await previousSnapshotResponse.json()) as {
     capturedAt?: string
@@ -47,7 +47,7 @@ test('deterministic example.com extension ingests a snapshot into the scraping s
   await expect
     .poll(async () => {
       const response = await fetch(
-        `${serverUrl}/api/deterministic/latest?provider=example-com`
+        `${serverUrl}/api/snapshots/latest?provider=example-com`
       )
       const snapshot = (await response.json()) as {
         capturedAt?: string
