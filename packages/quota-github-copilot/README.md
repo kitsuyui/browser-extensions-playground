@@ -1,6 +1,6 @@
 # quota-github-copilot
 
-Deterministic quota extension for GitHub Copilot usage pages.
+Quota extension for GitHub Copilot usage pages with snapshot syncing.
 
 ## Target URLs
 

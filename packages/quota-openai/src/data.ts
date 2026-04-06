@@ -55,7 +55,7 @@ export function createOpenAIStableUsageSnapshot(
 
 export function createQuotaOpenAITools(baseUrl = LOCAL_SERVER_HTTP_ORIGIN) {
   const getLatestSnapshot = async (): Promise<ProviderSnapshot | null> => {
-    const url = new URL(`${baseUrl}/api/deterministic/latest`)
+    const url = new URL(`${baseUrl}/api/snapshots/latest`)
     url.searchParams.set('provider', 'openai')
 
     const response = await fetch(url)

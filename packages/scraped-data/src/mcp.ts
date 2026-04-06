@@ -32,7 +32,7 @@ const TOOLS = [
   {
     name: 'get_snapshot',
     description:
-      'Read the latest deterministic snapshot for one provider or all providers.',
+      'Read the latest recorded snapshot for one provider or all providers.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -45,7 +45,7 @@ const TOOLS = [
   {
     name: 'get_history',
     description:
-      'Read deterministic snapshot history rows with optional provider and time-window filters.',
+      'Read recorded snapshot history rows with optional provider and time-window filters.',
     inputSchema: {
       type: 'object',
       properties: {

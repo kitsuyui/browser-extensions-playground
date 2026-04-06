@@ -5,7 +5,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "author": "Yui Kitsu <kitsuyui@kitsuyui.com>",
-  "description": "Deterministic read-only accessors for scraped provider data",
+  "description": "Read-only accessors for recorded provider snapshots",
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --no-clean --watch",

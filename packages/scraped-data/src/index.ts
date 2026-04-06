@@ -37,7 +37,7 @@ export function createScrapedDataTools(baseUrl = LOCAL_SERVER_HTTP_ORIGIN) {
     async getLatestSnapshot(
       provider?: ProviderId
     ): Promise<ProviderSnapshot | Record<string, ProviderSnapshot> | null> {
-      const url = new URL(`${baseUrl}/api/deterministic/latest`)
+      const url = new URL(`${baseUrl}/api/snapshots/latest`)
 
       if (provider) {
         url.searchParams.set('provider', provider)
@@ -52,7 +52,7 @@ export function createScrapedDataTools(baseUrl = LOCAL_SERVER_HTTP_ORIGIN) {
     async getSnapshotHistory(
       query: DeterministicHistoryQuery = {}
     ): Promise<readonly DeterministicSnapshotRecord[]> {
-      const url = new URL(`${baseUrl}/api/deterministic/history`)
+      const url = new URL(`${baseUrl}/api/snapshots/history`)
 
       if (query.provider) {
         url.searchParams.set('provider', query.provider)

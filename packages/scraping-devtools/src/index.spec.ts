@@ -15,6 +15,7 @@ describe('createScrapingDevtoolsTools', () => {
           JSON.stringify({
             riskLevel: 'elevated',
             warnings: ['Remote browser control is enabled.'],
+            snapshotProviders: [],
             deterministicProviders: [],
             devClients: [
               {

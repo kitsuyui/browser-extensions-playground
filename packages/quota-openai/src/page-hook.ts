@@ -1,6 +1,6 @@
 ;(() => {
   const messageType = 'quota-openai:wham-usage'
-  const whamPathPrefix = '/backend-api/wham/'
+  const usageEndpointPath = '/backend-api/wham/usage'
   const originalFetch = window.fetch
   const originalOpen = XMLHttpRequest.prototype.open
   const originalSend = XMLHttpRequest.prototype.send
@@ -12,8 +12,20 @@
     )
   }
 
+  function toPathname(input: unknown): string | null {
+    if (typeof input !== 'string' || input.length === 0) {
+      return null
+    }
+
+    try {
+      return new URL(input, window.location.origin).pathname
+    } catch {
+      return null
+    }
+  }
+
   function matchesUsage(input: unknown): boolean {
-    return typeof input === 'string' && input.includes(whamPathPrefix)
+    return toPathname(input) === usageEndpointPath
   }
 
   window.fetch = async (...args) => {

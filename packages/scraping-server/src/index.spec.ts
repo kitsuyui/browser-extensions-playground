@@ -4,19 +4,28 @@ import path from 'node:path'
 
 import { providerManifest as openAiProviderManifest } from '@kitsuyui/browser-extensions-quota-openai'
 import type { ProviderSnapshot } from '@kitsuyui/browser-extensions-scraping-platform'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { WebSocket } from 'ws'
 
 import { createScrapingServer } from './index'
 
 const servers: Array<Awaited<ReturnType<typeof createServerForTest>>> = []
 
-async function createServerForTest() {
+function createLoggerSpy() {
+  return {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  }
+}
+
+async function createServerForTest(logger = createLoggerSpy()) {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), 'scraping-server-'))
   const server = createScrapingServer({
     host: '127.0.0.1',
     port: 0,
     storeFile: path.join(tempDir, 'deterministic.sqlite'),
+    logger,
   })
   const listening = await server.listen()
 
@@ -24,6 +33,7 @@ async function createServerForTest() {
     tempDir,
     server,
     listening,
+    logger,
   }
   servers.push(resource)
   return resource
@@ -43,8 +53,8 @@ afterEach(async () => {
 })
 
 describe('createScrapingServer', () => {
-  it('ingests deterministic snapshots and exposes status', async () => {
-    const { listening } = await createServerForTest()
+  it('ingests snapshots and exposes status', async () => {
+    const { listening, logger } = await createServerForTest()
     const snapshot: ProviderSnapshot = {
       provider: 'openai',
       capturedAt: new Date().toISOString(),
@@ -55,7 +65,7 @@ describe('createScrapingServer', () => {
     }
 
     const ingestResponse = await fetch(
-      `${listening.url}/api/deterministic/ingest`,
+      `${listening.url}/api/snapshots/ingest`,
       {
         method: 'POST',
         headers: {
@@ -69,9 +79,26 @@ describe('createScrapingServer', () => {
     )
 
     expect(ingestResponse.status).toBe(201)
+    expect(logger.info).toHaveBeenCalledWith(
+      '[scraping-server] snapshot ingested',
+      expect.objectContaining({
+        provider: 'openai',
+        rawVersion: 'test',
+        metricCount: 0,
+        source: 'dom',
+      })
+    )
+    expect(logger.info).toHaveBeenCalledWith(
+      '[scraping-server] request completed',
+      expect.objectContaining({
+        method: 'POST',
+        pathname: '/api/snapshots/ingest',
+        statusCode: 201,
+      })
+    )
 
     const latestResponse = await fetch(
-      `${listening.url}/api/deterministic/latest?provider=openai`
+      `${listening.url}/api/snapshots/latest?provider=openai`
     )
     expect(await latestResponse.json()).toMatchObject({
       provider: 'openai',
@@ -81,6 +108,7 @@ describe('createScrapingServer', () => {
     const statusResponse = await fetch(`${listening.url}/api/status`)
     expect(await statusResponse.json()).toMatchObject({
       riskLevel: 'normal',
+      snapshotProviders: ['openai'],
       deterministicProviders: ['openai'],
     })
 
@@ -116,7 +144,7 @@ describe('createScrapingServer', () => {
     )
   })
 
-  it('returns deterministic history rows with provider and limit filters', async () => {
+  it('returns snapshot history rows with provider and limit filters', async () => {
     const { listening } = await createServerForTest()
     const baseCapturedAt = new Date('2026-04-04T12:00:00.000Z')
 
@@ -133,7 +161,7 @@ describe('createScrapingServer', () => {
       }
 
       const ingestResponse = await fetch(
-        `${listening.url}/api/deterministic/ingest`,
+        `${listening.url}/api/snapshots/ingest`,
         {
           method: 'POST',
           headers: {
@@ -150,7 +178,7 @@ describe('createScrapingServer', () => {
     }
 
     const response = await fetch(
-      `${listening.url}/api/deterministic/history?provider=openai&limit=2`
+      `${listening.url}/api/snapshots/history?provider=openai&limit=2`
     )
 
     expect(response.status).toBe(200)
@@ -238,7 +266,7 @@ describe('createScrapingServer', () => {
 
   it('returns 400 for invalid JSON bodies without crashing the server', async () => {
     const { listening } = await createServerForTest()
-    const response = await fetch(`${listening.url}/api/deterministic/ingest`, {
+    const response = await fetch(`${listening.url}/api/snapshots/ingest`, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
@@ -287,7 +315,7 @@ describe('createScrapingServer', () => {
       metrics: [],
     }
 
-    const response = await fetch(`${listening.url}/api/deterministic/ingest`, {
+    const response = await fetch(`${listening.url}/api/snapshots/ingest`, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
@@ -309,7 +337,7 @@ describe('createScrapingServer', () => {
 
   it('returns 400 when providerManifest is missing or malformed', async () => {
     const { listening } = await createServerForTest()
-    const response = await fetch(`${listening.url}/api/deterministic/ingest`, {
+    const response = await fetch(`${listening.url}/api/snapshots/ingest`, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
@@ -331,7 +359,7 @@ describe('createScrapingServer', () => {
 
   it('returns 400 when providerManifest shape is incomplete', async () => {
     const { listening } = await createServerForTest()
-    const response = await fetch(`${listening.url}/api/deterministic/ingest`, {
+    const response = await fetch(`${listening.url}/api/snapshots/ingest`, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
@@ -381,10 +409,10 @@ describe('createScrapingServer', () => {
     )
   })
 
-  it('returns 400 when deterministic history query is malformed', async () => {
+  it('returns 400 when snapshot history query is malformed', async () => {
     const { listening } = await createServerForTest()
     const response = await fetch(
-      `${listening.url}/api/deterministic/history?limit=0`
+      `${listening.url}/api/snapshots/history?limit=0`
     )
 
     expect(response.status).toBe(400)
@@ -400,10 +428,12 @@ describe('createScrapingServer', () => {
     const fallbackTempDir = await mkdtemp(
       path.join(os.tmpdir(), 'scraping-server-')
     )
+    const fallbackLogger = createLoggerSpy()
     const fallbackStoreServer = createScrapingServer({
       host: '127.0.0.1',
       port: 0,
       storeFile: path.join(fallbackTempDir, 'fallback.sqlite'),
+      logger: fallbackLogger,
     })
 
     servers.push({
@@ -453,6 +483,7 @@ describe('createScrapingServer', () => {
     )
 
     expect(await statusResponse.json()).toMatchObject({
+      snapshotProviders: ['github-copilot', 'openai'],
       deterministicProviders: ['github-copilot', 'openai'],
     })
   })

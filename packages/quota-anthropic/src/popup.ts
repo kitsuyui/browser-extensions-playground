@@ -28,15 +28,33 @@ type Snapshot = {
   readonly metrics?: readonly Metric[]
 }
 
+type UsageApiState = {
+  readonly updatedAt?: string
+  readonly received?: boolean
+  readonly meta?: {
+    readonly url?: string
+    readonly status?: number
+  }
+  readonly events?: readonly {
+    readonly updatedAt?: string
+    readonly meta?: {
+      readonly url?: string
+      readonly status?: number
+    }
+  }[]
+}
+
 async function loadState(): Promise<{
   readonly latestSnapshot: Snapshot | null
   readonly syncStatus: Record<string, unknown> | null
   readonly enabled: boolean
+  readonly usageApiState: UsageApiState | null
 }> {
   const record = (await chrome?.storage?.local?.get?.([
     'latestSnapshot',
     'syncStatus',
     DETERMINISTIC_EXTENSION_ENABLED_KEY,
+    'anthropicUsageApiState',
   ])) as Record<string, unknown> | undefined
 
   return {
@@ -44,6 +62,8 @@ async function loadState(): Promise<{
     syncStatus:
       (record?.syncStatus as Record<string, unknown> | undefined) ?? null,
     enabled: record?.[DETERMINISTIC_EXTENSION_ENABLED_KEY] !== false,
+    usageApiState:
+      (record?.anthropicUsageApiState as UsageApiState | undefined) ?? null,
   }
 }
 
@@ -85,6 +105,35 @@ function renderEnabledState(enabled: boolean): void {
   }
 }
 
+function formatUsageApiSummary(usageApiState: UsageApiState | null): string {
+  const recentEvent =
+    usageApiState?.events && usageApiState.events.length > 0
+      ? usageApiState.events[usageApiState.events.length - 1]
+      : null
+  const meta = usageApiState?.meta ?? recentEvent?.meta
+
+  if (!usageApiState?.received && !recentEvent) {
+    return 'Not observed'
+  }
+
+  return `fetch ${String(meta?.status ?? 'unknown')}`
+}
+
+function formatUsageApiUrls(usageApiState: UsageApiState | null): string {
+  const urls = [
+    ...(usageApiState?.events ?? []).map((event) => event.meta?.url),
+    usageApiState?.meta?.url,
+  ].filter((url): url is string => typeof url === 'string' && url.length > 0)
+
+  const uniqueUrls = [...new Set(urls)]
+
+  if (uniqueUrls.length === 0) {
+    return ''
+  }
+
+  return uniqueUrls.slice(-3).join(', ')
+}
+
 async function render(): Promise<void> {
   const state = await loadState()
   const metrics = state.latestSnapshot?.metrics ?? []
@@ -111,6 +160,8 @@ async function render(): Promise<void> {
           ? `Error: ${String(state.syncStatus.error ?? 'unknown')}`
           : 'Waiting'
   setText('#sync-summary', syncSummary)
+  setText('#usage-api-summary', formatUsageApiSummary(state.usageApiState))
+  setText('#usage-api-detail', formatUsageApiUrls(state.usageApiState))
   renderEnabledState(state.enabled)
 }
 

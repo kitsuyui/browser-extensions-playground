@@ -2,6 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { build } from 'esbuild'
+import { writeProviderIcons } from '../../../scripts/write-provider-icons.mjs'
 
 const scriptDir = dirname(fileURLToPath(import.meta.url))
 const packageDir = resolve(scriptDir, '..')
@@ -27,6 +28,11 @@ await build({
 })
 
 await mkdir(distDir, { recursive: true })
+await writeProviderIcons(distDir, {
+  label: 'O',
+  backgroundColor: [16, 118, 105, 255],
+  foregroundColor: [255, 255, 255, 255],
+})
 await writeFile(
   resolve(distDir, 'manifest.json'),
   `${JSON.stringify(
