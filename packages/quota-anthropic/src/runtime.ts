@@ -60,6 +60,7 @@ export function createPopupHtml(): string {
       .metric-row {
         display: flex;
         justify-content: space-between;
+        align-items: flex-start;
         gap: 12px;
         font-size: 14px;
       }
@@ -70,6 +71,21 @@ export function createPopupHtml(): string {
 
       .value {
         font-weight: 700;
+        text-align: right;
+        overflow-wrap: anywhere;
+      }
+
+      details {
+        border-top: 1px solid #e7dcc9;
+        margin-top: 12px;
+        padding-top: 12px;
+      }
+
+      summary {
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 700;
+        color: #4b5563;
       }
 
       .switch-row {
@@ -163,10 +179,23 @@ export function createPopupHtml(): string {
           <span class="label">Extra usage</span>
           <span id="extra-usage-value" class="value">Unavailable</span>
         </div>
-        <div class="metric-row">
-          <span class="label">Sync</span>
-          <span id="sync-summary" class="value">Waiting</span>
-        </div>
+        <details>
+          <summary>Debug</summary>
+          <div class="metrics">
+            <div class="metric-row">
+              <span class="label">Sync</span>
+              <span id="sync-summary" class="value">Waiting</span>
+            </div>
+            <div class="metric-row">
+              <span class="label">Usage API</span>
+              <span id="usage-api-summary" class="value">Not observed</span>
+            </div>
+            <div class="metric-row">
+              <span class="label">Usage URLs</span>
+              <span id="usage-api-detail" class="value"></span>
+            </div>
+          </div>
+        </details>
       </section>
     </main>
     <script type="module" src="./popup.js"></script>

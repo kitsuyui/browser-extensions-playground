@@ -28,15 +28,23 @@ type Snapshot = {
   readonly metrics?: readonly Metric[]
 }
 
+type CaptureState = {
+  readonly updatedAt?: string
+  readonly received?: boolean
+  readonly pageUrl?: string
+}
+
 async function loadState(): Promise<{
   readonly latestSnapshot: Snapshot | null
   readonly syncStatus: Record<string, unknown> | null
   readonly enabled: boolean
+  readonly captureState: CaptureState | null
 }> {
   const record = (await chrome?.storage?.local?.get?.([
     'latestSnapshot',
     'syncStatus',
     DETERMINISTIC_EXTENSION_ENABLED_KEY,
+    'githubCopilotCaptureState',
   ])) as Record<string, unknown> | undefined
 
   return {
@@ -44,6 +52,8 @@ async function loadState(): Promise<{
     syncStatus:
       (record?.syncStatus as Record<string, unknown> | undefined) ?? null,
     enabled: record?.[DETERMINISTIC_EXTENSION_ENABLED_KEY] !== false,
+    captureState:
+      (record?.githubCopilotCaptureState as CaptureState | undefined) ?? null,
   }
 }
 
@@ -85,6 +95,14 @@ function renderEnabledState(enabled: boolean): void {
   }
 }
 
+function formatCaptureSummary(captureState: CaptureState | null): string {
+  if (!captureState?.received) {
+    return 'Not observed'
+  }
+
+  return 'DOM observed'
+}
+
 async function render(): Promise<void> {
   const state = await loadState()
   const metrics = state.latestSnapshot?.metrics ?? []
@@ -105,6 +123,8 @@ async function render(): Promise<void> {
           ? `Error: ${String(state.syncStatus.error ?? 'unknown')}`
           : 'Waiting'
   setText('#sync-summary', syncSummary)
+  setText('#capture-summary', formatCaptureSummary(state.captureState))
+  setText('#capture-detail', state.captureState?.pageUrl ?? '')
   renderEnabledState(state.enabled)
 }
 

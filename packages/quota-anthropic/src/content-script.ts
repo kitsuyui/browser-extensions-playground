@@ -7,11 +7,22 @@ import {
 
 declare const chrome:
   | {
+      storage?: {
+        local?: {
+          get?: (
+            keys: string[] | string
+          ) => Promise<Record<string, unknown>> | Record<string, unknown>
+          set?: (items: Record<string, unknown>) => Promise<void> | void
+        }
+      }
       runtime?: {
         sendMessage?: (message: unknown) => Promise<unknown> | undefined
       }
     }
   | undefined
+
+const USAGE_API_STATE_KEY = 'anthropicUsageApiState'
+const MAX_USAGE_API_EVENTS = 5
 
 const uuidPattern =
   /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/giu
@@ -58,6 +69,44 @@ function collectOrganizationIdsFromUnknown(value: unknown): readonly string[] {
 async function fetchJson(url: string): Promise<unknown | null> {
   const response = await fetch(url, {
     credentials: 'include',
+  })
+
+  const updatedAt = new Date().toISOString()
+  const record = (await chrome?.storage?.local?.get?.(USAGE_API_STATE_KEY)) as
+    | Record<string, unknown>
+    | undefined
+  const previousState = (record?.[USAGE_API_STATE_KEY] ?? null) as {
+    readonly events?: readonly {
+      readonly updatedAt?: string
+      readonly meta?: {
+        readonly url?: string
+        readonly status?: number
+      }
+    }[]
+  } | null
+  const previousEvents = Array.isArray(previousState?.events)
+    ? previousState.events
+    : []
+
+  await chrome?.storage?.local?.set?.({
+    [USAGE_API_STATE_KEY]: {
+      updatedAt,
+      received: response.ok,
+      meta: {
+        url: new URL(url, window.location.origin).toString(),
+        status: response.status,
+      },
+      events: [
+        ...previousEvents,
+        {
+          updatedAt,
+          meta: {
+            url: new URL(url, window.location.origin).toString(),
+            status: response.status,
+          },
+        },
+      ].slice(-MAX_USAGE_API_EVENTS),
+    },
   })
 
   if (!response.ok) {

@@ -2,12 +2,18 @@ import { extractSnapshot, providerManifest } from './index'
 
 declare const chrome:
   | {
+      storage?: {
+        local?: {
+          set?: (items: Record<string, unknown>) => Promise<void> | void
+        }
+      }
       runtime?: {
         sendMessage?: (message: unknown) => Promise<unknown> | undefined
       }
     }
   | undefined
 
+const CAPTURE_STATE_KEY = 'githubCopilotCaptureState'
 const MAX_CAPTURE_ATTEMPTS = 20
 const RETRY_DELAY_MS = 1_000
 const OBSERVER_TIMEOUT_MS = 20_000
@@ -22,6 +28,14 @@ async function emitSnapshot(): Promise<boolean> {
   if (hasSentSnapshot) {
     return true
   }
+
+  await chrome?.storage?.local?.set?.({
+    [CAPTURE_STATE_KEY]: {
+      updatedAt: new Date().toISOString(),
+      received: true,
+      pageUrl: window.location.href,
+    },
+  })
 
   const snapshot = extractSnapshot({
     url: window.location.href,

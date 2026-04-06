@@ -14,5 +14,5 @@ test('opens the provider-specific popup page', async ({
   await expect(page.getByText(/Quota OpenAI/)).toBeVisible()
   await expect(page.getByText('Capture enabled')).toBeVisible()
   await expect(page.getByText('Codex 5h')).toBeVisible()
-  await expect(page.getByText('Credits')).toBeVisible()
+  await expect(page.getByText('Credits remaining')).toBeVisible()
 })

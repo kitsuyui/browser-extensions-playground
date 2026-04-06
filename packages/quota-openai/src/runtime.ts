@@ -60,6 +60,7 @@ export function createPopupHtml(): string {
       .metric-row {
         display: flex;
         justify-content: space-between;
+        align-items: flex-start;
         gap: 12px;
         font-size: 14px;
       }
@@ -70,6 +71,8 @@ export function createPopupHtml(): string {
 
       .value {
         font-weight: 700;
+        text-align: right;
+        overflow-wrap: anywhere;
       }
 
       details {
@@ -173,7 +176,7 @@ export function createPopupHtml(): string {
           <span id="codex-weekly-value" class="value">Unavailable</span>
         </div>
         <div class="metric-row">
-          <span class="label">Credits</span>
+          <span class="label">Credits remaining</span>
           <span id="credits-value" class="value">Unavailable</span>
         </div>
         <details>
