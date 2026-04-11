@@ -19,7 +19,7 @@ The popup can enable or disable the connection explicitly.
 ## Build and Load
 
 ```sh
-pnpm build
+bun run build
 ```
 
 Load `dist` as an unpacked Chrome extension.

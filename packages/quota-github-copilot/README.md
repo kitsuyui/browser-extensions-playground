@@ -15,7 +15,7 @@ The extension stores its latest local snapshot and also submits every captured s
 ## Build and Load
 
 ```sh
-pnpm build
+bun run build
 ```
 
 Load `dist` as an unpacked Chrome extension.
