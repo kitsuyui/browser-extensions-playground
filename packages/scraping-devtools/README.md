@@ -12,17 +12,17 @@ CLI and MCP client for the local devtools control API.
 ## Usage
 
 ```sh
-pnpm build
-pnpm inspect -- status
-pnpm inspect -- list-clients
-pnpm inspect -- capture-page
+bun run build
+bun run inspect -- status
+bun run inspect -- list-clients
+bun run inspect -- capture-page
 ```
 
 Run the MCP server:
 
 ```sh
-pnpm build
-pnpm mcp
+bun run build
+bun run mcp
 ```
 
 This package operates against the server-side devtools API exposed by [scraping-server](../scraping-server/README.md).

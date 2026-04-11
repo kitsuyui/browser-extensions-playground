@@ -22,15 +22,15 @@ The snapshot store is backed by SQLite.
 From this package directory:
 
 ```sh
-pnpm build
-pnpm start -- --store-file ../../.tmp/scraping-server/deterministic.sqlite
+bun run build
+bun run start -- --store-file ../../.tmp/scraping-server/deterministic.sqlite
 ```
 
 From the repository root:
 
 ```sh
-pnpm --filter @kitsuyui/browser-extensions-scraping-server build
-pnpm --filter @kitsuyui/browser-extensions-scraping-server start -- --store-file .tmp/scraping-server/deterministic.sqlite
+bun run --filter @kitsuyui/browser-extensions-scraping-server build
+bun run --filter @kitsuyui/browser-extensions-scraping-server start -- --store-file .tmp/scraping-server/deterministic.sqlite
 ```
 
 ## HTTP API

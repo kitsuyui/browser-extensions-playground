@@ -23,22 +23,22 @@ This workspace centers on a single local scraping server.
 Install dependencies:
 
 ```sh
-pnpm install
+bun install
 ```
 
 Start the local scraping server:
 
 ```sh
 cd packages/scraping-server
-pnpm build
-pnpm start -- --store-file ../../.tmp/scraping-server/deterministic.sqlite
+bun run build
+bun run start -- --store-file ../../.tmp/scraping-server/deterministic.sqlite
 ```
 
 Build an extension and load its `dist` directory as an unpacked Chrome extension:
 
 ```sh
 cd packages/quota-openai
-pnpm build
+bun run build
 ```
 
 For package-specific setup, API details, metric semantics, and MCP usage, follow the package README links above.
@@ -48,15 +48,15 @@ For package-specific setup, API details, metric semantics, and MCP usage, follow
 ### Build
 
 ```sh
-pnpm build
+bun run build
 ```
 
 ### Test
 
 ```sh
-pnpm typecheck
-pnpm test
-pnpm playwright:test
+bun run typecheck
+bun run test
+bun run playwright:test
 ```
 
 ## License

@@ -11,7 +11,7 @@ Example extension used for automated end-to-end snapshot testing.
 ## Build
 
 ```sh
-pnpm build
+bun run build
 ```
 
 Load `dist` as an unpacked Chrome extension when running the example flow manually.

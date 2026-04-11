@@ -9,16 +9,16 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "pnpm -r build",
-    "dev": "pnpm --parallel dev",
+    "build": "bun run --workspaces --if-present --sequential build",
+    "dev": "bun run --workspaces --if-present --parallel dev",
     "format": "biome check --write ./",
     "lint": "biome check ./",
-    "prisma:generate": "pnpm --filter @kitsuyui/browser-extensions-scraping-server exec prisma generate",
-    "playwright:test": "pnpm --filter @kitsuyui/browser-extensions-scraping-extension-devtools build && pnpm --filter @kitsuyui/browser-extensions-quota-openai build && pnpm --filter @kitsuyui/browser-extensions-example-com build && playwright test",
-    "check-module-isolation": "find packages -type d -name src -print -exec pnpm ts-module-isolation -- {} +",
-    "test": "pnpm prisma:generate && vitest run --coverage",
-    "validate": "pnpm -r validate",
-    "typecheck": "pnpm prisma:generate && tsc --strict -p tsconfig.json --noEmit --skipLibCheck --downlevelIteration",
+    "prisma:generate": "cd packages/scraping-server && bunx prisma generate",
+    "playwright:test": "bun run --filter @kitsuyui/browser-extensions-scraping-extension-devtools build && bun run --filter @kitsuyui/browser-extensions-quota-openai build && bun run --filter @kitsuyui/browser-extensions-example-com build && playwright test",
+    "check-module-isolation": "find packages -type d -name src -print -exec bunx ts-module-isolation -- {} +",
+    "test": "bun run prisma:generate && vitest run --coverage",
+    "validate": "bun run --workspaces --if-present --sequential validate",
+    "typecheck": "bun run prisma:generate && tsc --strict -p tsconfig.json --noEmit --skipLibCheck --downlevelIteration",
     "typedoc": "typedoc --treatValidationWarningsAsErrors --treatWarningsAsErrors",
     "typedoc:server": "python3 -m http.server --directory build/typedocs"
   },
@@ -37,7 +37,7 @@
     "validate-package-exports": "^0.18.0",
     "vitest": "^4.0.4"
   },
-  "packageManager": "pnpm@10.30.1",
+  "packageManager": "bun@1.3.11",
   "dependencies": {
     "ws": "^8.20.0"
   }

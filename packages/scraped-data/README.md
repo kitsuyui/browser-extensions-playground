@@ -15,16 +15,16 @@ Read-only accessors over the local scraping server.
 Build first:
 
 ```sh
-pnpm build
+bun run build
 ```
 
 Common commands:
 
 ```sh
-pnpm inspect -- status
-pnpm inspect -- providers
-pnpm inspect -- snapshot openai
-pnpm inspect -- history openai http://127.0.0.1:3929
+bun run inspect -- status
+bun run inspect -- providers
+bun run inspect -- snapshot openai
+bun run inspect -- history openai http://127.0.0.1:3929
 ```
 
 ## MCP
@@ -32,8 +32,8 @@ pnpm inspect -- history openai http://127.0.0.1:3929
 Run the MCP server over stdio:
 
 ```sh
-pnpm build
-pnpm mcp
+bun run build
+bun run mcp
 ```
 
 Available tools:
