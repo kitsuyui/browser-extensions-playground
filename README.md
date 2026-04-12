@@ -3,6 +3,8 @@
 ![Coverage](https://raw.githubusercontent.com/kitsuyui/octocov-central/main/badges/kitsuyui/browser-extensions-playground/coverage.svg)
 
 Playground for browser scraping extensions and scraped data tooling.
+The repository also tracks built package artifact size with
+[`gh-build-size`](https://github.com/kitsuyui/gh-build-size).
 
 ## Architecture
 
