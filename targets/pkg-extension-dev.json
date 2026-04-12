@@ -1,0 +1,347 @@
+{
+  "id": "pkg-extension-dev",
+  "label": "extension-dev",
+  "files": [
+    {
+      "path": "packages/extension-dev/dist/background.cjs",
+      "sizes": {
+        "raw": 2750,
+        "gzip": 1169,
+        "brotli": 981
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/background.cjs.map",
+      "sizes": {
+        "raw": 11288,
+        "gzip": 3241,
+        "brotli": 2845
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/background.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/background.d.ts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/background.js",
+      "sizes": {
+        "raw": 3001,
+        "gzip": 1284,
+        "brotli": 1105
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/background.js.map",
+      "sizes": {
+        "raw": 16810,
+        "gzip": 4670,
+        "brotli": 4135
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/content-script.cjs",
+      "sizes": {
+        "raw": 13775,
+        "gzip": 4257,
+        "brotli": 3713
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/content-script.cjs.map",
+      "sizes": {
+        "raw": 56103,
+        "gzip": 11430,
+        "brotli": 9996
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/content-script.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/content-script.d.ts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/content-script.js",
+      "sizes": {
+        "raw": 14423,
+        "gzip": 4460,
+        "brotli": 3909
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/content-script.js.map",
+      "sizes": {
+        "raw": 63849,
+        "gzip": 13399,
+        "brotli": 11672
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/index.cjs",
+      "sizes": {
+        "raw": 787,
+        "gzip": 484,
+        "brotli": 351
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/index.cjs.map",
+      "sizes": {
+        "raw": 1490,
+        "gzip": 727,
+        "brotli": 600
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/index.d.cts",
+      "sizes": {
+        "raw": 779,
+        "gzip": 404,
+        "brotli": 337
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/index.d.ts",
+      "sizes": {
+        "raw": 777,
+        "gzip": 402,
+        "brotli": 336
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/index.js",
+      "sizes": {
+        "raw": 689,
+        "gzip": 447,
+        "brotli": 328
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/index.js.map",
+      "sizes": {
+        "raw": 1397,
+        "gzip": 712,
+        "brotli": 587
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/manifest.json",
+      "sizes": {
+        "raw": 1021,
+        "gzip": 406,
+        "brotli": 329
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/popup.cjs",
+      "sizes": {
+        "raw": 1545,
+        "gzip": 635,
+        "brotli": 533
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/popup.cjs.map",
+      "sizes": {
+        "raw": 4423,
+        "gzip": 1532,
+        "brotli": 1340
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/popup.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/popup.d.ts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/popup.html",
+      "sizes": {
+        "raw": 4520,
+        "gzip": 1389,
+        "brotli": 1069
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/popup.js",
+      "sizes": {
+        "raw": 1565,
+        "gzip": 656,
+        "brotli": 553
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/popup.js.map",
+      "sizes": {
+        "raw": 4739,
+        "gzip": 1629,
+        "brotli": 1413
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/protocol-CPpnJiDw.cjs",
+      "sizes": {
+        "raw": 367,
+        "gzip": 209,
+        "brotli": 164
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/protocol-CPpnJiDw.cjs.map",
+      "sizes": {
+        "raw": 2906,
+        "gzip": 956,
+        "brotli": 811
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/protocol-g0iBrTqZ.js",
+      "sizes": {
+        "raw": 157,
+        "gzip": 150,
+        "brotli": 127
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/protocol-g0iBrTqZ.js.map",
+      "sizes": {
+        "raw": 2905,
+        "gzip": 956,
+        "brotli": 812
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/providers.cjs",
+      "sizes": {
+        "raw": 926,
+        "gzip": 441,
+        "brotli": 363
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/providers.cjs.map",
+      "sizes": {
+        "raw": 1838,
+        "gzip": 742,
+        "brotli": 641
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/providers.d.cts",
+      "sizes": {
+        "raw": 631,
+        "gzip": 325,
+        "brotli": 256
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/providers.d.ts",
+      "sizes": {
+        "raw": 630,
+        "gzip": 323,
+        "brotli": 255
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/providers.js",
+      "sizes": {
+        "raw": 846,
+        "gzip": 395,
+        "brotli": 328
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/providers.js.map",
+      "sizes": {
+        "raw": 1836,
+        "gzip": 740,
+        "brotli": 639
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/runtime.cjs",
+      "sizes": {
+        "raw": 4715,
+        "gzip": 1533,
+        "brotli": 1198
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/runtime.cjs.map",
+      "sizes": {
+        "raw": 5290,
+        "gzip": 1636,
+        "brotli": 1314
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/runtime.d.cts",
+      "sizes": {
+        "raw": 150,
+        "gzip": 133,
+        "brotli": 101
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/runtime.d.ts",
+      "sizes": {
+        "raw": 149,
+        "gzip": 131,
+        "brotli": 99
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/runtime.js",
+      "sizes": {
+        "raw": 4648,
+        "gzip": 1482,
+        "brotli": 1150
+      }
+    },
+    {
+      "path": "packages/extension-dev/dist/runtime.js.map",
+      "sizes": {
+        "raw": 5256,
+        "gzip": 1629,
+        "brotli": 1304
+      }
+    }
+  ],
+  "totals": {
+    "raw": 239047,
+    "gzip": 65300,
+    "brotli": 55784
+  }
+}

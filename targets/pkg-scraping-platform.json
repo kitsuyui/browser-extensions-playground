@@ -1,0 +1,187 @@
+{
+  "id": "pkg-scraping-platform",
+  "label": "scraping-platform",
+  "files": [
+    {
+      "path": "packages/scraping-platform/dist/deterministic-extension.cjs",
+      "sizes": {
+        "raw": 2882,
+        "gzip": 1289,
+        "brotli": 1074
+      }
+    },
+    {
+      "path": "packages/scraping-platform/dist/deterministic-extension.cjs.map",
+      "sizes": {
+        "raw": 10147,
+        "gzip": 3113,
+        "brotli": 2723
+      }
+    },
+    {
+      "path": "packages/scraping-platform/dist/deterministic-extension.d.cts",
+      "sizes": {
+        "raw": 1239,
+        "gzip": 535,
+        "brotli": 406
+      }
+    },
+    {
+      "path": "packages/scraping-platform/dist/deterministic-extension.d.ts",
+      "sizes": {
+        "raw": 1237,
+        "gzip": 533,
+        "brotli": 402
+      }
+    },
+    {
+      "path": "packages/scraping-platform/dist/deterministic-extension.js",
+      "sizes": {
+        "raw": 2810,
+        "gzip": 1251,
+        "brotli": 1054
+      }
+    },
+    {
+      "path": "packages/scraping-platform/dist/deterministic-extension.js.map",
+      "sizes": {
+        "raw": 10089,
+        "gzip": 3105,
+        "brotli": 2714
+      }
+    },
+    {
+      "path": "packages/scraping-platform/dist/index.cjs",
+      "sizes": {
+        "raw": 1509,
+        "gzip": 705,
+        "brotli": 567
+      }
+    },
+    {
+      "path": "packages/scraping-platform/dist/index.cjs.map",
+      "sizes": {
+        "raw": 2876,
+        "gzip": 1092,
+        "brotli": 966
+      }
+    },
+    {
+      "path": "packages/scraping-platform/dist/index.d.cts",
+      "sizes": {
+        "raw": 1611,
+        "gzip": 496,
+        "brotli": 390
+      }
+    },
+    {
+      "path": "packages/scraping-platform/dist/index.d.ts",
+      "sizes": {
+        "raw": 1608,
+        "gzip": 493,
+        "brotli": 389
+      }
+    },
+    {
+      "path": "packages/scraping-platform/dist/index.js",
+      "sizes": {
+        "raw": 1405,
+        "gzip": 678,
+        "brotli": 564
+      }
+    },
+    {
+      "path": "packages/scraping-platform/dist/index.js.map",
+      "sizes": {
+        "raw": 2849,
+        "gzip": 1084,
+        "brotli": 952
+      }
+    },
+    {
+      "path": "packages/scraping-platform/dist/model.cjs",
+      "sizes": {
+        "raw": 583,
+        "gzip": 304,
+        "brotli": 238
+      }
+    },
+    {
+      "path": "packages/scraping-platform/dist/model.cjs.map",
+      "sizes": {
+        "raw": 3923,
+        "gzip": 1106,
+        "brotli": 957
+      }
+    },
+    {
+      "path": "packages/scraping-platform/dist/model.d.cts",
+      "sizes": {
+        "raw": 3008,
+        "gzip": 788,
+        "brotli": 683
+      }
+    },
+    {
+      "path": "packages/scraping-platform/dist/model.d.ts",
+      "sizes": {
+        "raw": 3007,
+        "gzip": 786,
+        "brotli": 685
+      }
+    },
+    {
+      "path": "packages/scraping-platform/dist/model.js",
+      "sizes": {
+        "raw": 508,
+        "gzip": 265,
+        "brotli": 213
+      }
+    },
+    {
+      "path": "packages/scraping-platform/dist/model.js.map",
+      "sizes": {
+        "raw": 3921,
+        "gzip": 1105,
+        "brotli": 956
+      }
+    },
+    {
+      "path": "packages/scraping-platform/dist/protocol-DPg4ELyu.js",
+      "sizes": {
+        "raw": 145,
+        "gzip": 145,
+        "brotli": 113
+      }
+    },
+    {
+      "path": "packages/scraping-platform/dist/protocol-DPg4ELyu.js.map",
+      "sizes": {
+        "raw": 2899,
+        "gzip": 956,
+        "brotli": 812
+      }
+    },
+    {
+      "path": "packages/scraping-platform/dist/protocol-lfoyNip5.cjs",
+      "sizes": {
+        "raw": 276,
+        "gzip": 194,
+        "brotli": 164
+      }
+    },
+    {
+      "path": "packages/scraping-platform/dist/protocol-lfoyNip5.cjs.map",
+      "sizes": {
+        "raw": 2900,
+        "gzip": 957,
+        "brotli": 814
+      }
+    }
+  ],
+  "totals": {
+    "raw": 61432,
+    "gzip": 20980,
+    "brotli": 17836
+  }
+}

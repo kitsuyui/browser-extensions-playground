@@ -1,0 +1,507 @@
+{
+  "id": "pkg-quota-github-copilot",
+  "label": "quota-github-copilot",
+  "files": [
+    {
+      "path": "packages/quota-github-copilot/dist/background.cjs",
+      "sizes": {
+        "raw": 201,
+        "gzip": 166,
+        "brotli": 123
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/background.cjs.map",
+      "sizes": {
+        "raw": 436,
+        "gzip": 248,
+        "brotli": 215
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/background.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/background.d.ts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/background.js",
+      "sizes": {
+        "raw": 3156,
+        "gzip": 1391,
+        "brotli": 1176
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/background.js.map",
+      "sizes": {
+        "raw": 19291,
+        "gzip": 5465,
+        "brotli": 4829
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/cli.cjs",
+      "sizes": {
+        "raw": 444,
+        "gzip": 327,
+        "brotli": 277
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/cli.cjs.map",
+      "sizes": {
+        "raw": 1226,
+        "gzip": 678,
+        "brotli": 610
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/cli.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/cli.d.ts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/cli.js",
+      "sizes": {
+        "raw": 445,
+        "gzip": 326,
+        "brotli": 302
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/cli.js.map",
+      "sizes": {
+        "raw": 1152,
+        "gzip": 666,
+        "brotli": 592
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/content-script.cjs",
+      "sizes": {
+        "raw": 977,
+        "gzip": 599,
+        "brotli": 493
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/content-script.cjs.map",
+      "sizes": {
+        "raw": 3162,
+        "gzip": 1350,
+        "brotli": 1172
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/content-script.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/content-script.d.ts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/content-script.js",
+      "sizes": {
+        "raw": 3176,
+        "gzip": 1478,
+        "brotli": 1277
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/content-script.js.map",
+      "sizes": {
+        "raw": 16803,
+        "gzip": 4911,
+        "brotli": 4356
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/data.cjs",
+      "sizes": {
+        "raw": 364,
+        "gzip": 288,
+        "brotli": 236
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/data.cjs.map",
+      "sizes": {
+        "raw": 899,
+        "gzip": 544,
+        "brotli": 462
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/data.d.cts",
+      "sizes": {
+        "raw": 305,
+        "gzip": 225,
+        "brotli": 204
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/data.d.ts",
+      "sizes": {
+        "raw": 303,
+        "gzip": 221,
+        "brotli": 197
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/data.js",
+      "sizes": {
+        "raw": 297,
+        "gzip": 244,
+        "brotli": 207
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/data.js.map",
+      "sizes": {
+        "raw": 865,
+        "gzip": 538,
+        "brotli": 459
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/deterministic-extension-BAzgsQ_i.cjs",
+      "sizes": {
+        "raw": 2855,
+        "gzip": 1200,
+        "brotli": 1023
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/deterministic-extension-BAzgsQ_i.cjs.map",
+      "sizes": {
+        "raw": 10177,
+        "gzip": 3130,
+        "brotli": 2756
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/deterministic-extension-C9i9Quj1.js",
+      "sizes": {
+        "raw": 2659,
+        "gzip": 1163,
+        "brotli": 995
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/deterministic-extension-C9i9Quj1.js.map",
+      "sizes": {
+        "raw": 10107,
+        "gzip": 3119,
+        "brotli": 2734
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/icon-128.png",
+      "sizes": {
+        "raw": 584,
+        "gzip": 415,
+        "brotli": 440
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/icon-16.png",
+      "sizes": {
+        "raw": 93,
+        "gzip": 113,
+        "brotli": 97
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/icon-32.png",
+      "sizes": {
+        "raw": 149,
+        "gzip": 164,
+        "brotli": 153
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/icon-48.png",
+      "sizes": {
+        "raw": 184,
+        "gzip": 195,
+        "brotli": 185
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/index.cjs",
+      "sizes": {
+        "raw": 3019,
+        "gzip": 1329,
+        "brotli": 1129
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/index.cjs.map",
+      "sizes": {
+        "raw": 6670,
+        "gzip": 2293,
+        "brotli": 2000
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/index.d.cts",
+      "sizes": {
+        "raw": 1238,
+        "gzip": 507,
+        "brotli": 421
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/index.d.ts",
+      "sizes": {
+        "raw": 1234,
+        "gzip": 503,
+        "brotli": 421
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/index.js",
+      "sizes": {
+        "raw": 2936,
+        "gzip": 1299,
+        "brotli": 1114
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/index.js.map",
+      "sizes": {
+        "raw": 6597,
+        "gzip": 2280,
+        "brotli": 1988
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/manifest.json",
+      "sizes": {
+        "raw": 938,
+        "gzip": 407,
+        "brotli": 335
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/model-BUa_dSst.d.ts",
+      "sizes": {
+        "raw": 2025,
+        "gzip": 627,
+        "brotli": 536
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/model-CM0dDIzl.js",
+      "sizes": {
+        "raw": 135,
+        "gzip": 142,
+        "brotli": 110
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/model-CM0dDIzl.js.map",
+      "sizes": {
+        "raw": 3653,
+        "gzip": 1032,
+        "brotli": 884
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/model-DI83PPAn.cjs",
+      "sizes": {
+        "raw": 197,
+        "gzip": 181,
+        "brotli": 135
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/model-DI83PPAn.cjs.map",
+      "sizes": {
+        "raw": 3654,
+        "gzip": 1032,
+        "brotli": 884
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/model-Dmg8Zi0M.d.cts",
+      "sizes": {
+        "raw": 2026,
+        "gzip": 630,
+        "brotli": 542
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/popup.cjs",
+      "sizes": {
+        "raw": 1637,
+        "gzip": 778,
+        "brotli": 649
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/popup.cjs.map",
+      "sizes": {
+        "raw": 5479,
+        "gzip": 1972,
+        "brotli": 1718
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/popup.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/popup.d.ts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/popup.html",
+      "sizes": {
+        "raw": 4468,
+        "gzip": 1287,
+        "brotli": 978
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/popup.js",
+      "sizes": {
+        "raw": 1695,
+        "gzip": 815,
+        "brotli": 683
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/popup.js.map",
+      "sizes": {
+        "raw": 16359,
+        "gzip": 4532,
+        "brotli": 3977
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/protocol-DPg4ELyu.js",
+      "sizes": {
+        "raw": 145,
+        "gzip": 145,
+        "brotli": 113
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/protocol-DPg4ELyu.js.map",
+      "sizes": {
+        "raw": 2899,
+        "gzip": 956,
+        "brotli": 812
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/protocol-lfoyNip5.cjs",
+      "sizes": {
+        "raw": 276,
+        "gzip": 194,
+        "brotli": 164
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/protocol-lfoyNip5.cjs.map",
+      "sizes": {
+        "raw": 2900,
+        "gzip": 957,
+        "brotli": 814
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/runtime.cjs",
+      "sizes": {
+        "raw": 4635,
+        "gzip": 1409,
+        "brotli": 1094
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/runtime.cjs.map",
+      "sizes": {
+        "raw": 4951,
+        "gzip": 1461,
+        "brotli": 1163
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/runtime.d.cts",
+      "sizes": {
+        "raw": 150,
+        "gzip": 133,
+        "brotli": 101
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/runtime.d.ts",
+      "sizes": {
+        "raw": 149,
+        "gzip": 131,
+        "brotli": 99
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/runtime.js",
+      "sizes": {
+        "raw": 4570,
+        "gzip": 1363,
+        "brotli": 1059
+      }
+    },
+    {
+      "path": "packages/quota-github-copilot/dist/runtime.js.map",
+      "sizes": {
+        "raw": 4949,
+        "gzip": 1460,
+        "brotli": 1157
+      }
+    }
+  ],
+  "totals": {
+    "raw": 169982,
+    "gzip": 59267,
+    "brotli": 50770
+  }
+}

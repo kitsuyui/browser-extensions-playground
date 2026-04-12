@@ -1,0 +1,555 @@
+{
+  "id": "pkg-quota-openai",
+  "label": "quota-openai",
+  "files": [
+    {
+      "path": "packages/quota-openai/dist/background.cjs",
+      "sizes": {
+        "raw": 201,
+        "gzip": 166,
+        "brotli": 123
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/background.cjs.map",
+      "sizes": {
+        "raw": 436,
+        "gzip": 248,
+        "brotli": 215
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/background.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/background.d.ts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/background.js",
+      "sizes": {
+        "raw": 5490,
+        "gzip": 1983,
+        "brotli": 1707
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/background.js.map",
+      "sizes": {
+        "raw": 31219,
+        "gzip": 7640,
+        "brotli": 6765
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/cli.cjs",
+      "sizes": {
+        "raw": 610,
+        "gzip": 347,
+        "brotli": 328
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/cli.cjs.map",
+      "sizes": {
+        "raw": 1549,
+        "gzip": 718,
+        "brotli": 639
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/cli.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/cli.d.ts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/cli.js",
+      "sizes": {
+        "raw": 611,
+        "gzip": 350,
+        "brotli": 295
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/cli.js.map",
+      "sizes": {
+        "raw": 1482,
+        "gzip": 702,
+        "brotli": 624
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/content-script.cjs",
+      "sizes": {
+        "raw": 1535,
+        "gzip": 851,
+        "brotli": 699
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/content-script.cjs.map",
+      "sizes": {
+        "raw": 5931,
+        "gzip": 2180,
+        "brotli": 1886
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/content-script.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/content-script.d.ts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/content-script.js",
+      "sizes": {
+        "raw": 8797,
+        "gzip": 2886,
+        "brotli": 2527
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/content-script.js.map",
+      "sizes": {
+        "raw": 34977,
+        "gzip": 8764,
+        "brotli": 7737
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/data.cjs",
+      "sizes": {
+        "raw": 861,
+        "gzip": 548,
+        "brotli": 442
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/data.cjs.map",
+      "sizes": {
+        "raw": 2824,
+        "gzip": 1179,
+        "brotli": 1036
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/data.d.cts",
+      "sizes": {
+        "raw": 1082,
+        "gzip": 492,
+        "brotli": 407
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/data.d.ts",
+      "sizes": {
+        "raw": 1080,
+        "gzip": 488,
+        "brotli": 403
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/data.js",
+      "sizes": {
+        "raw": 790,
+        "gzip": 510,
+        "brotli": 424
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/data.js.map",
+      "sizes": {
+        "raw": 2795,
+        "gzip": 1176,
+        "brotli": 1032
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/deterministic-extension-BAzgsQ_i.cjs",
+      "sizes": {
+        "raw": 2855,
+        "gzip": 1200,
+        "brotli": 1023
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/deterministic-extension-BAzgsQ_i.cjs.map",
+      "sizes": {
+        "raw": 10177,
+        "gzip": 3130,
+        "brotli": 2756
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/deterministic-extension-C9i9Quj1.js",
+      "sizes": {
+        "raw": 2659,
+        "gzip": 1163,
+        "brotli": 995
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/deterministic-extension-C9i9Quj1.js.map",
+      "sizes": {
+        "raw": 10107,
+        "gzip": 3119,
+        "brotli": 2734
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/icon-128.png",
+      "sizes": {
+        "raw": 637,
+        "gzip": 420,
+        "brotli": 400
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/icon-16.png",
+      "sizes": {
+        "raw": 95,
+        "gzip": 114,
+        "brotli": 99
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/icon-32.png",
+      "sizes": {
+        "raw": 144,
+        "gzip": 167,
+        "brotli": 148
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/icon-48.png",
+      "sizes": {
+        "raw": 188,
+        "gzip": 196,
+        "brotli": 192
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/index.cjs",
+      "sizes": {
+        "raw": 8260,
+        "gzip": 2640,
+        "brotli": 2280
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/index.cjs.map",
+      "sizes": {
+        "raw": 21276,
+        "gzip": 5315,
+        "brotli": 4643
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/index.d.cts",
+      "sizes": {
+        "raw": 2880,
+        "gzip": 887,
+        "brotli": 761
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/index.d.ts",
+      "sizes": {
+        "raw": 2876,
+        "gzip": 884,
+        "brotli": 768
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/index.js",
+      "sizes": {
+        "raw": 8165,
+        "gzip": 2619,
+        "brotli": 2270
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/index.js.map",
+      "sizes": {
+        "raw": 21196,
+        "gzip": 5302,
+        "brotli": 4616
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/manifest.json",
+      "sizes": {
+        "raw": 1151,
+        "gzip": 442,
+        "brotli": 354
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/model--DJ8R008.d.cts",
+      "sizes": {
+        "raw": 2047,
+        "gzip": 637,
+        "brotli": 548
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/model-CM0dDIzl.js",
+      "sizes": {
+        "raw": 135,
+        "gzip": 142,
+        "brotli": 110
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/model-CM0dDIzl.js.map",
+      "sizes": {
+        "raw": 3653,
+        "gzip": 1032,
+        "brotli": 884
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/model-DI83PPAn.cjs",
+      "sizes": {
+        "raw": 197,
+        "gzip": 181,
+        "brotli": 135
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/model-DI83PPAn.cjs.map",
+      "sizes": {
+        "raw": 3654,
+        "gzip": 1032,
+        "brotli": 884
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/model-b-Bp7mJL.d.ts",
+      "sizes": {
+        "raw": 2046,
+        "gzip": 635,
+        "brotli": 545
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/page-hook.cjs",
+      "sizes": {
+        "raw": 1050,
+        "gzip": 552,
+        "brotli": 455
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/page-hook.cjs.map",
+      "sizes": {
+        "raw": 4032,
+        "gzip": 1462,
+        "brotli": 1272
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/page-hook.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/page-hook.d.ts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/page-hook.js",
+      "sizes": {
+        "raw": 1082,
+        "gzip": 568,
+        "brotli": 477
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/page-hook.js.map",
+      "sizes": {
+        "raw": 4449,
+        "gzip": 1612,
+        "brotli": 1418
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/popup.cjs",
+      "sizes": {
+        "raw": 2036,
+        "gzip": 927,
+        "brotli": 777
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/popup.cjs.map",
+      "sizes": {
+        "raw": 7063,
+        "gzip": 2382,
+        "brotli": 2101
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/popup.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/popup.d.ts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/popup.html",
+      "sizes": {
+        "raw": 4783,
+        "gzip": 1329,
+        "brotli": 1017
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/popup.js",
+      "sizes": {
+        "raw": 2092,
+        "gzip": 969,
+        "brotli": 822
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/popup.js.map",
+      "sizes": {
+        "raw": 18070,
+        "gzip": 4993,
+        "brotli": 4401
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/protocol-DPg4ELyu.js",
+      "sizes": {
+        "raw": 145,
+        "gzip": 145,
+        "brotli": 113
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/protocol-DPg4ELyu.js.map",
+      "sizes": {
+        "raw": 2899,
+        "gzip": 956,
+        "brotli": 812
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/protocol-lfoyNip5.cjs",
+      "sizes": {
+        "raw": 276,
+        "gzip": 194,
+        "brotli": 164
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/protocol-lfoyNip5.cjs.map",
+      "sizes": {
+        "raw": 2900,
+        "gzip": 957,
+        "brotli": 814
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/runtime.cjs",
+      "sizes": {
+        "raw": 4950,
+        "gzip": 1451,
+        "brotli": 1110
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/runtime.cjs.map",
+      "sizes": {
+        "raw": 5290,
+        "gzip": 1502,
+        "brotli": 1202
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/runtime.d.cts",
+      "sizes": {
+        "raw": 150,
+        "gzip": 133,
+        "brotli": 101
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/runtime.d.ts",
+      "sizes": {
+        "raw": 149,
+        "gzip": 131,
+        "brotli": 99
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/runtime.js",
+      "sizes": {
+        "raw": 4885,
+        "gzip": 1406,
+        "brotli": 1083
+      }
+    },
+    {
+      "path": "packages/quota-openai/dist/runtime.js.map",
+      "sizes": {
+        "raw": 5288,
+        "gzip": 1499,
+        "brotli": 1197
+      }
+    }
+  ],
+  "totals": {
+    "raw": 278367,
+    "gzip": 85963,
+    "brotli": 74019
+  }
+}

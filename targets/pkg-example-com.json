@@ -1,0 +1,443 @@
+{
+  "id": "pkg-example-com",
+  "label": "example-com",
+  "files": [
+    {
+      "path": "packages/example-com/dist/background.cjs",
+      "sizes": {
+        "raw": 183,
+        "gzip": 159,
+        "brotli": 117
+      }
+    },
+    {
+      "path": "packages/example-com/dist/background.cjs.map",
+      "sizes": {
+        "raw": 436,
+        "gzip": 248,
+        "brotli": 215
+      }
+    },
+    {
+      "path": "packages/example-com/dist/background.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/example-com/dist/background.d.ts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/example-com/dist/background.js",
+      "sizes": {
+        "raw": 3015,
+        "gzip": 1338,
+        "brotli": 1133
+      }
+    },
+    {
+      "path": "packages/example-com/dist/background.js.map",
+      "sizes": {
+        "raw": 17039,
+        "gzip": 4805,
+        "brotli": 4238
+      }
+    },
+    {
+      "path": "packages/example-com/dist/cli.cjs",
+      "sizes": {
+        "raw": 436,
+        "gzip": 318,
+        "brotli": 270
+      }
+    },
+    {
+      "path": "packages/example-com/dist/cli.cjs.map",
+      "sizes": {
+        "raw": 1202,
+        "gzip": 671,
+        "brotli": 594
+      }
+    },
+    {
+      "path": "packages/example-com/dist/cli.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/example-com/dist/cli.d.ts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/example-com/dist/cli.js",
+      "sizes": {
+        "raw": 437,
+        "gzip": 322,
+        "brotli": 269
+      }
+    },
+    {
+      "path": "packages/example-com/dist/cli.js.map",
+      "sizes": {
+        "raw": 1136,
+        "gzip": 660,
+        "brotli": 580
+      }
+    },
+    {
+      "path": "packages/example-com/dist/content-script.cjs",
+      "sizes": {
+        "raw": 482,
+        "gzip": 353,
+        "brotli": 278
+      }
+    },
+    {
+      "path": "packages/example-com/dist/content-script.cjs.map",
+      "sizes": {
+        "raw": 1267,
+        "gzip": 681,
+        "brotli": 571
+      }
+    },
+    {
+      "path": "packages/example-com/dist/content-script.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/example-com/dist/content-script.d.ts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/example-com/dist/content-script.js",
+      "sizes": {
+        "raw": 1665,
+        "gzip": 830,
+        "brotli": 668
+      }
+    },
+    {
+      "path": "packages/example-com/dist/content-script.js.map",
+      "sizes": {
+        "raw": 11487,
+        "gzip": 3262,
+        "brotli": 2826
+      }
+    },
+    {
+      "path": "packages/example-com/dist/data.cjs",
+      "sizes": {
+        "raw": 353,
+        "gzip": 282,
+        "brotli": 219
+      }
+    },
+    {
+      "path": "packages/example-com/dist/data.cjs.map",
+      "sizes": {
+        "raw": 883,
+        "gzip": 534,
+        "brotli": 461
+      }
+    },
+    {
+      "path": "packages/example-com/dist/data.d.cts",
+      "sizes": {
+        "raw": 289,
+        "gzip": 218,
+        "brotli": 171
+      }
+    },
+    {
+      "path": "packages/example-com/dist/data.d.ts",
+      "sizes": {
+        "raw": 287,
+        "gzip": 217,
+        "brotli": 168
+      }
+    },
+    {
+      "path": "packages/example-com/dist/data.js",
+      "sizes": {
+        "raw": 286,
+        "gzip": 238,
+        "brotli": 192
+      }
+    },
+    {
+      "path": "packages/example-com/dist/data.js.map",
+      "sizes": {
+        "raw": 849,
+        "gzip": 526,
+        "brotli": 447
+      }
+    },
+    {
+      "path": "packages/example-com/dist/index.cjs",
+      "sizes": {
+        "raw": 1751,
+        "gzip": 798,
+        "brotli": 652
+      }
+    },
+    {
+      "path": "packages/example-com/dist/index.cjs.map",
+      "sizes": {
+        "raw": 3747,
+        "gzip": 1379,
+        "brotli": 1198
+      }
+    },
+    {
+      "path": "packages/example-com/dist/index.d.cts",
+      "sizes": {
+        "raw": 1060,
+        "gzip": 465,
+        "brotli": 383
+      }
+    },
+    {
+      "path": "packages/example-com/dist/index.d.ts",
+      "sizes": {
+        "raw": 1056,
+        "gzip": 464,
+        "brotli": 384
+      }
+    },
+    {
+      "path": "packages/example-com/dist/index.js",
+      "sizes": {
+        "raw": 1669,
+        "gzip": 760,
+        "brotli": 628
+      }
+    },
+    {
+      "path": "packages/example-com/dist/index.js.map",
+      "sizes": {
+        "raw": 3674,
+        "gzip": 1369,
+        "brotli": 1187
+      }
+    },
+    {
+      "path": "packages/example-com/dist/manifest.json",
+      "sizes": {
+        "raw": 651,
+        "gzip": 325,
+        "brotli": 264
+      }
+    },
+    {
+      "path": "packages/example-com/dist/model-B2iqvKLi.js",
+      "sizes": {
+        "raw": 2718,
+        "gzip": 1182,
+        "brotli": 1013
+      }
+    },
+    {
+      "path": "packages/example-com/dist/model-B2iqvKLi.js.map",
+      "sizes": {
+        "raw": 13647,
+        "gzip": 3882,
+        "brotli": 3399
+      }
+    },
+    {
+      "path": "packages/example-com/dist/model-BXESOQw0.cjs",
+      "sizes": {
+        "raw": 2914,
+        "gzip": 1222,
+        "brotli": 1044
+      }
+    },
+    {
+      "path": "packages/example-com/dist/model-BXESOQw0.cjs.map",
+      "sizes": {
+        "raw": 13717,
+        "gzip": 3893,
+        "brotli": 3411
+      }
+    },
+    {
+      "path": "packages/example-com/dist/model-DIfWmoy7.d.ts",
+      "sizes": {
+        "raw": 2025,
+        "gzip": 629,
+        "brotli": 540
+      }
+    },
+    {
+      "path": "packages/example-com/dist/model-Dmg8Zi0M.d.cts",
+      "sizes": {
+        "raw": 2026,
+        "gzip": 630,
+        "brotli": 542
+      }
+    },
+    {
+      "path": "packages/example-com/dist/popup.cjs",
+      "sizes": {
+        "raw": 907,
+        "gzip": 494,
+        "brotli": 408
+      }
+    },
+    {
+      "path": "packages/example-com/dist/popup.cjs.map",
+      "sizes": {
+        "raw": 2824,
+        "gzip": 1163,
+        "brotli": 1031
+      }
+    },
+    {
+      "path": "packages/example-com/dist/popup.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/example-com/dist/popup.d.ts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/example-com/dist/popup.html",
+      "sizes": {
+        "raw": 1436,
+        "gzip": 615,
+        "brotli": 449
+      }
+    },
+    {
+      "path": "packages/example-com/dist/popup.js",
+      "sizes": {
+        "raw": 973,
+        "gzip": 535,
+        "brotli": 451
+      }
+    },
+    {
+      "path": "packages/example-com/dist/popup.js.map",
+      "sizes": {
+        "raw": 5968,
+        "gzip": 1977,
+        "brotli": 1716
+      }
+    },
+    {
+      "path": "packages/example-com/dist/protocol-DPg4ELyu.js",
+      "sizes": {
+        "raw": 145,
+        "gzip": 145,
+        "brotli": 113
+      }
+    },
+    {
+      "path": "packages/example-com/dist/protocol-DPg4ELyu.js.map",
+      "sizes": {
+        "raw": 2899,
+        "gzip": 956,
+        "brotli": 812
+      }
+    },
+    {
+      "path": "packages/example-com/dist/protocol-lfoyNip5.cjs",
+      "sizes": {
+        "raw": 276,
+        "gzip": 194,
+        "brotli": 164
+      }
+    },
+    {
+      "path": "packages/example-com/dist/protocol-lfoyNip5.cjs.map",
+      "sizes": {
+        "raw": 2900,
+        "gzip": 957,
+        "brotli": 814
+      }
+    },
+    {
+      "path": "packages/example-com/dist/runtime.cjs",
+      "sizes": {
+        "raw": 1631,
+        "gzip": 761,
+        "brotli": 585
+      }
+    },
+    {
+      "path": "packages/example-com/dist/runtime.cjs.map",
+      "sizes": {
+        "raw": 1921,
+        "gzip": 855,
+        "brotli": 675
+      }
+    },
+    {
+      "path": "packages/example-com/dist/runtime.d.cts",
+      "sizes": {
+        "raw": 150,
+        "gzip": 133,
+        "brotli": 101
+      }
+    },
+    {
+      "path": "packages/example-com/dist/runtime.d.ts",
+      "sizes": {
+        "raw": 149,
+        "gzip": 131,
+        "brotli": 99
+      }
+    },
+    {
+      "path": "packages/example-com/dist/runtime.js",
+      "sizes": {
+        "raw": 1564,
+        "gzip": 711,
+        "brotli": 536
+      }
+    },
+    {
+      "path": "packages/example-com/dist/runtime.js.map",
+      "sizes": {
+        "raw": 1887,
+        "gzip": 848,
+        "brotli": 666
+      }
+    }
+  ],
+  "totals": {
+    "raw": 118105,
+    "gzip": 43383,
+    "brotli": 36802
+  }
+}

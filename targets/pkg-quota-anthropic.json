@@ -1,0 +1,507 @@
+{
+  "id": "pkg-quota-anthropic",
+  "label": "quota-anthropic",
+  "files": [
+    {
+      "path": "packages/quota-anthropic/dist/background.cjs",
+      "sizes": {
+        "raw": 201,
+        "gzip": 166,
+        "brotli": 123
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/background.cjs.map",
+      "sizes": {
+        "raw": 436,
+        "gzip": 248,
+        "brotli": 215
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/background.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/background.d.ts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/background.js",
+      "sizes": {
+        "raw": 3825,
+        "gzip": 1598,
+        "brotli": 1355
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/background.js.map",
+      "sizes": {
+        "raw": 25453,
+        "gzip": 6598,
+        "brotli": 5834
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/cli.cjs",
+      "sizes": {
+        "raw": 440,
+        "gzip": 322,
+        "brotli": 274
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/cli.cjs.map",
+      "sizes": {
+        "raw": 1214,
+        "gzip": 674,
+        "brotli": 606
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/cli.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/cli.d.ts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/cli.js",
+      "sizes": {
+        "raw": 441,
+        "gzip": 322,
+        "brotli": 281
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/cli.js.map",
+      "sizes": {
+        "raw": 1144,
+        "gzip": 662,
+        "brotli": 592
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/content-script.cjs",
+      "sizes": {
+        "raw": 1998,
+        "gzip": 983,
+        "brotli": 833
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/content-script.cjs.map",
+      "sizes": {
+        "raw": 7183,
+        "gzip": 2496,
+        "brotli": 2177
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/content-script.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/content-script.d.ts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/content-script.js",
+      "sizes": {
+        "raw": 6650,
+        "gzip": 2491,
+        "brotli": 2185
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/content-script.js.map",
+      "sizes": {
+        "raw": 29397,
+        "gzip": 7725,
+        "brotli": 6831
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/data.cjs",
+      "sizes": {
+        "raw": 355,
+        "gzip": 280,
+        "brotli": 225
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/data.cjs.map",
+      "sizes": {
+        "raw": 885,
+        "gzip": 533,
+        "brotli": 459
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/data.d.cts",
+      "sizes": {
+        "raw": 297,
+        "gzip": 221,
+        "brotli": 198
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/data.d.ts",
+      "sizes": {
+        "raw": 295,
+        "gzip": 217,
+        "brotli": 190
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/data.js",
+      "sizes": {
+        "raw": 288,
+        "gzip": 238,
+        "brotli": 200
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/data.js.map",
+      "sizes": {
+        "raw": 851,
+        "gzip": 527,
+        "brotli": 440
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/deterministic-extension-BAzgsQ_i.cjs",
+      "sizes": {
+        "raw": 2855,
+        "gzip": 1200,
+        "brotli": 1023
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/deterministic-extension-BAzgsQ_i.cjs.map",
+      "sizes": {
+        "raw": 10177,
+        "gzip": 3130,
+        "brotli": 2756
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/deterministic-extension-C9i9Quj1.js",
+      "sizes": {
+        "raw": 2659,
+        "gzip": 1163,
+        "brotli": 995
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/deterministic-extension-C9i9Quj1.js.map",
+      "sizes": {
+        "raw": 10107,
+        "gzip": 3119,
+        "brotli": 2734
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/icon-128.png",
+      "sizes": {
+        "raw": 592,
+        "gzip": 433,
+        "brotli": 478
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/icon-16.png",
+      "sizes": {
+        "raw": 103,
+        "gzip": 123,
+        "brotli": 107
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/icon-32.png",
+      "sizes": {
+        "raw": 151,
+        "gzip": 174,
+        "brotli": 155
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/icon-48.png",
+      "sizes": {
+        "raw": 190,
+        "gzip": 203,
+        "brotli": 190
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/index.cjs",
+      "sizes": {
+        "raw": 5579,
+        "gzip": 2045,
+        "brotli": 1741
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/index.cjs.map",
+      "sizes": {
+        "raw": 14617,
+        "gzip": 3965,
+        "brotli": 3475
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/index.d.cts",
+      "sizes": {
+        "raw": 2364,
+        "gzip": 769,
+        "brotli": 660
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/index.d.ts",
+      "sizes": {
+        "raw": 2360,
+        "gzip": 761,
+        "brotli": 656
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/index.js",
+      "sizes": {
+        "raw": 5484,
+        "gzip": 2014,
+        "brotli": 1727
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/index.js.map",
+      "sizes": {
+        "raw": 14537,
+        "gzip": 3952,
+        "brotli": 3465
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/manifest.json",
+      "sizes": {
+        "raw": 969,
+        "gzip": 408,
+        "brotli": 337
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/model-BUa_dSst.d.ts",
+      "sizes": {
+        "raw": 2025,
+        "gzip": 627,
+        "brotli": 536
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/model-CM0dDIzl.js",
+      "sizes": {
+        "raw": 135,
+        "gzip": 142,
+        "brotli": 110
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/model-CM0dDIzl.js.map",
+      "sizes": {
+        "raw": 3653,
+        "gzip": 1032,
+        "brotli": 884
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/model-DI83PPAn.cjs",
+      "sizes": {
+        "raw": 197,
+        "gzip": 181,
+        "brotli": 135
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/model-DI83PPAn.cjs.map",
+      "sizes": {
+        "raw": 3654,
+        "gzip": 1032,
+        "brotli": 884
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/model-Dmg8Zi0M.d.cts",
+      "sizes": {
+        "raw": 2026,
+        "gzip": 630,
+        "brotli": 542
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/popup.cjs",
+      "sizes": {
+        "raw": 2037,
+        "gzip": 934,
+        "brotli": 788
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/popup.cjs.map",
+      "sizes": {
+        "raw": 7159,
+        "gzip": 2406,
+        "brotli": 2135
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/popup.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/popup.d.ts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/popup.html",
+      "sizes": {
+        "raw": 4814,
+        "gzip": 1343,
+        "brotli": 1012
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/popup.js",
+      "sizes": {
+        "raw": 2093,
+        "gzip": 975,
+        "brotli": 830
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/popup.js.map",
+      "sizes": {
+        "raw": 18177,
+        "gzip": 5002,
+        "brotli": 4405
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/protocol-DPg4ELyu.js",
+      "sizes": {
+        "raw": 145,
+        "gzip": 145,
+        "brotli": 113
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/protocol-DPg4ELyu.js.map",
+      "sizes": {
+        "raw": 2899,
+        "gzip": 956,
+        "brotli": 812
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/protocol-lfoyNip5.cjs",
+      "sizes": {
+        "raw": 276,
+        "gzip": 194,
+        "brotli": 164
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/protocol-lfoyNip5.cjs.map",
+      "sizes": {
+        "raw": 2900,
+        "gzip": 957,
+        "brotli": 814
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/runtime.cjs",
+      "sizes": {
+        "raw": 4981,
+        "gzip": 1465,
+        "brotli": 1106
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/runtime.cjs.map",
+      "sizes": {
+        "raw": 5321,
+        "gzip": 1515,
+        "brotli": 1203
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/runtime.d.cts",
+      "sizes": {
+        "raw": 150,
+        "gzip": 133,
+        "brotli": 101
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/runtime.d.ts",
+      "sizes": {
+        "raw": 149,
+        "gzip": 131,
+        "brotli": 99
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/runtime.js",
+      "sizes": {
+        "raw": 4916,
+        "gzip": 1418,
+        "brotli": 1101
+      }
+    },
+    {
+      "path": "packages/quota-anthropic/dist/runtime.js.map",
+      "sizes": {
+        "raw": 5319,
+        "gzip": 1513,
+        "brotli": 1205
+      }
+    }
+  ],
+  "totals": {
+    "raw": 227211,
+    "gzip": 72739,
+    "brotli": 62616
+  }
+}

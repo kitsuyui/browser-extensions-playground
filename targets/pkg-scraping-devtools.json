@@ -1,0 +1,187 @@
+{
+  "id": "pkg-scraping-devtools",
+  "label": "scraping-devtools",
+  "files": [
+    {
+      "path": "packages/scraping-devtools/dist/cli.cjs",
+      "sizes": {
+        "raw": 1442,
+        "gzip": 517,
+        "brotli": 447
+      }
+    },
+    {
+      "path": "packages/scraping-devtools/dist/cli.cjs.map",
+      "sizes": {
+        "raw": 3642,
+        "gzip": 1064,
+        "brotli": 941
+      }
+    },
+    {
+      "path": "packages/scraping-devtools/dist/cli.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/scraping-devtools/dist/cli.d.mts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/scraping-devtools/dist/cli.mjs",
+      "sizes": {
+        "raw": 1455,
+        "gzip": 528,
+        "brotli": 452
+      }
+    },
+    {
+      "path": "packages/scraping-devtools/dist/cli.mjs.map",
+      "sizes": {
+        "raw": 3571,
+        "gzip": 1053,
+        "brotli": 928
+      }
+    },
+    {
+      "path": "packages/scraping-devtools/dist/index.cjs",
+      "sizes": {
+        "raw": 604,
+        "gzip": 355,
+        "brotli": 274
+      }
+    },
+    {
+      "path": "packages/scraping-devtools/dist/index.cjs.map",
+      "sizes": {
+        "raw": 1785,
+        "gzip": 708,
+        "brotli": 609
+      }
+    },
+    {
+      "path": "packages/scraping-devtools/dist/index.d.cts",
+      "sizes": {
+        "raw": 3051,
+        "gzip": 929,
+        "brotli": 802
+      }
+    },
+    {
+      "path": "packages/scraping-devtools/dist/index.d.mts",
+      "sizes": {
+        "raw": 3051,
+        "gzip": 929,
+        "brotli": 800
+      }
+    },
+    {
+      "path": "packages/scraping-devtools/dist/index.mjs",
+      "sizes": {
+        "raw": 539,
+        "gzip": 310,
+        "brotli": 247
+      }
+    },
+    {
+      "path": "packages/scraping-devtools/dist/index.mjs.map",
+      "sizes": {
+        "raw": 1752,
+        "gzip": 701,
+        "brotli": 600
+      }
+    },
+    {
+      "path": "packages/scraping-devtools/dist/mcp.cjs",
+      "sizes": {
+        "raw": 4350,
+        "gzip": 1653,
+        "brotli": 1416
+      }
+    },
+    {
+      "path": "packages/scraping-devtools/dist/mcp.cjs.map",
+      "sizes": {
+        "raw": 12990,
+        "gzip": 3581,
+        "brotli": 3183
+      }
+    },
+    {
+      "path": "packages/scraping-devtools/dist/mcp.d.cts",
+      "sizes": {
+        "raw": 310,
+        "gzip": 204,
+        "brotli": 166
+      }
+    },
+    {
+      "path": "packages/scraping-devtools/dist/mcp.d.mts",
+      "sizes": {
+        "raw": 310,
+        "gzip": 204,
+        "brotli": 167
+      }
+    },
+    {
+      "path": "packages/scraping-devtools/dist/mcp.mjs",
+      "sizes": {
+        "raw": 4255,
+        "gzip": 1599,
+        "brotli": 1375
+      }
+    },
+    {
+      "path": "packages/scraping-devtools/dist/mcp.mjs.map",
+      "sizes": {
+        "raw": 12898,
+        "gzip": 3551,
+        "brotli": 3140
+      }
+    },
+    {
+      "path": "packages/scraping-devtools/dist/protocol-Bc5WLHco.cjs",
+      "sizes": {
+        "raw": 195,
+        "gzip": 185,
+        "brotli": 137
+      }
+    },
+    {
+      "path": "packages/scraping-devtools/dist/protocol-Bc5WLHco.cjs.map",
+      "sizes": {
+        "raw": 2897,
+        "gzip": 960,
+        "brotli": 810
+      }
+    },
+    {
+      "path": "packages/scraping-devtools/dist/protocol-CKX5hhhV.mjs",
+      "sizes": {
+        "raw": 134,
+        "gzip": 140,
+        "brotli": 112
+      }
+    },
+    {
+      "path": "packages/scraping-devtools/dist/protocol-CKX5hhhV.mjs.map",
+      "sizes": {
+        "raw": 2897,
+        "gzip": 961,
+        "brotli": 810
+      }
+    }
+  ],
+  "totals": {
+    "raw": 62150,
+    "gzip": 20194,
+    "brotli": 17446
+  }
+}

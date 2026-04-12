@@ -1,0 +1,267 @@
+{
+  "id": "pkg-scraping-server",
+  "label": "scraping-server",
+  "files": [
+    {
+      "path": "packages/scraping-server/dist/cli.cjs",
+      "sizes": {
+        "raw": 1323,
+        "gzip": 759,
+        "brotli": 659
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/cli.cjs.map",
+      "sizes": {
+        "raw": 2211,
+        "gzip": 967,
+        "brotli": 895
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/cli.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/cli.d.mts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/cli.mjs",
+      "sizes": {
+        "raw": 759,
+        "gzip": 468,
+        "brotli": 411
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/cli.mjs.map",
+      "sizes": {
+        "raw": 2099,
+        "gzip": 936,
+        "brotli": 850
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/index.cjs",
+      "sizes": {
+        "raw": 10594,
+        "gzip": 3447,
+        "brotli": 3027
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/index.cjs.map",
+      "sizes": {
+        "raw": 31317,
+        "gzip": 7844,
+        "brotli": 6911
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/index.d.cts",
+      "sizes": {
+        "raw": 2313,
+        "gzip": 730,
+        "brotli": 639
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/index.d.mts",
+      "sizes": {
+        "raw": 2313,
+        "gzip": 728,
+        "brotli": 644
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/index.mjs",
+      "sizes": {
+        "raw": 10450,
+        "gzip": 3436,
+        "brotli": 2997
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/index.mjs.map",
+      "sizes": {
+        "raw": 30950,
+        "gzip": 7749,
+        "brotli": 6832
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/mcp.cjs",
+      "sizes": {
+        "raw": 1890,
+        "gzip": 983,
+        "brotli": 823
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/mcp.cjs.map",
+      "sizes": {
+        "raw": 7073,
+        "gzip": 2303,
+        "brotli": 2042
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/mcp.d.cts",
+      "sizes": {
+        "raw": 670,
+        "gzip": 331,
+        "brotli": 289
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/mcp.d.mts",
+      "sizes": {
+        "raw": 670,
+        "gzip": 332,
+        "brotli": 290
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/mcp.mjs",
+      "sizes": {
+        "raw": 1821,
+        "gzip": 945,
+        "brotli": 801
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/mcp.mjs.map",
+      "sizes": {
+        "raw": 7072,
+        "gzip": 2303,
+        "brotli": 2064
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/model-D9jcduaa.d.mts",
+      "sizes": {
+        "raw": 1705,
+        "gzip": 553,
+        "brotli": 464
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/model-ago_Wh6w.d.cts",
+      "sizes": {
+        "raw": 1705,
+        "gzip": 556,
+        "brotli": 468
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/protocol.cjs",
+      "sizes": {
+        "raw": 516,
+        "gzip": 291,
+        "brotli": 228
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/protocol.cjs.map",
+      "sizes": {
+        "raw": 2903,
+        "gzip": 953,
+        "brotli": 808
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/protocol.d.cts",
+      "sizes": {
+        "raw": 2909,
+        "gzip": 901,
+        "brotli": 756
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/protocol.d.mts",
+      "sizes": {
+        "raw": 2909,
+        "gzip": 900,
+        "brotli": 757
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/protocol.mjs",
+      "sizes": {
+        "raw": 407,
+        "gzip": 246,
+        "brotli": 209
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/protocol.mjs.map",
+      "sizes": {
+        "raw": 2926,
+        "gzip": 958,
+        "brotli": 808
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/validation.cjs",
+      "sizes": {
+        "raw": 2601,
+        "gzip": 921,
+        "brotli": 772
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/validation.cjs.map",
+      "sizes": {
+        "raw": 7700,
+        "gzip": 1887,
+        "brotli": 1672
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/validation.d.cts",
+      "sizes": {
+        "raw": 889,
+        "gzip": 353,
+        "brotli": 308
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/validation.d.mts",
+      "sizes": {
+        "raw": 889,
+        "gzip": 353,
+        "brotli": 309
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/validation.mjs",
+      "sizes": {
+        "raw": 2356,
+        "gzip": 871,
+        "brotli": 733
+      }
+    },
+    {
+      "path": "packages/scraping-server/dist/validation.mjs.map",
+      "sizes": {
+        "raw": 7179,
+        "gzip": 1856,
+        "brotli": 1644
+      }
+    }
+  ],
+  "totals": {
+    "raw": 151141,
+    "gzip": 45922,
+    "brotli": 40140
+  }
+}

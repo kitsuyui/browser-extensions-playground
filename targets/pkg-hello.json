@@ -1,0 +1,123 @@
+{
+  "id": "pkg-hello",
+  "label": "hello",
+  "files": [
+    {
+      "path": "packages/hello/dist/index.cjs",
+      "sizes": {
+        "raw": 1360,
+        "gzip": 715,
+        "brotli": 520
+      }
+    },
+    {
+      "path": "packages/hello/dist/index.cjs.map",
+      "sizes": {
+        "raw": 2820,
+        "gzip": 1111,
+        "brotli": 900
+      }
+    },
+    {
+      "path": "packages/hello/dist/index.d.cts",
+      "sizes": {
+        "raw": 1267,
+        "gzip": 485,
+        "brotli": 397
+      }
+    },
+    {
+      "path": "packages/hello/dist/index.d.ts",
+      "sizes": {
+        "raw": 1266,
+        "gzip": 483,
+        "brotli": 405
+      }
+    },
+    {
+      "path": "packages/hello/dist/index.js",
+      "sizes": {
+        "raw": 1280,
+        "gzip": 666,
+        "brotli": 478
+      }
+    },
+    {
+      "path": "packages/hello/dist/index.js.map",
+      "sizes": {
+        "raw": 2818,
+        "gzip": 1110,
+        "brotli": 900
+      }
+    },
+    {
+      "path": "packages/hello/dist/manifest.json",
+      "sizes": {
+        "raw": 363,
+        "gzip": 227,
+        "brotli": 175
+      }
+    },
+    {
+      "path": "packages/hello/dist/popup.cjs",
+      "sizes": {
+        "raw": 182,
+        "gzip": 172,
+        "brotli": 127
+      }
+    },
+    {
+      "path": "packages/hello/dist/popup.cjs.map",
+      "sizes": {
+        "raw": 411,
+        "gzip": 288,
+        "brotli": 252
+      }
+    },
+    {
+      "path": "packages/hello/dist/popup.d.cts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/hello/dist/popup.d.ts",
+      "sizes": {
+        "raw": 11,
+        "gzip": 31,
+        "brotli": 15
+      }
+    },
+    {
+      "path": "packages/hello/dist/popup.html",
+      "sizes": {
+        "raw": 708,
+        "gzip": 381,
+        "brotli": 249
+      }
+    },
+    {
+      "path": "packages/hello/dist/popup.js",
+      "sizes": {
+        "raw": 185,
+        "gzip": 175,
+        "brotli": 149
+      }
+    },
+    {
+      "path": "packages/hello/dist/popup.js.map",
+      "sizes": {
+        "raw": 382,
+        "gzip": 285,
+        "brotli": 245
+      }
+    }
+  ],
+  "totals": {
+    "raw": 13064,
+    "gzip": 6160,
+    "brotli": 4827
+  }
+}
