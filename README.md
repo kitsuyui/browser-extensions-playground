@@ -1,6 +1,7 @@
 # browser-extensions-playground
 
 ![Coverage](https://raw.githubusercontent.com/kitsuyui/octocov-central/main/badges/kitsuyui/browser-extensions-playground/coverage.svg)
+[![Build Size Report](https://raw.githubusercontent.com/kitsuyui/browser-extensions-playground/gh-build-size-assets/badges/total.svg)](https://github.com/kitsuyui/browser-extensions-playground/blob/gh-build-size-assets/report.md)
 
 Playground for browser scraping extensions and scraped data tooling.
 The repository also tracks built package artifact size with
