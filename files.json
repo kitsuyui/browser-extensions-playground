@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-04-12T16:16:08.563Z",
+  "generated_at": "2026-04-12T17:10:33.699Z",
   "repository": "kitsuyui/browser-extensions-playground",
   "default_branch": "main",
   "publish_branch": "gh-build-size-assets",
   "event_name": "push",
-  "head_reference": "8e16c8d6499dca4be6de33295a7e03e92ad6cc16",
+  "head_reference": "f5fd008d53da3e5660d74b17ee5dc6f85e75946b",
   "files": [
     {
       "path": "packages/example-com/dist/background.cjs",

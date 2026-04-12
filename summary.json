@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-04-12T16:16:08.563Z",
+  "generated_at": "2026-04-12T17:10:33.698Z",
   "repository": "kitsuyui/browser-extensions-playground",
   "default_branch": "main",
   "publish_branch": "gh-build-size-assets",
   "event_name": "push",
   "base_label": "main",
-  "base_reference": null,
+  "base_reference": "8e16c8d6499dca4be6de33295a7e03e92ad6cc16",
   "head_label": "main",
-  "head_reference": "8e16c8d6499dca4be6de33295a7e03e92ad6cc16",
+  "head_reference": "f5fd008d53da3e5660d74b17ee5dc6f85e75946b",
   "targets": [
     {
       "id": "total",
@@ -422,18 +422,18 @@
       "sizes": {
         "raw": {
           "current": 1382325,
-          "base": null,
-          "delta": null
+          "base": 1382325,
+          "delta": 0
         },
         "gzip": {
           "current": 441368,
-          "base": null,
-          "delta": null
+          "base": 441368,
+          "delta": 0
         },
         "brotli": {
           "current": 378739,
-          "base": null,
-          "delta": null
+          "base": 378739,
+          "delta": 0
         }
       },
       "violations": [],
@@ -505,18 +505,18 @@
       "sizes": {
         "raw": {
           "current": 118105,
-          "base": null,
-          "delta": null
+          "base": 118105,
+          "delta": 0
         },
         "gzip": {
           "current": 43383,
-          "base": null,
-          "delta": null
+          "base": 43383,
+          "delta": 0
         },
         "brotli": {
           "current": 36802,
-          "base": null,
-          "delta": null
+          "base": 36802,
+          "delta": 0
         }
       },
       "violations": [],
@@ -576,18 +576,18 @@
       "sizes": {
         "raw": {
           "current": 239047,
-          "base": null,
-          "delta": null
+          "base": 239047,
+          "delta": 0
         },
         "gzip": {
           "current": 65300,
-          "base": null,
-          "delta": null
+          "base": 65300,
+          "delta": 0
         },
         "brotli": {
           "current": 55784,
-          "base": null,
-          "delta": null
+          "base": 55784,
+          "delta": 0
         }
       },
       "violations": [],
@@ -619,18 +619,18 @@
       "sizes": {
         "raw": {
           "current": 13064,
-          "base": null,
-          "delta": null
+          "base": 13064,
+          "delta": 0
         },
         "gzip": {
           "current": 6160,
-          "base": null,
-          "delta": null
+          "base": 6160,
+          "delta": 0
         },
         "brotli": {
           "current": 4827,
-          "base": null,
-          "delta": null
+          "base": 4827,
+          "delta": 0
         }
       },
       "violations": [],
@@ -710,18 +710,18 @@
       "sizes": {
         "raw": {
           "current": 227211,
-          "base": null,
-          "delta": null
+          "base": 227211,
+          "delta": 0
         },
         "gzip": {
           "current": 72739,
-          "base": null,
-          "delta": null
+          "base": 72739,
+          "delta": 0
         },
         "brotli": {
           "current": 62616,
-          "base": null,
-          "delta": null
+          "base": 62616,
+          "delta": 0
         }
       },
       "violations": [],
@@ -801,18 +801,18 @@
       "sizes": {
         "raw": {
           "current": 169982,
-          "base": null,
-          "delta": null
+          "base": 169982,
+          "delta": 0
         },
         "gzip": {
           "current": 59267,
-          "base": null,
-          "delta": null
+          "base": 59267,
+          "delta": 0
         },
         "brotli": {
           "current": 50770,
-          "base": null,
-          "delta": null
+          "base": 50770,
+          "delta": 0
         }
       },
       "violations": [],
@@ -898,18 +898,18 @@
       "sizes": {
         "raw": {
           "current": 278367,
-          "base": null,
-          "delta": null
+          "base": 278367,
+          "delta": 0
         },
         "gzip": {
           "current": 85963,
-          "base": null,
-          "delta": null
+          "base": 85963,
+          "delta": 0
         },
         "brotli": {
           "current": 74019,
-          "base": null,
-          "delta": null
+          "base": 74019,
+          "delta": 0
         }
       },
       "violations": [],
@@ -951,18 +951,18 @@
       "sizes": {
         "raw": {
           "current": 61826,
-          "base": null,
-          "delta": null
+          "base": 61826,
+          "delta": 0
         },
         "gzip": {
           "current": 21460,
-          "base": null,
-          "delta": null
+          "base": 21460,
+          "delta": 0
         },
         "brotli": {
           "current": 18499,
-          "base": null,
-          "delta": null
+          "base": 18499,
+          "delta": 0
         }
       },
       "violations": [],
@@ -1002,18 +1002,18 @@
       "sizes": {
         "raw": {
           "current": 62150,
-          "base": null,
-          "delta": null
+          "base": 62150,
+          "delta": 0
         },
         "gzip": {
           "current": 20194,
-          "base": null,
-          "delta": null
+          "base": 20194,
+          "delta": 0
         },
         "brotli": {
           "current": 17446,
-          "base": null,
-          "delta": null
+          "base": 17446,
+          "delta": 0
         }
       },
       "violations": [],
@@ -1053,18 +1053,18 @@
       "sizes": {
         "raw": {
           "current": 61432,
-          "base": null,
-          "delta": null
+          "base": 61432,
+          "delta": 0
         },
         "gzip": {
           "current": 20980,
-          "base": null,
-          "delta": null
+          "base": 20980,
+          "delta": 0
         },
         "brotli": {
           "current": 17836,
-          "base": null,
-          "delta": null
+          "base": 17836,
+          "delta": 0
         }
       },
       "violations": [],
@@ -1114,18 +1114,18 @@
       "sizes": {
         "raw": {
           "current": 151141,
-          "base": null,
-          "delta": null
+          "base": 151141,
+          "delta": 0
         },
         "gzip": {
           "current": 45922,
-          "base": null,
-          "delta": null
+          "base": 45922,
+          "delta": 0
         },
         "brotli": {
           "current": 40140,
-          "base": null,
-          "delta": null
+          "base": 40140,
+          "delta": 0
         }
       },
       "violations": [],
