@@ -1,8 +1,8 @@
 # gh-build-size report
 
 - Repository: **kitsuyui/browser-extensions-playground**
-- Head: `f5fd008d53da3e5660d74b17ee5dc6f85e75946b`
-- Generated at: 2026-04-12T17:10:33.699Z
+- Head: `38c806c27d4841420a56651df03440a7e00baa8a`
+- Generated at: 2026-04-16T13:41:08.650Z
 
 | File | Raw | Gzip | Brotli |
 | --- | ---: | ---: | ---: |
