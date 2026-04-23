@@ -1,8 +1,8 @@
 # gh-build-size report
 
 - Repository: **kitsuyui/browser-extensions-playground**
-- Head: `38c806c27d4841420a56651df03440a7e00baa8a`
-- Generated at: 2026-04-16T13:41:08.650Z
+- Head: `f4e872652d008b7c9fc480b71a4084ea8f6a4bbc`
+- Generated at: 2026-04-23T14:54:38.227Z
 
 | File | Raw | Gzip | Brotli |
 | --- | ---: | ---: | ---: |
@@ -320,12 +320,12 @@
 | `packages/scraped-data/dist/index.d.mts` | 817 B | 389 B | 322 B |
 | `packages/scraped-data/dist/index.mjs` | 885 B | 414 B | 344 B |
 | `packages/scraped-data/dist/index.mjs.map` | 3,291 B | 1,092 B | 947 B |
-| `packages/scraped-data/dist/mcp.cjs` | 3,898 B | 1,624 B | 1,387 B |
-| `packages/scraped-data/dist/mcp.cjs.map` | 12,081 B | 3,547 B | 3,131 B |
+| `packages/scraped-data/dist/mcp.cjs` | 3,958 B | 1,666 B | 1,430 B |
+| `packages/scraped-data/dist/mcp.cjs.map` | 12,874 B | 3,822 B | 3,385 B |
 | `packages/scraped-data/dist/mcp.d.cts` | 649 B | 338 B | 274 B |
 | `packages/scraped-data/dist/mcp.d.mts` | 649 B | 339 B | 277 B |
-| `packages/scraped-data/dist/mcp.mjs` | 3,803 B | 1,573 B | 1,343 B |
-| `packages/scraped-data/dist/mcp.mjs.map` | 11,994 B | 3,519 B | 3,103 B |
+| `packages/scraped-data/dist/mcp.mjs` | 3,863 B | 1,616 B | 1,384 B |
+| `packages/scraped-data/dist/mcp.mjs.map` | 12,787 B | 3,791 B | 3,349 B |
 | `packages/scraped-data/dist/protocol-Bc5WLHco.cjs` | 195 B | 185 B | 137 B |
 | `packages/scraped-data/dist/protocol-Bc5WLHco.cjs.map` | 2,897 B | 960 B | 810 B |
 | `packages/scraped-data/dist/protocol-CKX5hhhV.mjs` | 134 B | 140 B | 112 B |
@@ -344,12 +344,12 @@
 | `packages/scraping-devtools/dist/index.d.mts` | 3,051 B | 929 B | 800 B |
 | `packages/scraping-devtools/dist/index.mjs` | 539 B | 310 B | 247 B |
 | `packages/scraping-devtools/dist/index.mjs.map` | 1,752 B | 701 B | 600 B |
-| `packages/scraping-devtools/dist/mcp.cjs` | 4,350 B | 1,653 B | 1,416 B |
-| `packages/scraping-devtools/dist/mcp.cjs.map` | 12,990 B | 3,581 B | 3,183 B |
+| `packages/scraping-devtools/dist/mcp.cjs` | 4,410 B | 1,699 B | 1,454 B |
+| `packages/scraping-devtools/dist/mcp.cjs.map` | 13,783 B | 3,855 B | 3,414 B |
 | `packages/scraping-devtools/dist/mcp.d.cts` | 310 B | 204 B | 166 B |
 | `packages/scraping-devtools/dist/mcp.d.mts` | 310 B | 204 B | 167 B |
-| `packages/scraping-devtools/dist/mcp.mjs` | 4,255 B | 1,599 B | 1,375 B |
-| `packages/scraping-devtools/dist/mcp.mjs.map` | 12,898 B | 3,551 B | 3,140 B |
+| `packages/scraping-devtools/dist/mcp.mjs` | 4,315 B | 1,645 B | 1,416 B |
+| `packages/scraping-devtools/dist/mcp.mjs.map` | 13,691 B | 3,827 B | 3,375 B |
 | `packages/scraping-devtools/dist/protocol-Bc5WLHco.cjs` | 195 B | 185 B | 137 B |
 | `packages/scraping-devtools/dist/protocol-Bc5WLHco.cjs.map` | 2,897 B | 960 B | 810 B |
 | `packages/scraping-devtools/dist/protocol-CKX5hhhV.mjs` | 134 B | 140 B | 112 B |
@@ -382,18 +382,18 @@
 | `packages/scraping-server/dist/cli.d.mts` | 11 B | 31 B | 15 B |
 | `packages/scraping-server/dist/cli.mjs` | 759 B | 468 B | 411 B |
 | `packages/scraping-server/dist/cli.mjs.map` | 2,099 B | 936 B | 850 B |
-| `packages/scraping-server/dist/index.cjs` | 10,594 B | 3,447 B | 3,027 B |
-| `packages/scraping-server/dist/index.cjs.map` | 31,317 B | 7,844 B | 6,911 B |
+| `packages/scraping-server/dist/index.cjs` | 11,393 B | 3,699 B | 3,260 B |
+| `packages/scraping-server/dist/index.cjs.map` | 34,642 B | 8,661 B | 7,639 B |
 | `packages/scraping-server/dist/index.d.cts` | 2,313 B | 730 B | 639 B |
 | `packages/scraping-server/dist/index.d.mts` | 2,313 B | 728 B | 644 B |
-| `packages/scraping-server/dist/index.mjs` | 10,450 B | 3,436 B | 2,997 B |
-| `packages/scraping-server/dist/index.mjs.map` | 30,950 B | 7,749 B | 6,832 B |
-| `packages/scraping-server/dist/mcp.cjs` | 1,890 B | 983 B | 823 B |
-| `packages/scraping-server/dist/mcp.cjs.map` | 7,073 B | 2,303 B | 2,042 B |
+| `packages/scraping-server/dist/index.mjs` | 11,249 B | 3,701 B | 3,244 B |
+| `packages/scraping-server/dist/index.mjs.map` | 34,275 B | 8,566 B | 7,554 B |
+| `packages/scraping-server/dist/mcp.cjs` | 1,950 B | 1,032 B | 872 B |
+| `packages/scraping-server/dist/mcp.cjs.map` | 7,866 B | 2,589 B | 2,294 B |
 | `packages/scraping-server/dist/mcp.d.cts` | 670 B | 331 B | 289 B |
 | `packages/scraping-server/dist/mcp.d.mts` | 670 B | 332 B | 290 B |
-| `packages/scraping-server/dist/mcp.mjs` | 1,821 B | 945 B | 801 B |
-| `packages/scraping-server/dist/mcp.mjs.map` | 7,072 B | 2,303 B | 2,064 B |
+| `packages/scraping-server/dist/mcp.mjs` | 1,881 B | 994 B | 847 B |
+| `packages/scraping-server/dist/mcp.mjs.map` | 7,865 B | 2,589 B | 2,296 B |
 | `packages/scraping-server/dist/model-ago_Wh6w.d.cts` | 1,705 B | 556 B | 468 B |
 | `packages/scraping-server/dist/model-D9jcduaa.d.mts` | 1,705 B | 553 B | 464 B |
 | `packages/scraping-server/dist/protocol.cjs` | 516 B | 291 B | 228 B |

@@ -2517,17 +2517,17 @@
     {
       "path": "packages/scraped-data/dist/mcp.cjs",
       "sizes": {
-        "raw": 3898,
-        "gzip": 1624,
-        "brotli": 1387
+        "raw": 3958,
+        "gzip": 1666,
+        "brotli": 1430
       }
     },
     {
       "path": "packages/scraped-data/dist/mcp.cjs.map",
       "sizes": {
-        "raw": 12081,
-        "gzip": 3547,
-        "brotli": 3131
+        "raw": 12874,
+        "gzip": 3822,
+        "brotli": 3385
       }
     },
     {
@@ -2549,17 +2549,17 @@
     {
       "path": "packages/scraped-data/dist/mcp.mjs",
       "sizes": {
-        "raw": 3803,
-        "gzip": 1573,
-        "brotli": 1343
+        "raw": 3863,
+        "gzip": 1616,
+        "brotli": 1384
       }
     },
     {
       "path": "packages/scraped-data/dist/mcp.mjs.map",
       "sizes": {
-        "raw": 11994,
-        "gzip": 3519,
-        "brotli": 3103
+        "raw": 12787,
+        "gzip": 3791,
+        "brotli": 3349
       }
     },
     {
@@ -2709,17 +2709,17 @@
     {
       "path": "packages/scraping-devtools/dist/mcp.cjs",
       "sizes": {
-        "raw": 4350,
-        "gzip": 1653,
-        "brotli": 1416
+        "raw": 4410,
+        "gzip": 1699,
+        "brotli": 1454
       }
     },
     {
       "path": "packages/scraping-devtools/dist/mcp.cjs.map",
       "sizes": {
-        "raw": 12990,
-        "gzip": 3581,
-        "brotli": 3183
+        "raw": 13783,
+        "gzip": 3855,
+        "brotli": 3414
       }
     },
     {
@@ -2741,17 +2741,17 @@
     {
       "path": "packages/scraping-devtools/dist/mcp.mjs",
       "sizes": {
-        "raw": 4255,
-        "gzip": 1599,
-        "brotli": 1375
+        "raw": 4315,
+        "gzip": 1645,
+        "brotli": 1416
       }
     },
     {
       "path": "packages/scraping-devtools/dist/mcp.mjs.map",
       "sizes": {
-        "raw": 12898,
-        "gzip": 3551,
-        "brotli": 3140
+        "raw": 13691,
+        "gzip": 3827,
+        "brotli": 3375
       }
     },
     {
@@ -3013,17 +3013,17 @@
     {
       "path": "packages/scraping-server/dist/index.cjs",
       "sizes": {
-        "raw": 10594,
-        "gzip": 3447,
-        "brotli": 3027
+        "raw": 11393,
+        "gzip": 3699,
+        "brotli": 3260
       }
     },
     {
       "path": "packages/scraping-server/dist/index.cjs.map",
       "sizes": {
-        "raw": 31317,
-        "gzip": 7844,
-        "brotli": 6911
+        "raw": 34642,
+        "gzip": 8661,
+        "brotli": 7639
       }
     },
     {
@@ -3045,33 +3045,33 @@
     {
       "path": "packages/scraping-server/dist/index.mjs",
       "sizes": {
-        "raw": 10450,
-        "gzip": 3436,
-        "brotli": 2997
+        "raw": 11249,
+        "gzip": 3701,
+        "brotli": 3244
       }
     },
     {
       "path": "packages/scraping-server/dist/index.mjs.map",
       "sizes": {
-        "raw": 30950,
-        "gzip": 7749,
-        "brotli": 6832
+        "raw": 34275,
+        "gzip": 8566,
+        "brotli": 7554
       }
     },
     {
       "path": "packages/scraping-server/dist/mcp.cjs",
       "sizes": {
-        "raw": 1890,
-        "gzip": 983,
-        "brotli": 823
+        "raw": 1950,
+        "gzip": 1032,
+        "brotli": 872
       }
     },
     {
       "path": "packages/scraping-server/dist/mcp.cjs.map",
       "sizes": {
-        "raw": 7073,
-        "gzip": 2303,
-        "brotli": 2042
+        "raw": 7866,
+        "gzip": 2589,
+        "brotli": 2294
       }
     },
     {
@@ -3093,17 +3093,17 @@
     {
       "path": "packages/scraping-server/dist/mcp.mjs",
       "sizes": {
-        "raw": 1821,
-        "gzip": 945,
-        "brotli": 801
+        "raw": 1881,
+        "gzip": 994,
+        "brotli": 847
       }
     },
     {
       "path": "packages/scraping-server/dist/mcp.mjs.map",
       "sizes": {
-        "raw": 7072,
-        "gzip": 2303,
-        "brotli": 2064
+        "raw": 7865,
+        "gzip": 2589,
+        "brotli": 2296
       }
     },
     {
@@ -3220,8 +3220,8 @@
     }
   ],
   "totals": {
-    "raw": 1382325,
-    "gzip": 441368,
-    "brotli": 378739
+    "raw": 1395691,
+    "gzip": 445463,
+    "brotli": 382377
   }
 }
