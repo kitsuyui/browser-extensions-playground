@@ -423,6 +423,282 @@ function createLogger(logger?: ScrapingServerLogger): ScrapingServerLogger {
   return logger ?? console
 }
 
+type ScrapingRoute =
+  | { type: 'health' }
+  | { type: 'status' }
+  | { type: 'providers' }
+  | { type: 'provider'; providerId: ProviderId }
+  | { type: 'latest'; provider: ProviderId | null }
+  | { type: 'history'; query: DeterministicHistoryQuery }
+  | { type: 'ingest' }
+  | { type: 'devClients' }
+  | { type: 'devCommands' }
+  | { type: 'notFound'; method: string; pathname: string }
+
+type ScrapingRequestContext = {
+  readonly store: PrismaScrapedDataStore
+  readonly devClients: Map<string, DevClientConnection>
+  readonly pendingCommands: Map<string, PendingCommand>
+  readonly logger: ScrapingServerLogger
+}
+
+function serializeDevClients(
+  devClients: Map<string, DevClientConnection>
+): readonly DevClientInfo[] {
+  return [...devClients.values()].map(
+    ({ socket: _socket, ...client }) => client
+  )
+}
+
+function isLatestRoute(method: string, pathname: string): boolean {
+  return (
+    (method === 'GET' && pathname === '/api/deterministic/latest') ||
+    pathname === '/api/snapshots/latest'
+  )
+}
+
+function isHistoryRoute(method: string, pathname: string): boolean {
+  return (
+    (method === 'GET' && pathname === '/api/deterministic/history') ||
+    pathname === '/api/snapshots/history'
+  )
+}
+
+function isIngestRoute(method: string, pathname: string): boolean {
+  return (
+    (method === 'POST' && pathname === '/api/deterministic/ingest') ||
+    pathname === '/api/snapshots/ingest'
+  )
+}
+
+function resolveScrapingRoute(method: string, url: URL): ScrapingRoute {
+  if (method === 'GET' && url.pathname === '/health') {
+    return { type: 'health' }
+  }
+  if (method === 'GET' && url.pathname === '/api/status') {
+    return { type: 'status' }
+  }
+  if (method === 'GET' && url.pathname === '/api/providers') {
+    return { type: 'providers' }
+  }
+  if (
+    method === 'GET' &&
+    url.pathname.startsWith('/api/providers/') &&
+    url.pathname.length > '/api/providers/'.length
+  ) {
+    return {
+      type: 'provider',
+      providerId: decodeURIComponent(
+        url.pathname.slice('/api/providers/'.length)
+      ) as ProviderId,
+    }
+  }
+  if (isLatestRoute(method, url.pathname)) {
+    return {
+      type: 'latest',
+      provider: (url.searchParams.get('provider') as ProviderId | null) ?? null,
+    }
+  }
+  if (isHistoryRoute(method, url.pathname)) {
+    return {
+      type: 'history',
+      query: validateDeterministicHistoryQuery({
+        provider: url.searchParams.get('provider') ?? undefined,
+        from: url.searchParams.get('from') ?? undefined,
+        to: url.searchParams.get('to') ?? undefined,
+        limit: url.searchParams.get('limit') ?? undefined,
+      }),
+    }
+  }
+  if (isIngestRoute(method, url.pathname)) {
+    return { type: 'ingest' }
+  }
+  if (method === 'GET' && url.pathname === '/api/dev/clients') {
+    return { type: 'devClients' }
+  }
+  if (method === 'POST' && url.pathname === '/api/dev/commands') {
+    return { type: 'devCommands' }
+  }
+
+  return {
+    type: 'notFound',
+    method,
+    pathname: url.pathname,
+  }
+}
+
+function resolveDevCommandTarget(
+  targetClientId: string | undefined,
+  devClients: Map<string, DevClientConnection>
+): DevClientConnection | undefined {
+  return (
+    (targetClientId ? devClients.get(targetClientId) : undefined) ??
+    devClients.values().next().value
+  )
+}
+
+async function executeDevCommand(
+  target: DevClientConnection,
+  command: DevCommandRequest['command'],
+  pendingCommands: Map<string, PendingCommand>
+): Promise<DevCommandResult> {
+  const commandId = randomUUID()
+  const envelope: DevCommandEnvelope = {
+    commandId,
+    command,
+  }
+
+  return new Promise<DevCommandResult>((resolveResult, rejectResult) => {
+    const timeoutId = setTimeout(() => {
+      pendingCommands.delete(commandId)
+      rejectResult(new Error('Timed out waiting for dev command result.'))
+    }, 10_000)
+
+    pendingCommands.set(commandId, {
+      resolve: resolveResult,
+      reject: rejectResult,
+      timeoutId,
+    })
+
+    target.socket.send(
+      JSON.stringify({
+        type: 'run-command',
+        ...envelope,
+      })
+    )
+  }).catch((error) => ({
+    commandId,
+    ok: false,
+    error: error instanceof Error ? error.message : 'unknown error',
+  }))
+}
+
+function isClientRequestError(error: unknown): boolean {
+  return (
+    error instanceof InvalidJsonBodyError ||
+    error instanceof InvalidDeterministicIngestError ||
+    error instanceof InvalidDevCommandRequestError ||
+    error instanceof InvalidDeterministicHistoryQueryError
+  )
+}
+
+async function handleScrapingRoute(
+  route: ScrapingRoute,
+  request: IncomingMessage,
+  response: ServerResponse,
+  context: ScrapingRequestContext
+): Promise<void> {
+  switch (route.type) {
+    case 'health':
+      writeJson(response, 200, { ok: true })
+      return
+    case 'status':
+      writeJson(
+        response,
+        200,
+        createStatus(await context.store.listProviderIds(), context.devClients)
+      )
+      return
+    case 'providers':
+      writeJson(
+        response,
+        200,
+        (await context.store.listProviderManifests()).map(
+          toRegisteredProviderInfo
+        )
+      )
+      return
+    case 'provider': {
+      const provider = await context.store.getProviderManifest(route.providerId)
+      if (!provider) {
+        writeJson(response, 404, {
+          error: `Unknown provider: ${route.providerId}`,
+        })
+        return
+      }
+
+      writeJson(response, 200, toProviderDescription(provider))
+      return
+    }
+    case 'latest':
+      if (route.provider) {
+        writeJson(
+          response,
+          200,
+          (await context.store.getLatest(route.provider))?.snapshot ?? null
+        )
+        return
+      }
+
+      writeJson(response, 200, await context.store.getLatestAll())
+      return
+    case 'history':
+      writeJson(response, 200, await context.store.getHistory(route.query))
+      return
+    case 'ingest': {
+      const body = validateDeterministicIngest(
+        await readJsonBody<DeterministicIngestRequest>(request)
+      )
+      const record = await context.store.submitDeterministicSnapshot(
+        body.providerManifest,
+        body.snapshot
+      )
+      context.logger.info('[scraping-server] snapshot ingested', {
+        provider: body.snapshot.provider,
+        rawVersion: body.snapshot.rawVersion,
+        metricCount: body.snapshot.metrics.length,
+        source: body.snapshot.source,
+      })
+      writeJson(response, 201, record)
+      return
+    }
+    case 'devClients':
+      writeJson(response, 200, serializeDevClients(context.devClients))
+      return
+    case 'devCommands': {
+      const body = validateDevCommandRequest(
+        await readJsonBody<DevCommandRequest>(request)
+      )
+      const target = resolveDevCommandTarget(
+        body.targetClientId,
+        context.devClients
+      )
+
+      if (!target) {
+        writeJson(response, 409, {
+          error: 'No devtool websocket clients are connected.',
+        })
+        return
+      }
+
+      context.logger.info('[scraping-server] dev command dispatched', {
+        type: body.command.type,
+        targetClientId: target.clientId,
+      })
+
+      const result = await executeDevCommand(
+        target,
+        body.command,
+        context.pendingCommands
+      )
+
+      context.logger.info('[scraping-server] dev command completed', {
+        commandId: result.commandId,
+        ok: result.ok,
+        error: result.error,
+      })
+
+      writeJson(response, result.ok ? 200 : 500, result)
+      return
+    }
+    case 'notFound':
+      writeJson(response, 404, {
+        error: `No route for ${route.method} ${route.pathname}`,
+      })
+      return
+  }
+}
+
 export function createScrapingServer(options: {
   readonly host?: string
   readonly port?: number
@@ -444,199 +720,22 @@ export function createScrapingServer(options: {
     try {
       const url = new URL(request.url ?? '/', `http://${host}:${port}`)
       pathname = url.pathname
-
-      if (method === 'GET' && url.pathname === '/health') {
-        writeJson(response, 200, { ok: true })
-        return
-      }
-
-      if (method === 'GET' && url.pathname === '/api/status') {
-        writeJson(
-          response,
-          200,
-          createStatus(await store.listProviderIds(), devClients)
-        )
-        return
-      }
-
-      if (method === 'GET' && url.pathname === '/api/providers') {
-        writeJson(
-          response,
-          200,
-          (await store.listProviderManifests()).map(toRegisteredProviderInfo)
-        )
-        return
-      }
-
-      if (
-        method === 'GET' &&
-        url.pathname.startsWith('/api/providers/') &&
-        url.pathname.length > '/api/providers/'.length
-      ) {
-        const providerId = decodeURIComponent(
-          url.pathname.slice('/api/providers/'.length)
-        )
-        const provider = await store.getProviderManifest(providerId)
-
-        if (!provider) {
-          writeJson(response, 404, {
-            error: `Unknown provider: ${providerId}`,
-          })
-          return
-        }
-
-        writeJson(response, 200, toProviderDescription(provider))
-        return
-      }
-
-      if (
-        (method === 'GET' && url.pathname === '/api/deterministic/latest') ||
-        url.pathname === '/api/snapshots/latest'
-      ) {
-        const provider = url.searchParams.get('provider')
-
-        if (provider) {
-          writeJson(
-            response,
-            200,
-            (await store.getLatest(provider))?.snapshot ?? null
-          )
-          return
-        }
-
-        writeJson(response, 200, await store.getLatestAll())
-        return
-      }
-
-      if (
-        (method === 'GET' && url.pathname === '/api/deterministic/history') ||
-        url.pathname === '/api/snapshots/history'
-      ) {
-        const query = validateDeterministicHistoryQuery({
-          provider: url.searchParams.get('provider') ?? undefined,
-          from: url.searchParams.get('from') ?? undefined,
-          to: url.searchParams.get('to') ?? undefined,
-          limit: url.searchParams.get('limit') ?? undefined,
-        })
-
-        writeJson(response, 200, await store.getHistory(query))
-        return
-      }
-
-      if (
-        (method === 'POST' && url.pathname === '/api/deterministic/ingest') ||
-        url.pathname === '/api/snapshots/ingest'
-      ) {
-        const body = validateDeterministicIngest(
-          await readJsonBody<DeterministicIngestRequest>(request)
-        )
-        const record = await store.submitDeterministicSnapshot(
-          body.providerManifest,
-          body.snapshot
-        )
-        logger.info('[scraping-server] snapshot ingested', {
-          provider: body.snapshot.provider,
-          rawVersion: body.snapshot.rawVersion,
-          metricCount: body.snapshot.metrics.length,
-          source: body.snapshot.source,
-        })
-        writeJson(response, 201, record)
-        return
-      }
-
-      if (method === 'GET' && url.pathname === '/api/dev/clients') {
-        writeJson(
-          response,
-          200,
-          [...devClients.values()].map(
-            ({ socket: _socket, ...client }) => client
-          )
-        )
-        return
-      }
-
-      if (method === 'POST' && url.pathname === '/api/dev/commands') {
-        const body = validateDevCommandRequest(
-          await readJsonBody<DevCommandRequest>(request)
-        )
-        const target =
-          (body.targetClientId ? devClients.get(body.targetClientId) : null) ??
-          devClients.values().next().value
-
-        if (!target) {
-          writeJson(response, 409, {
-            error: 'No devtool websocket clients are connected.',
-          })
-          return
-        }
-
-        const commandId = randomUUID()
-        const envelope: DevCommandEnvelope = {
-          commandId,
-          command: body.command,
-        }
-
-        logger.info('[scraping-server] dev command dispatched', {
-          commandId,
-          type: body.command.type,
-          targetClientId: target.clientId,
-        })
-
-        const result = await new Promise<DevCommandResult>(
-          (resolveResult, rejectResult) => {
-            const timeoutId = setTimeout(() => {
-              pendingCommands.delete(commandId)
-              rejectResult(
-                new Error('Timed out waiting for dev command result.')
-              )
-            }, 10_000)
-
-            pendingCommands.set(commandId, {
-              resolve: resolveResult,
-              reject: rejectResult,
-              timeoutId,
-            })
-
-            target.socket.send(
-              JSON.stringify({
-                type: 'run-command',
-                ...envelope,
-              })
-            )
-          }
-        ).catch((error) => ({
-          commandId,
-          ok: false,
-          error: error instanceof Error ? error.message : 'unknown error',
-        }))
-
-        logger.info('[scraping-server] dev command completed', {
-          commandId,
-          ok: result.ok,
-          error: result.error,
-        })
-
-        writeJson(response, result.ok ? 200 : 500, result)
-        return
-      }
-
-      writeJson(response, 404, {
-        error: `No route for ${request.method ?? 'GET'} ${url.pathname}`,
-      })
-    } catch (error) {
-      writeJson(
+      await handleScrapingRoute(
+        resolveScrapingRoute(method, url),
+        request,
         response,
-        error instanceof InvalidJsonBodyError ||
-          error instanceof InvalidDeterministicIngestError ||
-          error instanceof InvalidDevCommandRequestError ||
-          error instanceof InvalidDeterministicHistoryQueryError
-          ? 400
-          : 500,
         {
-          error:
-            error instanceof Error ? error.message : 'Internal server error.',
+          store,
+          devClients,
+          pendingCommands,
+          logger,
         }
       )
+    } catch (error) {
+      writeJson(response, isClientRequestError(error) ? 400 : 500, {
+        error:
+          error instanceof Error ? error.message : 'Internal server error.',
+      })
       logger.error('[scraping-server] request failed', {
         method,
         pathname,
