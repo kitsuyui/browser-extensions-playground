@@ -87,6 +87,79 @@ export function createMcpTextResult(result: unknown) {
   }
 }
 
+function resolveToolArguments(
+  value: unknown
+): Record<string, unknown> | undefined {
+  return typeof value === 'object' && value !== null
+    ? (value as Record<string, unknown>)
+    : undefined
+}
+
+function writeInitializeResponse(
+  request: JsonRpcRequest,
+  options: { readonly name: string; readonly version: string }
+): void {
+  writeMessage(
+    createSuccessResponse(request.id ?? null, {
+      protocolVersion: '2024-11-05',
+      capabilities: {
+        tools: {},
+      },
+      serverInfo: {
+        name: options.name,
+        version: options.version,
+      },
+    })
+  )
+}
+
+function writeToolsListResponse(
+  request: JsonRpcRequest,
+  tools: readonly McpToolDefinition[]
+): void {
+  writeMessage(
+    createSuccessResponse(request.id ?? null, {
+      tools,
+    })
+  )
+}
+
+async function writeToolCallResponse(
+  request: JsonRpcRequest,
+  options: {
+    readonly callTool: (
+      name: string,
+      arguments_: Record<string, unknown> | undefined
+    ) => Promise<unknown>
+  }
+): Promise<void> {
+  const name = request.params?.name
+  if (typeof name !== 'string') {
+    writeMessage(
+      createErrorResponse(request.id ?? null, -32602, 'Tool name is required.')
+    )
+    return
+  }
+
+  try {
+    const result = await options.callTool(
+      name,
+      resolveToolArguments(request.params?.arguments)
+    )
+    writeMessage(
+      createSuccessResponse(request.id ?? null, createMcpTextResult(result))
+    )
+  } catch (error) {
+    writeMessage(
+      createErrorResponse(
+        request.id ?? null,
+        -32000,
+        error instanceof Error ? error.message : 'Unknown tool execution error.'
+      )
+    )
+  }
+}
+
 export function startStdioMcpServer(options: {
   readonly name: string
   readonly version: string
@@ -99,90 +172,40 @@ export function startStdioMcpServer(options: {
   let buffer = Buffer.alloc(0)
 
   async function handleRequest(request: JsonRpcRequest): Promise<void> {
-    if (!request.method) {
+    const method = request.method
+    if (!method || method === 'notifications/initialized') {
       return
     }
 
-    if (request.method === 'notifications/initialized') {
-      return
+    const handlers: Record<
+      string,
+      (request_: JsonRpcRequest) => Promise<void> | void
+    > = {
+      initialize: (request_) => {
+        writeInitializeResponse(request_, options)
+      },
+      ping: (request_) => {
+        writeMessage(createSuccessResponse(request_.id ?? null, {}))
+      },
+      'tools/list': (request_) => {
+        writeToolsListResponse(request_, options.tools)
+      },
+      'tools/call': (request_) => writeToolCallResponse(request_, options),
     }
 
-    if (request.method === 'initialize') {
+    const handler = handlers[method]
+    if (!handler) {
       writeMessage(
-        createSuccessResponse(request.id ?? null, {
-          protocolVersion: '2024-11-05',
-          capabilities: {
-            tools: {},
-          },
-          serverInfo: {
-            name: options.name,
-            version: options.version,
-          },
-        })
+        createErrorResponse(
+          request.id ?? null,
+          -32601,
+          `Method not found: ${method}`
+        )
       )
       return
     }
 
-    if (request.method === 'ping') {
-      writeMessage(createSuccessResponse(request.id ?? null, {}))
-      return
-    }
-
-    if (request.method === 'tools/list') {
-      writeMessage(
-        createSuccessResponse(request.id ?? null, {
-          tools: options.tools,
-        })
-      )
-      return
-    }
-
-    if (request.method === 'tools/call') {
-      const name = request.params?.name
-      const arguments_ = request.params?.arguments
-
-      if (typeof name !== 'string') {
-        writeMessage(
-          createErrorResponse(
-            request.id ?? null,
-            -32602,
-            'Tool name is required.'
-          )
-        )
-        return
-      }
-
-      try {
-        const result = await options.callTool(
-          name,
-          typeof arguments_ === 'object' && arguments_ !== null
-            ? (arguments_ as Record<string, unknown>)
-            : undefined
-        )
-        writeMessage(
-          createSuccessResponse(request.id ?? null, createMcpTextResult(result))
-        )
-      } catch (error) {
-        writeMessage(
-          createErrorResponse(
-            request.id ?? null,
-            -32000,
-            error instanceof Error
-              ? error.message
-              : 'Unknown tool execution error.'
-          )
-        )
-      }
-      return
-    }
-
-    writeMessage(
-      createErrorResponse(
-        request.id ?? null,
-        -32601,
-        `Method not found: ${request.method}`
-      )
-    )
+    await handler(request)
   }
 
   process.stdin.on('data', (chunk: Buffer | string) => {
