@@ -5,6 +5,14 @@
     "enabled": true,
     "rules": {
       "recommended": true,
+      "complexity": {
+        "noExcessiveCognitiveComplexity": {
+          "level": "error",
+          "options": {
+            "maxAllowedComplexity": 67
+          }
+        }
+      },
       "style": {
         "useImportType": "error",
         "noParameterAssign": "error",
