@@ -101,17 +101,17 @@
     {
       "path": "packages/scraping-server/dist/mcp.cjs",
       "sizes": {
-        "raw": 1950,
-        "gzip": 1032,
-        "brotli": 872
+        "raw": 2133,
+        "gzip": 1110,
+        "brotli": 943
       }
     },
     {
       "path": "packages/scraping-server/dist/mcp.cjs.map",
       "sizes": {
-        "raw": 7866,
-        "gzip": 2589,
-        "brotli": 2294
+        "raw": 8723,
+        "gzip": 2777,
+        "brotli": 2500
       }
     },
     {
@@ -133,17 +133,17 @@
     {
       "path": "packages/scraping-server/dist/mcp.mjs",
       "sizes": {
-        "raw": 1881,
-        "gzip": 994,
-        "brotli": 847
+        "raw": 2064,
+        "gzip": 1072,
+        "brotli": 920
       }
     },
     {
       "path": "packages/scraping-server/dist/mcp.mjs.map",
       "sizes": {
-        "raw": 7865,
-        "gzip": 2589,
-        "brotli": 2296
+        "raw": 8722,
+        "gzip": 2776,
+        "brotli": 2467
       }
     },
     {
@@ -260,8 +260,8 @@
     }
   ],
   "totals": {
-    "raw": 161095,
-    "gzip": 48743,
-    "brotli": 42649
+    "raw": 163175,
+    "gzip": 49274,
+    "brotli": 43170
   }
 }

@@ -1,8 +1,8 @@
 # gh-build-size report
 
 - Repository: **kitsuyui/browser-extensions-playground**
-- Head: `f4e872652d008b7c9fc480b71a4084ea8f6a4bbc`
-- Generated at: 2026-04-23T14:54:38.227Z
+- Head: `cbc219bebaefc0f673ebd608537dee7a315ab007`
+- Generated at: 2026-04-27T12:12:34.778Z
 
 | File | Raw | Gzip | Brotli |
 | --- | ---: | ---: | ---: |
@@ -320,12 +320,12 @@
 | `packages/scraped-data/dist/index.d.mts` | 817 B | 389 B | 322 B |
 | `packages/scraped-data/dist/index.mjs` | 885 B | 414 B | 344 B |
 | `packages/scraped-data/dist/index.mjs.map` | 3,291 B | 1,092 B | 947 B |
-| `packages/scraped-data/dist/mcp.cjs` | 3,958 B | 1,666 B | 1,430 B |
-| `packages/scraped-data/dist/mcp.cjs.map` | 12,874 B | 3,822 B | 3,385 B |
+| `packages/scraped-data/dist/mcp.cjs` | 4,141 B | 1,746 B | 1,498 B |
+| `packages/scraped-data/dist/mcp.cjs.map` | 13,731 B | 4,015 B | 3,552 B |
 | `packages/scraped-data/dist/mcp.d.cts` | 649 B | 338 B | 274 B |
 | `packages/scraped-data/dist/mcp.d.mts` | 649 B | 339 B | 277 B |
-| `packages/scraped-data/dist/mcp.mjs` | 3,863 B | 1,616 B | 1,384 B |
-| `packages/scraped-data/dist/mcp.mjs.map` | 12,787 B | 3,791 B | 3,349 B |
+| `packages/scraped-data/dist/mcp.mjs` | 4,046 B | 1,693 B | 1,459 B |
+| `packages/scraped-data/dist/mcp.mjs.map` | 13,644 B | 3,984 B | 3,518 B |
 | `packages/scraped-data/dist/protocol-Bc5WLHco.cjs` | 195 B | 185 B | 137 B |
 | `packages/scraped-data/dist/protocol-Bc5WLHco.cjs.map` | 2,897 B | 960 B | 810 B |
 | `packages/scraped-data/dist/protocol-CKX5hhhV.mjs` | 134 B | 140 B | 112 B |
@@ -344,12 +344,12 @@
 | `packages/scraping-devtools/dist/index.d.mts` | 3,051 B | 929 B | 800 B |
 | `packages/scraping-devtools/dist/index.mjs` | 539 B | 310 B | 247 B |
 | `packages/scraping-devtools/dist/index.mjs.map` | 1,752 B | 701 B | 600 B |
-| `packages/scraping-devtools/dist/mcp.cjs` | 4,410 B | 1,699 B | 1,454 B |
-| `packages/scraping-devtools/dist/mcp.cjs.map` | 13,783 B | 3,855 B | 3,414 B |
+| `packages/scraping-devtools/dist/mcp.cjs` | 4,593 B | 1,779 B | 1,530 B |
+| `packages/scraping-devtools/dist/mcp.cjs.map` | 14,640 B | 4,047 B | 3,592 B |
 | `packages/scraping-devtools/dist/mcp.d.cts` | 310 B | 204 B | 166 B |
 | `packages/scraping-devtools/dist/mcp.d.mts` | 310 B | 204 B | 167 B |
-| `packages/scraping-devtools/dist/mcp.mjs` | 4,315 B | 1,645 B | 1,416 B |
-| `packages/scraping-devtools/dist/mcp.mjs.map` | 13,691 B | 3,827 B | 3,375 B |
+| `packages/scraping-devtools/dist/mcp.mjs` | 4,498 B | 1,725 B | 1,488 B |
+| `packages/scraping-devtools/dist/mcp.mjs.map` | 14,548 B | 4,017 B | 3,555 B |
 | `packages/scraping-devtools/dist/protocol-Bc5WLHco.cjs` | 195 B | 185 B | 137 B |
 | `packages/scraping-devtools/dist/protocol-Bc5WLHco.cjs.map` | 2,897 B | 960 B | 810 B |
 | `packages/scraping-devtools/dist/protocol-CKX5hhhV.mjs` | 134 B | 140 B | 112 B |
@@ -388,12 +388,12 @@
 | `packages/scraping-server/dist/index.d.mts` | 2,313 B | 728 B | 644 B |
 | `packages/scraping-server/dist/index.mjs` | 11,249 B | 3,701 B | 3,244 B |
 | `packages/scraping-server/dist/index.mjs.map` | 34,275 B | 8,566 B | 7,554 B |
-| `packages/scraping-server/dist/mcp.cjs` | 1,950 B | 1,032 B | 872 B |
-| `packages/scraping-server/dist/mcp.cjs.map` | 7,866 B | 2,589 B | 2,294 B |
+| `packages/scraping-server/dist/mcp.cjs` | 2,133 B | 1,110 B | 943 B |
+| `packages/scraping-server/dist/mcp.cjs.map` | 8,723 B | 2,777 B | 2,500 B |
 | `packages/scraping-server/dist/mcp.d.cts` | 670 B | 331 B | 289 B |
 | `packages/scraping-server/dist/mcp.d.mts` | 670 B | 332 B | 290 B |
-| `packages/scraping-server/dist/mcp.mjs` | 1,881 B | 994 B | 847 B |
-| `packages/scraping-server/dist/mcp.mjs.map` | 7,865 B | 2,589 B | 2,296 B |
+| `packages/scraping-server/dist/mcp.mjs` | 2,064 B | 1,072 B | 920 B |
+| `packages/scraping-server/dist/mcp.mjs.map` | 8,722 B | 2,776 B | 2,467 B |
 | `packages/scraping-server/dist/model-ago_Wh6w.d.cts` | 1,705 B | 556 B | 468 B |
 | `packages/scraping-server/dist/model-D9jcduaa.d.mts` | 1,705 B | 553 B | 464 B |
 | `packages/scraping-server/dist/protocol.cjs` | 516 B | 291 B | 228 B |
