@@ -210,4 +210,28 @@ describe('startStdioMcpServer', () => {
       message: 'Method not found: unknown/method',
     })
   })
+
+  it('returns a parse error and continues after malformed JSON', async () => {
+    startServer()
+
+    process.stdin.emit(
+      'data',
+      Buffer.from('Content-Length: 1\r\n\r\n{', 'utf8')
+    )
+    await new Promise((resolvePromise) => setTimeout(resolvePromise, 0))
+
+    const parseError = decodeResponses(written).at(-1)
+    expect(parseError?.error).toEqual({
+      code: -32700,
+      message: 'Parse error.',
+    })
+
+    const response = await sendRequest({
+      jsonrpc: '2.0',
+      id: 5,
+      method: 'ping',
+    })
+
+    expect(response.result).toEqual({})
+  })
 })

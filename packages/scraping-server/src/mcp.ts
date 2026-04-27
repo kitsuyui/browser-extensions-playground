@@ -87,6 +87,10 @@ export function createMcpTextResult(result: unknown) {
   }
 }
 
+function writeParseErrorResponse(): void {
+  writeMessage(createErrorResponse(null, -32700, 'Parse error.'))
+}
+
 function resolveToolArguments(
   value: unknown
 ): Record<string, unknown> | undefined {
@@ -215,15 +219,36 @@ export function startStdioMcpServer(options: {
     ])
 
     while (true) {
-      const extracted = tryExtractMessage(buffer)
+      let extracted: { consumedBytes: number; payload: string } | null
+      try {
+        extracted = tryExtractMessage(buffer)
+      } catch {
+        buffer = Buffer.alloc(0)
+        writeParseErrorResponse()
+        break
+      }
 
       if (!extracted) {
         break
       }
 
       buffer = buffer.subarray(extracted.consumedBytes)
-      const request = JSON.parse(extracted.payload) as JsonRpcRequest
-      void handleRequest(request)
+      let request: JsonRpcRequest
+      try {
+        request = JSON.parse(extracted.payload) as JsonRpcRequest
+      } catch {
+        writeParseErrorResponse()
+        continue
+      }
+      void handleRequest(request).catch(() => {
+        writeMessage(
+          createErrorResponse(
+            request.id ?? null,
+            -32603,
+            'Internal JSON-RPC error.'
+          )
+        )
+      })
     }
   })
 
