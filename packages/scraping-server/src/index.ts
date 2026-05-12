@@ -876,7 +876,17 @@ export function createScrapingServer(options: {
       return listening
     },
     async close() {
-      await store.close()
+      await new Promise<void>((resolvePromise, rejectPromise) => {
+        httpServer.close((error) => {
+          if (error) {
+            rejectPromise(error)
+            return
+          }
+
+          resolvePromise()
+        })
+      })
+
       await new Promise<void>((resolvePromise, rejectPromise) => {
         webSocketServer.close((error) => {
           if (error) {
@@ -888,16 +898,7 @@ export function createScrapingServer(options: {
         })
       })
 
-      await new Promise<void>((resolvePromise, rejectPromise) => {
-        httpServer.close((error) => {
-          if (error) {
-            rejectPromise(error)
-            return
-          }
-
-          resolvePromise()
-        })
-      })
+      await store.close()
     },
   }
 }
