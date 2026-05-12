@@ -61,6 +61,7 @@ const HEARTBEAT_INTERVAL_MS = 15_000
 let reconnectDelayMs = RECONNECT_INITIAL_DELAY_MS
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null
 let heartbeatTimer: ReturnType<typeof setInterval> | null = null
+let connectingGuard = false
 const DEVTOOLS_EXTENSION_ENABLED_KEY = 'devtoolsExtensionEnabled'
 
 function isProviderTab(url: string | undefined): boolean {
@@ -190,104 +191,111 @@ async function executeCommand(
 }
 
 async function connect(): Promise<void> {
-  if (!(await isExtensionEnabled())) {
-    disconnectSocket()
-    await persistState({
-      devtoolsConnectionState: 'disconnected',
-    })
+  if (connectingGuard) {
     return
   }
-
   if (socket && socket.readyState === WebSocket.OPEN) {
     return
   }
-
   if (socket && socket.readyState === WebSocket.CONNECTING) {
     return
   }
 
-  clearTimeoutIfNeeded(reconnectTimer)
-  reconnectTimer = null
+  connectingGuard = true
+  try {
+    if (!(await isExtensionEnabled())) {
+      disconnectSocket()
+      await persistState({
+        devtoolsConnectionState: 'disconnected',
+      })
+      return
+    }
 
-  await persistState({
-    devtoolsConnectionState: 'connecting',
-  })
-
-  const nextSocket = new WebSocket(LOCAL_SERVER_DEVTOOLS_WS_URL)
-  socket = nextSocket
-
-  nextSocket.addEventListener('open', () => {
-    reconnectDelayMs = RECONNECT_INITIAL_DELAY_MS
     clearTimeoutIfNeeded(reconnectTimer)
-    startHeartbeat(nextSocket)
-    void persistState({
-      devtoolsConnectionState: 'connected',
-    })
-    nextSocket.send(
-      JSON.stringify({
-        type: 'hello',
-        extensionName: 'Scraping Devtools',
-        extensionVersion: '0.0.0',
-      })
-    )
-  })
+    reconnectTimer = null
 
-  nextSocket.addEventListener('close', () => {
-    stopHeartbeat()
-    if (socket === nextSocket) {
-      socket = null
-    }
-    void persistState({
-      devtoolsConnectionState: 'disconnected',
+    await persistState({
+      devtoolsConnectionState: 'connecting',
     })
-    void isExtensionEnabled().then((enabled) => {
-      if (enabled) {
-        scheduleReconnect()
-      }
-    })
-  })
 
-  nextSocket.addEventListener('error', () => {
-    stopHeartbeat()
-    if (socket === nextSocket) {
-      socket = null
-    }
-    void persistState({
-      devtoolsConnectionState: 'disconnected',
-    })
-    void isExtensionEnabled().then((enabled) => {
-      if (enabled) {
-        scheduleReconnect()
-      }
-    })
-  })
+    const nextSocket = new WebSocket(LOCAL_SERVER_DEVTOOLS_WS_URL)
+    socket = nextSocket
 
-  nextSocket.addEventListener('message', (event) => {
-    const message = JSON.parse(String(event.data)) as ServerMessage
-
-    if (message.type === 'welcome') {
+    nextSocket.addEventListener('open', () => {
+      reconnectDelayMs = RECONNECT_INITIAL_DELAY_MS
+      clearTimeoutIfNeeded(reconnectTimer)
+      startHeartbeat(nextSocket)
       void persistState({
-        devtoolsWelcomeWarning: message.warning,
-      })
-      return
-    }
-
-    if (message.type !== 'run-command') {
-      return
-    }
-
-    void executeCommand(message).then((result) => {
-      void persistState({
-        devtoolsLastCommandResult: result,
+        devtoolsConnectionState: 'connected',
       })
       nextSocket.send(
         JSON.stringify({
-          type: 'command-result',
-          ...result,
+          type: 'hello',
+          extensionName: 'Scraping Devtools',
+          extensionVersion: '0.0.0',
         })
       )
     })
-  })
+
+    nextSocket.addEventListener('close', () => {
+      stopHeartbeat()
+      if (socket === nextSocket) {
+        socket = null
+      }
+      void persistState({
+        devtoolsConnectionState: 'disconnected',
+      })
+      void isExtensionEnabled().then((enabled) => {
+        if (enabled) {
+          scheduleReconnect()
+        }
+      })
+    })
+
+    nextSocket.addEventListener('error', () => {
+      stopHeartbeat()
+      if (socket === nextSocket) {
+        socket = null
+      }
+      void persistState({
+        devtoolsConnectionState: 'disconnected',
+      })
+      void isExtensionEnabled().then((enabled) => {
+        if (enabled) {
+          scheduleReconnect()
+        }
+      })
+    })
+
+    nextSocket.addEventListener('message', (event) => {
+      const message = JSON.parse(String(event.data)) as ServerMessage
+
+      if (message.type === 'welcome') {
+        void persistState({
+          devtoolsWelcomeWarning: message.warning,
+        })
+        return
+      }
+
+      if (message.type !== 'run-command') {
+        return
+      }
+
+      void executeCommand(message).then((result) => {
+        void persistState({
+          devtoolsLastCommandResult: result,
+        })
+        nextSocket.send(
+          JSON.stringify({
+            type: 'command-result',
+            ...result,
+          })
+        )
+      })
+    })
+  } finally {
+    connectingGuard = false
+  }
 }
 
 chrome?.runtime?.onInstalled?.addListener(() => {
