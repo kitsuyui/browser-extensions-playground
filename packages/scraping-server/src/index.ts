@@ -50,10 +50,19 @@ type PendingCommand = {
   readonly timeoutId: ReturnType<typeof setTimeout>
 }
 
+const MAX_BODY_BYTES = 10 * 1024 * 1024 // 10 MB
+
 class InvalidJsonBodyError extends Error {
   constructor() {
     super('Request body must be valid JSON.')
     this.name = 'InvalidJsonBodyError'
+  }
+}
+
+class BodyTooLargeError extends Error {
+  constructor() {
+    super(`Request body exceeds the ${MAX_BODY_BYTES}-byte limit.`)
+    this.name = 'BodyTooLargeError'
   }
 }
 
@@ -396,9 +405,16 @@ function parseDevtoolsMessage(buffer: RawData) {
 
 async function readJsonBody<T>(request: IncomingMessage): Promise<T> {
   const chunks: Uint8Array[] = []
+  let totalBytes = 0
 
   for await (const chunk of request) {
-    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
+    const buf = typeof chunk === 'string' ? Buffer.from(chunk) : chunk
+    totalBytes += buf.byteLength
+    if (totalBytes > MAX_BODY_BYTES) {
+      request.destroy()
+      throw new BodyTooLargeError()
+    }
+    chunks.push(buf)
   }
 
   try {
@@ -576,6 +592,7 @@ async function executeDevCommand(
 function isClientRequestError(error: unknown): boolean {
   return (
     error instanceof InvalidJsonBodyError ||
+    error instanceof BodyTooLargeError ||
     error instanceof InvalidDeterministicIngestError ||
     error instanceof InvalidDevCommandRequestError ||
     error instanceof InvalidDeterministicHistoryQueryError
