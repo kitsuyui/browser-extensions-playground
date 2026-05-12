@@ -453,21 +453,21 @@ function serializeDevClients(
 function isLatestRoute(method: string, pathname: string): boolean {
   return (
     (method === 'GET' && pathname === '/api/deterministic/latest') ||
-    pathname === '/api/snapshots/latest'
+    (method === 'GET' && pathname === '/api/snapshots/latest')
   )
 }
 
 function isHistoryRoute(method: string, pathname: string): boolean {
   return (
     (method === 'GET' && pathname === '/api/deterministic/history') ||
-    pathname === '/api/snapshots/history'
+    (method === 'GET' && pathname === '/api/snapshots/history')
   )
 }
 
 function isIngestRoute(method: string, pathname: string): boolean {
   return (
     (method === 'POST' && pathname === '/api/deterministic/ingest') ||
-    pathname === '/api/snapshots/ingest'
+    (method === 'POST' && pathname === '/api/snapshots/ingest')
   )
 }
 
