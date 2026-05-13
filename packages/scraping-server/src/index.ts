@@ -443,18 +443,26 @@ function validateDeterministicLatestQuery(
   }
 }
 
-function parseDevtoolsMessage(buffer: RawData) {
+function parseDevtoolsMessage(buffer: RawData, logger: ScrapingServerLogger) {
   let rawMessage: unknown
 
   try {
     rawMessage = JSON.parse(buffer.toString())
-  } catch {
+  } catch (e) {
+    logger.warn('[scraping-server] ignored malformed devtools message', {
+      reason: 'json-parse-error',
+      error: e instanceof Error ? e.message : String(e),
+    })
     return null
   }
 
   try {
     return parseDevtoolsInboundMessage(rawMessage)
-  } catch {
+  } catch (e) {
+    logger.warn('[scraping-server] ignored malformed devtools message', {
+      reason: 'schema-validation-error',
+      error: e instanceof Error ? e.message : String(e),
+    })
     return null
   }
 }
@@ -849,10 +857,9 @@ export function createScrapingServer(options: {
     let clientId: string | null = null
 
     socket.on('message', (buffer: RawData) => {
-      const message = parseDevtoolsMessage(buffer)
+      const message = parseDevtoolsMessage(buffer, logger)
 
       if (!message) {
-        logger.warn('[scraping-server] ignored malformed devtools message')
         return
       }
 
