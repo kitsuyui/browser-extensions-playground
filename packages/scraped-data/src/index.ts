@@ -9,7 +9,7 @@ import {
   type ProviderDescription,
   type RegisteredProviderInfo,
   type ScrapingServerStatus,
-} from '../../scraping-server/src/protocol'
+} from '@kitsuyui/browser-extensions-scraping-server'
 
 export function createScrapedDataTools(baseUrl = LOCAL_SERVER_HTTP_ORIGIN) {
   return {

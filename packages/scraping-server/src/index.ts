@@ -36,6 +36,7 @@ import {
   parseDevtoolsInboundMessage,
 } from './validation'
 
+export * from './mcp'
 export * from './protocol'
 
 type ScrapingServerLogger = Pick<Console, 'info' | 'warn' | 'error'>

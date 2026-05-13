@@ -34,5 +34,9 @@
   "files": [
     "dist",
     "package.json"
-  ]
+  ],
+  "dependencies": {
+    "@kitsuyui/browser-extensions-scraping-platform": "workspace:*",
+    "@kitsuyui/browser-extensions-scraping-server": "workspace:*"
+  }
 }

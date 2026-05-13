@@ -1,4 +1,4 @@
-import { LOCAL_SERVER_HTTP_ORIGIN } from '../../scraping-server/src/protocol'
+import { LOCAL_SERVER_HTTP_ORIGIN } from '@kitsuyui/browser-extensions-scraping-server'
 
 export function createPopupHtml(): string {
   return `<!doctype html>

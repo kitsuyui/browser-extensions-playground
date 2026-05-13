@@ -2,7 +2,7 @@ import {
   type DevCommandEnvelope,
   type DevCommandResult,
   LOCAL_SERVER_DEVTOOLS_WS_URL,
-} from '../../scraping-server/src/protocol'
+} from '@kitsuyui/browser-extensions-scraping-server'
 import {
   isSupportedProviderUrl,
   SUPPORTED_PROVIDER_MATCH_PATTERNS,

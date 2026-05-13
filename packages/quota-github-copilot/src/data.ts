@@ -1,5 +1,5 @@
 import type { ProviderSnapshot } from '@kitsuyui/browser-extensions-scraping-platform'
-import { LOCAL_SERVER_HTTP_ORIGIN } from '../../scraping-server/src/protocol'
+import { LOCAL_SERVER_HTTP_ORIGIN } from '@kitsuyui/browser-extensions-scraping-server'
 
 export function createQuotaGithubCopilotTools(
   baseUrl = LOCAL_SERVER_HTTP_ORIGIN

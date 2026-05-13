@@ -2,7 +2,7 @@ import type {
   ProviderSnapshot,
   SnapshotMetric,
 } from '@kitsuyui/browser-extensions-scraping-platform'
-import { LOCAL_SERVER_HTTP_ORIGIN } from '../../scraping-server/src/protocol'
+import { LOCAL_SERVER_HTTP_ORIGIN } from '@kitsuyui/browser-extensions-scraping-server'
 
 export const OPENAI_STABLE_USAGE_KEYS = [
   'codex_5h',

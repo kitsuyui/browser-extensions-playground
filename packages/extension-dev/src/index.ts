@@ -1,4 +1,4 @@
-import { LOCAL_SERVER_HTTP_MATCH_PATTERN } from '../../scraping-server/src/protocol'
+import { LOCAL_SERVER_HTTP_MATCH_PATTERN } from '@kitsuyui/browser-extensions-scraping-server'
 import { SUPPORTED_PROVIDER_MATCH_PATTERNS } from './providers'
 
 export function createExtensionManifest() {
