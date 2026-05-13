@@ -1,4 +1,4 @@
-import { DETERMINISTIC_EXTENSION_ENABLED_KEY } from '../../scraping-platform/src/deterministic-extension'
+import { DETERMINISTIC_EXTENSION_ENABLED_KEY } from '@kitsuyui/browser-extensions-scraping-platform'
 
 declare const chrome:
   | {

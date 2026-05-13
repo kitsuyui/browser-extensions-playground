@@ -2,7 +2,7 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-
+import { createScrapingServer } from '@kitsuyui/browser-extensions-scraping-server'
 import {
   type BrowserContext,
   test as base,
@@ -11,9 +11,7 @@ import {
   expect as playwrightExpect,
   type Worker,
 } from '@playwright/test'
-
 import { createScrapingDevtoolsTools } from '../../scraping-devtools/src/index'
-import { createScrapingServer } from '../../scraping-server/src/index'
 
 const SERVER_URL = 'http://127.0.0.1:3929'
 

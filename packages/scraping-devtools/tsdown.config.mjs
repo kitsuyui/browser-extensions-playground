@@ -11,4 +11,5 @@ export default defineConfig({
   minify: true,
   dts: true,
   noExternal: [/^@kitsuyui\//],
+  inlineOnly: ['ws', 'zod'],
 })

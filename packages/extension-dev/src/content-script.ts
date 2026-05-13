@@ -1,18 +1,17 @@
-import { providerExtractor as exampleComProviderExtractor } from '../../example-com/src/index'
-import { providerExtractor as anthropicProviderExtractor } from '../../quota-anthropic/src/index'
-import { providerExtractor as githubCopilotProviderExtractor } from '../../quota-github-copilot/src/index'
-import { providerExtractor as openAiProviderExtractor } from '../../quota-openai/src/index'
 import {
   collectDomProbeMatches,
   createDomCapture,
   createExtensionCaptureFromDocument,
   type ProviderExtractor,
-} from '../../scraping-platform/src/index'
-
+} from '@kitsuyui/browser-extensions-scraping-platform'
 import type {
   DevCommand,
   DevCommandResult,
-} from '../../scraping-server/src/protocol'
+} from '@kitsuyui/browser-extensions-scraping-server'
+import { providerExtractor as exampleComProviderExtractor } from '../../example-com/src/index'
+import { providerExtractor as anthropicProviderExtractor } from '../../quota-anthropic/src/index'
+import { providerExtractor as githubCopilotProviderExtractor } from '../../quota-github-copilot/src/index'
+import { providerExtractor as openAiProviderExtractor } from '../../quota-openai/src/index'
 import { inferProviderId } from './providers'
 
 const KNOWN_PROVIDER_EXTRACTORS: readonly ProviderExtractor[] = [

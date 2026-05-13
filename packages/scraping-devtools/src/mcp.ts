@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 
-import { startStdioMcpServer } from '../../scraping-server/src/mcp'
-import { LOCAL_SERVER_HTTP_ORIGIN } from '../../scraping-server/src/protocol'
+import {
+  LOCAL_SERVER_HTTP_ORIGIN,
+  startStdioMcpServer,
+} from '@kitsuyui/browser-extensions-scraping-server'
 
 import { createScrapingDevtoolsTools } from './index'
 

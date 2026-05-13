@@ -1,9 +1,9 @@
+import type { ProviderManifest, ProviderSnapshot } from './model'
 import {
   type DeterministicIngestRequest,
   LOCAL_SERVER_HTTP_MATCH_PATTERN,
   LOCAL_SERVER_HTTP_ORIGIN,
-} from '../../scraping-server/src/protocol'
-import type { ProviderManifest, ProviderSnapshot } from './model'
+} from './server-config'
 
 declare const chrome:
   | {

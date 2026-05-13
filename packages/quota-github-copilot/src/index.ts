@@ -1,11 +1,11 @@
-import { createDeterministicExtensionManifest } from '../../scraping-platform/src/deterministic-extension'
 import {
+  createDeterministicExtensionManifest,
   createProviderSnapshot,
   type ExtractionContext,
   type ProviderExtractor,
   type ProviderManifest,
   type SnapshotMetric,
-} from '../../scraping-platform/src/model'
+} from '@kitsuyui/browser-extensions-scraping-platform'
 
 const premiumRequestsUsagePercentPattern =
   /premium requests(?:\s+(?:used|usage))?\s+(?<usedPercent>\d+(?:\.\d+)?)%|(?<usedPercentLeading>\d+(?:\.\d+)?)%\s+(?:of\s+)?premium requests(?:\s+(?:used|usage))?/iu

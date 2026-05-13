@@ -1,11 +1,11 @@
-import { createDeterministicExtensionManifest } from '../../scraping-platform/src/deterministic-extension'
 import {
+  createDeterministicExtensionManifest,
   createProviderSnapshot,
   type ExtractionContext,
   type ProviderExtractor,
   type ProviderManifest,
   type SnapshotMetric,
-} from '../../scraping-platform/src/model'
+} from '@kitsuyui/browser-extensions-scraping-platform'
 
 type AnthropicUsageBucket = {
   readonly utilization: number

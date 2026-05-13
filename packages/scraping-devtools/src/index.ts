@@ -4,7 +4,7 @@ import {
   LOCAL_SERVER_HTTP_ORIGIN,
   type RegisteredProviderInfo,
   type ScrapingServerStatus,
-} from '../../scraping-server/src/protocol'
+} from '@kitsuyui/browser-extensions-scraping-server'
 
 export function createScrapingDevtoolsTools(
   baseUrl = LOCAL_SERVER_HTTP_ORIGIN
