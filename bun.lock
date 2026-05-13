@@ -26,12 +26,20 @@
     "packages/example-com": {
       "name": "@kitsuyui/browser-extensions-example-com",
       "version": "0.0.0",
+      "dependencies": {
+        "@kitsuyui/browser-extensions-scraping-platform": "workspace:*",
+      },
+      "devDependencies": {
+        "@kitsuyui/browser-extensions-scraping-server": "workspace:*",
+      },
     },
     "packages/extension-dev": {
       "name": "@kitsuyui/browser-extensions-scraping-extension-devtools",
       "version": "0.0.0",
       "dependencies": {
         "@kitsuyui/browser-extensions-scraping-platform": "workspace:*",
+      },
+      "devDependencies": {
         "@kitsuyui/browser-extensions-scraping-server": "workspace:*",
       },
     },
@@ -42,14 +50,23 @@
     "packages/quota-anthropic": {
       "name": "@kitsuyui/browser-extensions-quota-anthropic",
       "version": "0.0.0",
+      "dependencies": {
+        "@kitsuyui/browser-extensions-scraping-platform": "workspace:*",
+      },
     },
     "packages/quota-github-copilot": {
       "name": "@kitsuyui/browser-extensions-quota-github-copilot",
       "version": "0.0.0",
+      "dependencies": {
+        "@kitsuyui/browser-extensions-scraping-platform": "workspace:*",
+      },
     },
     "packages/quota-openai": {
       "name": "@kitsuyui/browser-extensions-quota-openai",
       "version": "0.0.0",
+      "dependencies": {
+        "@kitsuyui/browser-extensions-scraping-platform": "workspace:*",
+      },
     },
     "packages/scraped-data": {
       "name": "@kitsuyui/browser-extensions-scraped-data",

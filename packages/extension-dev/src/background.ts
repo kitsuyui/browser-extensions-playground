@@ -1,7 +1,7 @@
-import {
-  type DevCommandEnvelope,
-  type DevCommandResult,
-  LOCAL_SERVER_DEVTOOLS_WS_URL,
+import { LOCAL_SERVER_DEVTOOLS_WS_URL } from '@kitsuyui/browser-extensions-scraping-platform'
+import type {
+  DevCommandEnvelope,
+  DevCommandResult,
 } from '@kitsuyui/browser-extensions-scraping-server'
 import {
   isSupportedProviderUrl,

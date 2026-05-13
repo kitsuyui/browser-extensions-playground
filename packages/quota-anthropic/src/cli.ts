@@ -1,4 +1,4 @@
-import { LOCAL_SERVER_HTTP_ORIGIN } from '@kitsuyui/browser-extensions-scraping-server'
+import { LOCAL_SERVER_HTTP_ORIGIN } from '@kitsuyui/browser-extensions-scraping-platform'
 
 import { createQuotaAnthropicTools } from './data'
 
