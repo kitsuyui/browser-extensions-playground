@@ -51,6 +51,19 @@ bun run --filter @kitsuyui/browser-extensions-scraping-server start -- --store-f
 
 Used by [extension-dev](../extension-dev/README.md).
 
+## Latest Queries
+
+`GET /api/snapshots/latest` accepts:
+
+- `provider`
+- `source`
+- `rawVersion`
+- `accountLabel`
+
+When `provider` is present, the endpoint returns the latest matching snapshot
+for that provider or `null`. Without `provider`, it returns the latest matching
+snapshot per provider.
+
 ## History Queries
 
 `GET /api/snapshots/history` accepts:

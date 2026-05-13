@@ -3,6 +3,7 @@ import { z } from 'zod'
 import type {
   DeterministicHistoryQuery,
   DeterministicIngestRequest,
+  DeterministicLatestQuery,
   DevCommandRequest,
   DevCommandResult,
 } from './protocol'
@@ -25,11 +26,13 @@ const snapshotMetricSchema = z.object({
   resetsAt: z.string().optional(),
 })
 
+const snapshotSourceSchema = z.enum(['dom', 'network', 'inference'])
+
 const providerSnapshotSchema = z.object({
   provider: z.string(),
   accountLabel: z.string().optional(),
   capturedAt: z.string(),
-  source: z.enum(['dom', 'network', 'inference']),
+  source: snapshotSourceSchema,
   confidence: z.enum(['high', 'medium', 'low']),
   metrics: z.array(snapshotMetricSchema),
   rawVersion: z.string(),
@@ -37,7 +40,7 @@ const providerSnapshotSchema = z.object({
 
 const providerRawVersionDescriptionSchema = z.object({
   rawVersion: z.string(),
-  source: z.enum(['dom', 'network', 'inference']),
+  source: snapshotSourceSchema,
   description: z.string(),
 })
 
@@ -130,6 +133,13 @@ const devtoolsInboundMessageSchema = z.discriminatedUnion('type', [
   devtoolsCommandResultMessageSchema,
 ])
 
+const deterministicLatestQuerySchema = z.object({
+  provider: z.string().optional(),
+  source: snapshotSourceSchema.optional(),
+  rawVersion: z.string().optional(),
+  accountLabel: z.string().optional(),
+})
+
 const deterministicHistoryQuerySchema = z.object({
   provider: z.string().optional(),
   from: z.string().datetime({ offset: true }).optional(),
@@ -166,4 +176,10 @@ export function parseDeterministicHistoryQuery(
   query: Record<string, string | undefined>
 ): DeterministicHistoryQuery {
   return deterministicHistoryQuerySchema.parse(query)
+}
+
+export function parseDeterministicLatestQuery(
+  query: Record<string, string | undefined>
+): DeterministicLatestQuery {
+  return deterministicLatestQuerySchema.parse(query)
 }
