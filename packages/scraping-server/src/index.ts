@@ -19,6 +19,7 @@ import {
   DEFAULT_SERVER_PORT,
   type DeterministicHistoryQuery,
   type DeterministicIngestRequest,
+  type DeterministicLatestQuery,
   type DeterministicSnapshotRecord,
   type DevClientInfo,
   type DevCommandEnvelope,
@@ -32,6 +33,7 @@ import {
 import {
   parseDeterministicHistoryQuery,
   parseDeterministicIngestRequest,
+  parseDeterministicLatestQuery,
   parseDevCommandRequest,
   parseDevtoolsInboundMessage,
 } from './validation'
@@ -85,6 +87,13 @@ class InvalidDeterministicHistoryQueryError extends Error {
   constructor(message: string) {
     super(message)
     this.name = 'InvalidDeterministicHistoryQueryError'
+  }
+}
+
+class InvalidDeterministicLatestQueryError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'InvalidDeterministicLatestQueryError'
   }
 }
 
@@ -156,12 +165,36 @@ export class PrismaScrapedDataStore {
     }
   }
 
+  private toSnapshotRecord(record: {
+    readonly snapshotJson: string
+    readonly receivedAt: Date
+  }): DeterministicSnapshotRecord {
+    return {
+      snapshot: JSON.parse(record.snapshotJson) as ProviderSnapshot,
+      receivedAt: record.receivedAt.toISOString(),
+    }
+  }
+
+  private matchesLatestQuery(
+    snapshot: ProviderSnapshot,
+    query: DeterministicLatestQuery
+  ): boolean {
+    return (
+      (query.provider === undefined || snapshot.provider === query.provider) &&
+      (query.source === undefined || snapshot.source === query.source) &&
+      (query.rawVersion === undefined ||
+        snapshot.rawVersion === query.rawVersion) &&
+      (query.accountLabel === undefined ||
+        snapshot.accountLabel === query.accountLabel)
+    )
+  }
+
   async getLatest(
-    provider: ProviderId
+    query: DeterministicLatestQuery
   ): Promise<DeterministicSnapshotRecord | null> {
-    const record = await this.prisma.deterministicSnapshotRecord.findFirst({
+    const records = await this.prisma.deterministicSnapshotRecord.findMany({
       where: {
-        provider,
+        provider: query.provider,
       },
       orderBy: [
         {
@@ -173,18 +206,24 @@ export class PrismaScrapedDataStore {
       ],
     })
 
-    if (!record) {
-      return null
+    for (const record of records) {
+      const snapshotRecord = this.toSnapshotRecord(record)
+
+      if (this.matchesLatestQuery(snapshotRecord.snapshot, query)) {
+        return snapshotRecord
+      }
     }
 
-    return {
-      snapshot: JSON.parse(record.snapshotJson) as ProviderSnapshot,
-      receivedAt: record.receivedAt.toISOString(),
-    }
+    return null
   }
 
-  async getLatestAll(): Promise<Record<ProviderId, ProviderSnapshot>> {
+  async getLatestAll(
+    query: DeterministicLatestQuery = {}
+  ): Promise<Record<ProviderId, ProviderSnapshot>> {
     const records = await this.prisma.deterministicSnapshotRecord.findMany({
+      where: {
+        provider: query.provider,
+      },
       orderBy: [
         {
           provider: 'asc',
@@ -201,11 +240,14 @@ export class PrismaScrapedDataStore {
     const latest = new Map<ProviderId, ProviderSnapshot>()
 
     for (const record of records) {
-      if (!latest.has(record.provider)) {
-        latest.set(
-          record.provider,
-          JSON.parse(record.snapshotJson) as ProviderSnapshot
-        )
+      if (latest.has(record.provider)) {
+        continue
+      }
+
+      const snapshot = JSON.parse(record.snapshotJson) as ProviderSnapshot
+
+      if (this.matchesLatestQuery(snapshot, query)) {
+        latest.set(record.provider, snapshot)
       }
     }
 
@@ -237,10 +279,7 @@ export class PrismaScrapedDataStore {
       take: query.limit,
     })
 
-    return records.map((record) => ({
-      snapshot: JSON.parse(record.snapshotJson) as ProviderSnapshot,
-      receivedAt: record.receivedAt.toISOString(),
-    }))
+    return records.map((record) => this.toSnapshotRecord(record))
   }
 
   async listProviderIds(): Promise<readonly ProviderId[]> {
@@ -388,6 +427,22 @@ function validateDeterministicHistoryQuery(
   }
 }
 
+function validateDeterministicLatestQuery(
+  query: Record<string, string | undefined>
+): DeterministicLatestQuery {
+  try {
+    return parseDeterministicLatestQuery(query)
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new InvalidDeterministicLatestQueryError(
+        error.issues.at(0)?.message ?? 'Latest query is invalid.'
+      )
+    }
+
+    throw error
+  }
+}
+
 function parseDevtoolsMessage(buffer: RawData) {
   let rawMessage: unknown
 
@@ -445,7 +500,7 @@ type ScrapingRoute =
   | { type: 'status' }
   | { type: 'providers' }
   | { type: 'provider'; providerId: ProviderId }
-  | { type: 'latest'; provider: ProviderId | null }
+  | { type: 'latest'; query: DeterministicLatestQuery }
   | { type: 'history'; query: DeterministicHistoryQuery }
   | { type: 'ingest' }
   | { type: 'devClients' }
@@ -488,6 +543,24 @@ function isIngestRoute(method: string, pathname: string): boolean {
   )
 }
 
+function resolveLatestRouteQuery(url: URL): DeterministicLatestQuery {
+  return validateDeterministicLatestQuery({
+    provider: url.searchParams.get('provider') ?? undefined,
+    source: url.searchParams.get('source') ?? undefined,
+    rawVersion: url.searchParams.get('rawVersion') ?? undefined,
+    accountLabel: url.searchParams.get('accountLabel') ?? undefined,
+  })
+}
+
+function resolveHistoryRouteQuery(url: URL): DeterministicHistoryQuery {
+  return validateDeterministicHistoryQuery({
+    provider: url.searchParams.get('provider') ?? undefined,
+    from: url.searchParams.get('from') ?? undefined,
+    to: url.searchParams.get('to') ?? undefined,
+    limit: url.searchParams.get('limit') ?? undefined,
+  })
+}
+
 function resolveScrapingRoute(method: string, url: URL): ScrapingRoute {
   if (method === 'GET' && url.pathname === '/health') {
     return { type: 'health' }
@@ -513,18 +586,13 @@ function resolveScrapingRoute(method: string, url: URL): ScrapingRoute {
   if (isLatestRoute(method, url.pathname)) {
     return {
       type: 'latest',
-      provider: (url.searchParams.get('provider') as ProviderId | null) ?? null,
+      query: resolveLatestRouteQuery(url),
     }
   }
   if (isHistoryRoute(method, url.pathname)) {
     return {
       type: 'history',
-      query: validateDeterministicHistoryQuery({
-        provider: url.searchParams.get('provider') ?? undefined,
-        from: url.searchParams.get('from') ?? undefined,
-        to: url.searchParams.get('to') ?? undefined,
-        limit: url.searchParams.get('limit') ?? undefined,
-      }),
+      query: resolveHistoryRouteQuery(url),
     }
   }
   if (isIngestRoute(method, url.pathname)) {
@@ -596,7 +664,8 @@ function isClientRequestError(error: unknown): boolean {
     error instanceof BodyTooLargeError ||
     error instanceof InvalidDeterministicIngestError ||
     error instanceof InvalidDevCommandRequestError ||
-    error instanceof InvalidDeterministicHistoryQueryError
+    error instanceof InvalidDeterministicHistoryQueryError ||
+    error instanceof InvalidDeterministicLatestQueryError
   )
 }
 
@@ -639,16 +708,16 @@ async function handleScrapingRoute(
       return
     }
     case 'latest':
-      if (route.provider) {
+      if (route.query.provider !== undefined) {
         writeJson(
           response,
           200,
-          (await context.store.getLatest(route.provider))?.snapshot ?? null
+          (await context.store.getLatest(route.query))?.snapshot ?? null
         )
         return
       }
 
-      writeJson(response, 200, await context.store.getLatestAll())
+      writeJson(response, 200, await context.store.getLatestAll(route.query))
       return
     case 'history':
       writeJson(response, 200, await context.store.getHistory(route.query))
