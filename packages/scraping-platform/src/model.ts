@@ -11,7 +11,22 @@ export type MetricUnit =
 export type SnapshotMetric = {
   readonly key: string
   readonly label: string
+  /**
+   * Numeric metric value.
+   *
+   * For count-like units such as `messages`, `requests`, `tokens`, or
+   * `credits`, this is the remaining amount. For `percent`, this is the used
+   * percentage / utilization value. Extractors that read a remaining percent
+   * from a provider surface should normalize it before storing it here.
+   * Consumers must check `unit` before interpreting this field.
+   */
   readonly remaining?: number
+  /**
+   * Optional upper bound for count-like metrics.
+   *
+   * Percent metrics already encode utilization in `remaining`, so they usually
+   * omit this field.
+   */
   readonly limit?: number
   readonly unit: MetricUnit
   readonly resetsAt?: string
