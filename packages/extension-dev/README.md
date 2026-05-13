@@ -16,6 +16,20 @@ Dangerous developer-oriented browser extension for remote browser control and DO
 
 The popup can enable or disable the connection explicitly.
 
+## Security Warning
+
+While extension-dev is enabled, the local scraping server exposes an **unauthenticated** HTTP endpoint:
+
+```
+POST http://127.0.0.1:3929/api/dev/commands
+```
+
+Any process running on your machine can POST to this endpoint and cause the extension to execute arbitrary JavaScript in provider tabs (Claude.ai, ChatGPT, GitHub Copilot settings, etc.) or fetch authenticated API responses via `credentials: 'include'`.
+
+The server binds only to `127.0.0.1`, so remote attackers are blocked, but local processes — including other browser extensions, scripts, or malware — are not.
+
+**Disable the extension when not actively developing.** Do not leave it enabled in a browser used for daily work.
+
 ## Build and Load
 
 ```sh
