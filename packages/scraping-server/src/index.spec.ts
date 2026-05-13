@@ -144,6 +144,107 @@ describe('createScrapingServer', () => {
     )
   })
 
+  it('filters latest snapshots by stable snapshot discriminants', async () => {
+    const { listening } = await createServerForTest()
+    const baseCapturedAt = new Date('2026-04-04T12:00:00.000Z')
+    const snapshots: readonly ProviderSnapshot[] = [
+      {
+        provider: 'openai',
+        accountLabel: 'team-a',
+        capturedAt: baseCapturedAt.toISOString(),
+        source: 'dom',
+        confidence: 'medium',
+        rawVersion: 'dom-v1',
+        metrics: [],
+      },
+      {
+        provider: 'openai',
+        accountLabel: 'team-b',
+        capturedAt: new Date(baseCapturedAt.getTime() + 60_000).toISOString(),
+        source: 'network',
+        confidence: 'medium',
+        rawVersion: 'network-v1',
+        metrics: [],
+      },
+      {
+        provider: 'openai',
+        accountLabel: 'team-a',
+        capturedAt: new Date(baseCapturedAt.getTime() + 120_000).toISOString(),
+        source: 'inference',
+        confidence: 'low',
+        rawVersion: 'inference-v1',
+        metrics: [],
+      },
+    ]
+
+    for (const snapshot of snapshots) {
+      const ingestResponse = await fetch(
+        `${listening.url}/api/snapshots/ingest`,
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            providerManifest: openAiProviderManifest,
+            snapshot,
+          }),
+        }
+      )
+
+      expect(ingestResponse.status).toBe(201)
+    }
+
+    const latestResponse = await fetch(
+      `${listening.url}/api/snapshots/latest?provider=openai`
+    )
+    expect(await latestResponse.json()).toMatchObject({
+      provider: 'openai',
+      rawVersion: 'inference-v1',
+    })
+
+    const domLatestResponse = await fetch(
+      `${listening.url}/api/snapshots/latest?provider=openai&source=dom`
+    )
+    expect(await domLatestResponse.json()).toMatchObject({
+      provider: 'openai',
+      source: 'dom',
+      rawVersion: 'dom-v1',
+    })
+
+    const versionLatestResponse = await fetch(
+      `${listening.url}/api/snapshots/latest?provider=openai&rawVersion=network-v1`
+    )
+    expect(await versionLatestResponse.json()).toMatchObject({
+      provider: 'openai',
+      rawVersion: 'network-v1',
+    })
+
+    const accountLatestResponse = await fetch(
+      `${listening.url}/api/snapshots/latest?provider=openai&accountLabel=team-b`
+    )
+    expect(await accountLatestResponse.json()).toMatchObject({
+      provider: 'openai',
+      accountLabel: 'team-b',
+      rawVersion: 'network-v1',
+    })
+
+    const missingResponse = await fetch(
+      `${listening.url}/api/snapshots/latest?provider=openai&source=dom&accountLabel=team-b`
+    )
+    expect(await missingResponse.json()).toBeNull()
+
+    const latestAllResponse = await fetch(
+      `${listening.url}/api/snapshots/latest?source=dom`
+    )
+    expect(await latestAllResponse.json()).toEqual({
+      openai: expect.objectContaining({
+        source: 'dom',
+        rawVersion: 'dom-v1',
+      }),
+    })
+  })
+
   it('returns snapshot history rows with provider and limit filters', async () => {
     const { listening } = await createServerForTest()
     const baseCapturedAt = new Date('2026-04-04T12:00:00.000Z')
@@ -413,6 +514,20 @@ describe('createScrapingServer', () => {
     const { listening } = await createServerForTest()
     const response = await fetch(
       `${listening.url}/api/snapshots/history?limit=0`
+    )
+
+    expect(response.status).toBe(400)
+    expect(await response.json()).toEqual(
+      expect.objectContaining({
+        error: expect.any(String),
+      })
+    )
+  })
+
+  it('returns 400 when snapshot latest query is malformed', async () => {
+    const { listening } = await createServerForTest()
+    const response = await fetch(
+      `${listening.url}/api/snapshots/latest?source=extension`
     )
 
     expect(response.status).toBe(400)
