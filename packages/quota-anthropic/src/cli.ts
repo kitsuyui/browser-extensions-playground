@@ -17,7 +17,8 @@ async function main(): Promise<void> {
     return
   }
 
-  process.stdout.write('Usage:\n  node dist/cli.js snapshot [server-url]\n')
+  process.stderr.write('Usage:\n  node dist/cli.js snapshot [server-url]\n')
+  process.exit(1)
 }
 
 void main()
