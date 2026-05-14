@@ -109,7 +109,6 @@ describe('createScrapingServer', () => {
     expect(await statusResponse.json()).toMatchObject({
       riskLevel: 'normal',
       snapshotProviders: ['openai'],
-      deterministicProviders: ['openai'],
     })
 
     const providersResponse = await fetch(`${listening.url}/api/providers`)
@@ -599,7 +598,6 @@ describe('createScrapingServer', () => {
 
     expect(await statusResponse.json()).toMatchObject({
       snapshotProviders: ['github-copilot', 'openai'],
-      deterministicProviders: ['github-copilot', 'openai'],
     })
   })
 })
