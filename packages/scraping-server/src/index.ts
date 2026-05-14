@@ -614,10 +614,9 @@ function resolveDevCommandTarget(
   targetClientId: string | undefined,
   devClients: Map<string, DevClientConnection>
 ): DevClientConnection | undefined {
-  return (
-    (targetClientId ? devClients.get(targetClientId) : undefined) ??
-    devClients.values().next().value
-  )
+  return targetClientId !== undefined
+    ? devClients.get(targetClientId)
+    : devClients.values().next().value
 }
 
 async function executeDevCommand(
@@ -750,9 +749,15 @@ async function handleScrapingRoute(
       )
 
       if (!target) {
-        writeJson(response, 409, {
-          error: 'No devtool websocket clients are connected.',
-        })
+        if (body.targetClientId) {
+          writeJson(response, 404, {
+            error: `Dev client '${body.targetClientId}' is not connected.`,
+          })
+        } else {
+          writeJson(response, 409, {
+            error: 'No devtool websocket clients are connected.',
+          })
+        }
         return
       }
 
