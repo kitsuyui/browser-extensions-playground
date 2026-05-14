@@ -137,7 +137,9 @@ async function ingestSnapshot(
           detail = text
         }
       }
-    } catch {}
+    } catch (e) {
+      console.warn('snapshot sync: failed to read error response body', e)
+    }
 
     throw new Error(
       detail.length > 0
