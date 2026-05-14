@@ -47,9 +47,10 @@ async function main(): Promise<void> {
     return
   }
 
-  process.stdout.write(
+  process.stderr.write(
     'Usage:\n  node dist/cli.js status [server-url]\n  node dist/cli.js providers [server-url]\n  node dist/cli.js snapshot <provider> [server-url]\n  node dist/cli.js history [provider] [server-url]\n'
   )
+  process.exit(1)
 }
 
 void main()

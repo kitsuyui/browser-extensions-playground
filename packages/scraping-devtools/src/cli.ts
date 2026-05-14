@@ -50,7 +50,8 @@ async function main(): Promise<void> {
     const source = args[0]
 
     if (!source) {
-      throw new Error('execute-script requires a source string')
+      process.stderr.write('execute-script requires a source string\n')
+      process.exit(1)
     }
 
     process.stdout.write(
@@ -72,7 +73,8 @@ async function main(): Promise<void> {
     const url = args[0]
 
     if (!url) {
-      throw new Error('fetch-json requires a url string')
+      process.stderr.write('fetch-json requires a url string\n')
+      process.exit(1)
     }
 
     process.stdout.write(
@@ -90,9 +92,10 @@ async function main(): Promise<void> {
     return
   }
 
-  process.stdout.write(
+  process.stderr.write(
     'Usage:\n  node dist/cli.js list-providers\n  node dist/cli.js status [server-url]\n  node dist/cli.js list-clients [server-url]\n  node dist/cli.js capture-page [server-url]\n  node dist/cli.js execute-script <source> [server-url]\n  node dist/cli.js fetch-json <url> [server-url]\n'
   )
+  process.exit(1)
 }
 
 void main()
