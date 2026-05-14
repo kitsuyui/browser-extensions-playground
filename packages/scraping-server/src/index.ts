@@ -358,7 +358,6 @@ function createStatus(
     riskLevel,
     warnings,
     snapshotProviders: deterministicProviders,
-    deterministicProviders,
     devClients: [...devClients.values()].map(
       ({ socket: _socket, ...client }) => client
     ),
@@ -531,24 +530,15 @@ function serializeDevClients(
 }
 
 function isLatestRoute(method: string, pathname: string): boolean {
-  return (
-    (method === 'GET' && pathname === '/api/deterministic/latest') ||
-    (method === 'GET' && pathname === '/api/snapshots/latest')
-  )
+  return method === 'GET' && pathname === '/api/snapshots/latest'
 }
 
 function isHistoryRoute(method: string, pathname: string): boolean {
-  return (
-    (method === 'GET' && pathname === '/api/deterministic/history') ||
-    (method === 'GET' && pathname === '/api/snapshots/history')
-  )
+  return method === 'GET' && pathname === '/api/snapshots/history'
 }
 
 function isIngestRoute(method: string, pathname: string): boolean {
-  return (
-    (method === 'POST' && pathname === '/api/deterministic/ingest') ||
-    (method === 'POST' && pathname === '/api/snapshots/ingest')
-  )
+  return method === 'POST' && pathname === '/api/snapshots/ingest'
 }
 
 function resolveLatestRouteQuery(url: URL): DeterministicLatestQuery {

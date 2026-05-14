@@ -33,7 +33,9 @@ export type DeterministicLatestQuery = {
 
 export type DeterministicHistoryQuery = {
   readonly provider?: ProviderId
+  /** ISO 8601 datetime string (e.g. "2024-01-01T00:00:00.000Z") */
   readonly from?: string
+  /** ISO 8601 datetime string (e.g. "2024-12-31T23:59:59.999Z") */
   readonly to?: string
   readonly limit?: number
 }
@@ -60,7 +62,6 @@ export type ScrapingServerStatus = {
   readonly riskLevel: RiskLevel
   readonly warnings: readonly string[]
   readonly snapshotProviders: readonly ProviderId[]
-  readonly deterministicProviders?: readonly ProviderId[]
   readonly devClients: readonly DevClientInfo[]
 }
 
