@@ -491,7 +491,7 @@ export function extractSnapshotFromWhamUsageResponse(
     source: 'network',
     confidence: 'high',
     rawVersion: 'openai-wham-usage-v1',
-    capturedAt: options.capturedAt,
+    capturedAt: options.capturedAt ?? new Date().toISOString(),
     metrics,
   })
 }
@@ -509,7 +509,7 @@ export function extractSnapshot(context: ExtractionContext) {
     source: 'dom',
     confidence: 'medium',
     rawVersion: 'openai-dom-v2',
-    capturedAt: context.capturedAt,
+    capturedAt: context.capturedAt ?? new Date().toISOString(),
     metrics,
   })
 }

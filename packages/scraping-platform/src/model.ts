@@ -111,24 +111,18 @@ export type ExtensionCapture = {
 
 export function createProviderSnapshot(
   snapshot: Omit<ProviderSnapshot, 'capturedAt'> & {
-    readonly capturedAt?: string
+    readonly capturedAt: string
   }
 ): ProviderSnapshot {
-  return {
-    ...snapshot,
-    capturedAt: snapshot.capturedAt ?? new Date().toISOString(),
-  }
+  return { ...snapshot }
 }
 
 export function createDomCapture(
   capture: Omit<DomCapture, 'capturedAt'> & {
-    readonly capturedAt?: string
+    readonly capturedAt: string
   }
 ): DomCapture {
-  return {
-    ...capture,
-    capturedAt: capture.capturedAt ?? new Date().toISOString(),
-  }
+  return { ...capture }
 }
 
 export function isProviderSnapshot(value: unknown): value is ProviderSnapshot {
