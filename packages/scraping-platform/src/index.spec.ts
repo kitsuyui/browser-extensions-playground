@@ -9,16 +9,17 @@ import {
 } from './index'
 
 describe('provider snapshot helpers', () => {
-  it('fills capturedAt when omitted', () => {
+  it('preserves capturedAt when provided', () => {
     const snapshot = createProviderSnapshot({
       provider: 'openai',
       source: 'dom',
       confidence: 'high',
       rawVersion: 'test',
       metrics: [],
+      capturedAt: '2025-01-01T00:00:00.000Z',
     })
 
-    expect(snapshot.capturedAt).toMatch(/\d{4}-\d{2}-\d{2}T/)
+    expect(snapshot.capturedAt).toBe('2025-01-01T00:00:00.000Z')
   })
 
   it('accepts a valid snapshot shape', () => {

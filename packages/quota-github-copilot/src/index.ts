@@ -120,7 +120,7 @@ export function extractSnapshot(context: ExtractionContext) {
     source: 'dom',
     confidence: 'medium',
     rawVersion: 'github-copilot-dom-v1',
-    capturedAt: context.capturedAt,
+    capturedAt: context.capturedAt ?? new Date().toISOString(),
     metrics,
   })
 }

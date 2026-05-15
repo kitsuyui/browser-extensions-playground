@@ -266,7 +266,7 @@ export function extractSnapshot(context: ExtractionContext) {
     source: 'dom',
     confidence: 'medium',
     rawVersion: 'anthropic-dom-v2',
-    capturedAt: context.capturedAt,
+    capturedAt: context.capturedAt ?? new Date().toISOString(),
     metrics,
   })
 }
@@ -333,7 +333,7 @@ export function extractSnapshotFromUsageResponse(
     source: 'network',
     confidence: 'high',
     rawVersion: 'anthropic-usage-api-v1',
-    capturedAt: options.capturedAt,
+    capturedAt: options.capturedAt ?? new Date().toISOString(),
     metrics,
   })
 }

@@ -83,7 +83,7 @@ export function extractSnapshot(context: ExtractionContext) {
     source: 'dom',
     confidence: 'high',
     rawVersion: 'example-com-dom-v1',
-    capturedAt: context.capturedAt,
+    capturedAt: context.capturedAt ?? new Date().toISOString(),
     metrics,
   })
 }
