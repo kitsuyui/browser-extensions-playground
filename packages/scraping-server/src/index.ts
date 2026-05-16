@@ -662,7 +662,8 @@ function isClientRequestError(error: unknown): boolean {
     error instanceof InvalidDeterministicIngestError ||
     error instanceof InvalidDevCommandRequestError ||
     error instanceof InvalidDeterministicHistoryQueryError ||
-    error instanceof InvalidDeterministicLatestQueryError
+    error instanceof InvalidDeterministicLatestQueryError ||
+    error instanceof URIError
   )
 }
 
