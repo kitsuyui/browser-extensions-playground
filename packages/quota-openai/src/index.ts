@@ -365,6 +365,26 @@ function isWhamRateLimit(value: unknown): value is OpenAIWhamRateLimit {
   )
 }
 
+function isWhamCredits(value: unknown): value is OpenAIWhamCredits {
+  if (typeof value !== 'object' || value === null) {
+    return false
+  }
+
+  const candidate = value as Partial<OpenAIWhamCredits>
+  const balance =
+    typeof candidate.balance === 'string'
+      ? Number(candidate.balance.trim())
+      : Number.NaN
+
+  return (
+    typeof candidate.has_credits === 'boolean' &&
+    typeof candidate.unlimited === 'boolean' &&
+    typeof candidate.balance === 'string' &&
+    candidate.balance.trim().length > 0 &&
+    Number.isFinite(balance)
+  )
+}
+
 export function isOpenAIWhamUsageResponse(
   value: unknown
 ): value is OpenAIWhamUsageResponse {
@@ -384,7 +404,10 @@ export function isOpenAIWhamUsageResponse(
       candidate.code_review_rate_limit === undefined ||
       isWhamRateLimit(candidate.code_review_rate_limit)) &&
     (candidate.additional_rate_limits === undefined ||
-      Array.isArray(candidate.additional_rate_limits))
+      Array.isArray(candidate.additional_rate_limits)) &&
+    (candidate.credits === null ||
+      candidate.credits === undefined ||
+      isWhamCredits(candidate.credits))
   )
 }
 

@@ -5,6 +5,7 @@ import {
   extractSnapshot,
   extractSnapshotFromWhamUsageResponse,
   isOpenAIWhamUsageResponse,
+  type OpenAIWhamUsageResponse,
 } from '.'
 import { createPopupHtml } from './runtime'
 
@@ -286,6 +287,49 @@ describe('extractSnapshot', () => {
         },
       ],
     })
+  })
+
+  it('rejects malformed WHAM credits payloads', () => {
+    const malformedUsage = {
+      user_id: 'user-1',
+      account_id: 'user-1',
+      credits: {
+        has_credits: false,
+        unlimited: false,
+      },
+    }
+
+    expect(isOpenAIWhamUsageResponse(malformedUsage)).toBe(false)
+    expect(
+      extractSnapshotFromWhamUsageResponse(
+        malformedUsage as unknown as OpenAIWhamUsageResponse,
+        {
+          capturedAt: '2026-04-04T12:00:00.000Z',
+        }
+      )
+    ).toBeNull()
+  })
+
+  it('rejects non-numeric WHAM credit balances', () => {
+    const malformedUsage = {
+      user_id: 'user-1',
+      account_id: 'user-1',
+      credits: {
+        has_credits: true,
+        unlimited: false,
+        balance: 'not-a-number',
+      },
+    }
+
+    expect(isOpenAIWhamUsageResponse(malformedUsage)).toBe(false)
+    expect(
+      extractSnapshotFromWhamUsageResponse(
+        malformedUsage as unknown as OpenAIWhamUsageResponse,
+        {
+          capturedAt: '2026-04-04T12:00:00.000Z',
+        }
+      )
+    ).toBeNull()
   })
 })
 
