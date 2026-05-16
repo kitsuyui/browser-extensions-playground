@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest'
 import {
   createDeterministicExtensionManifest,
   DEFAULT_PERIODIC_CAPTURE_INTERVAL_MINUTES,
+  getDeterministicExtensionStorageKeys,
+  LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS,
 } from './deterministic-extension'
 
 describe('createDeterministicExtensionManifest', () => {
@@ -31,5 +33,24 @@ describe('createDeterministicExtensionManifest', () => {
 describe('DEFAULT_PERIODIC_CAPTURE_INTERVAL_MINUTES', () => {
   it('uses a conservative periodic reload interval', () => {
     expect(DEFAULT_PERIODIC_CAPTURE_INTERVAL_MINUTES).toBe(15)
+  })
+})
+
+describe('getDeterministicExtensionStorageKeys', () => {
+  it('scopes runtime storage entries by provider', () => {
+    expect(getDeterministicExtensionStorageKeys('openai')).toEqual({
+      latestSnapshot: 'deterministicExtension:openai:latestSnapshot',
+      syncStatus: 'deterministicExtension:openai:syncStatus',
+    })
+    expect(
+      getDeterministicExtensionStorageKeys('openai').latestSnapshot
+    ).not.toBe(getDeterministicExtensionStorageKeys('anthropic').latestSnapshot)
+  })
+
+  it('keeps stable legacy keys for fallback reads', () => {
+    expect(LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS).toEqual({
+      latestSnapshot: 'latestSnapshot',
+      syncStatus: 'syncStatus',
+    })
   })
 })

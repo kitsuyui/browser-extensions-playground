@@ -1,4 +1,10 @@
-import { DETERMINISTIC_EXTENSION_ENABLED_KEY } from '@kitsuyui/browser-extensions-scraping-platform'
+import {
+  DETERMINISTIC_EXTENSION_ENABLED_KEY,
+  getDeterministicExtensionStorageKeys,
+  LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS,
+} from '@kitsuyui/browser-extensions-scraping-platform'
+
+import { providerManifest } from './index'
 
 declare const chrome:
   | {
@@ -34,6 +40,10 @@ type CaptureState = {
   readonly pageUrl?: string
 }
 
+const providerStorageKeys = getDeterministicExtensionStorageKeys(
+  providerManifest.id
+)
+
 async function loadState(): Promise<{
   readonly latestSnapshot: Snapshot | null
   readonly syncStatus: Record<string, unknown> | null
@@ -41,16 +51,29 @@ async function loadState(): Promise<{
   readonly captureState: CaptureState | null
 }> {
   const record = (await chrome?.storage?.local?.get?.([
-    'latestSnapshot',
-    'syncStatus',
+    providerStorageKeys.latestSnapshot,
+    providerStorageKeys.syncStatus,
+    LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.latestSnapshot,
+    LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.syncStatus,
     DETERMINISTIC_EXTENSION_ENABLED_KEY,
     'githubCopilotCaptureState',
   ])) as Record<string, unknown> | undefined
 
   return {
-    latestSnapshot: (record?.latestSnapshot as Snapshot | undefined) ?? null,
+    latestSnapshot:
+      (record?.[providerStorageKeys.latestSnapshot] as Snapshot | undefined) ??
+      (record?.[LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.latestSnapshot] as
+        | Snapshot
+        | undefined) ??
+      null,
     syncStatus:
-      (record?.syncStatus as Record<string, unknown> | undefined) ?? null,
+      (record?.[providerStorageKeys.syncStatus] as
+        | Record<string, unknown>
+        | undefined) ??
+      (record?.[LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.syncStatus] as
+        | Record<string, unknown>
+        | undefined) ??
+      null,
     enabled: record?.[DETERMINISTIC_EXTENSION_ENABLED_KEY] !== false,
     captureState:
       (record?.githubCopilotCaptureState as CaptureState | undefined) ?? null,

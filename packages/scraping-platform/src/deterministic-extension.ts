@@ -51,6 +51,20 @@ declare const chrome:
 export const DEFAULT_PERIODIC_CAPTURE_INTERVAL_MINUTES = 15
 export const DETERMINISTIC_EXTENSION_ENABLED_KEY =
   'deterministicExtensionEnabled'
+export const LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS = {
+  latestSnapshot: 'latestSnapshot',
+  syncStatus: 'syncStatus',
+} as const
+
+export function getDeterministicExtensionStorageKeys(provider: string): {
+  readonly latestSnapshot: string
+  readonly syncStatus: string
+} {
+  return {
+    latestSnapshot: `deterministicExtension:${provider}:latestSnapshot`,
+    syncStatus: `deterministicExtension:${provider}:syncStatus`,
+  }
+}
 
 export function createDeterministicExtensionManifest(options: {
   readonly name: string
@@ -83,14 +97,23 @@ export function createDeterministicExtensionManifest(options: {
 }
 
 async function persistSnapshot(snapshot: ProviderSnapshot): Promise<void> {
+  const storageKeys = getDeterministicExtensionStorageKeys(snapshot.provider)
+
   await chrome?.storage?.local?.set?.({
-    latestSnapshot: snapshot,
+    [storageKeys.latestSnapshot]: snapshot,
+    [LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.latestSnapshot]: snapshot,
   })
 }
 
-async function persistSyncStatus(status: unknown): Promise<void> {
+async function persistSyncStatus(
+  provider: string,
+  status: unknown
+): Promise<void> {
+  const storageKeys = getDeterministicExtensionStorageKeys(provider)
+
   await chrome?.storage?.local?.set?.({
-    syncStatus: status,
+    [storageKeys.syncStatus]: status,
+    [LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.syncStatus]: status,
   })
 }
 
@@ -150,6 +173,7 @@ async function ingestSnapshot(
 }
 
 async function reloadMatchingTabs(
+  provider: string,
   matches: readonly string[],
   alarmName: string
 ): Promise<void> {
@@ -163,9 +187,10 @@ async function reloadMatchingTabs(
 
       return [
         Promise.resolve(chrome?.tabs?.reload?.(tab.id)).catch(async (error) => {
-          await persistSyncStatus({
+          await persistSyncStatus(provider, {
             status: 'error',
             updatedAt: new Date().toISOString(),
+            provider,
             alarmName,
             error:
               error instanceof Error ? error.message : 'unknown reload error',
@@ -207,7 +232,7 @@ export function registerDeterministicExtensionBackground(options: {
 
     void (async () => {
       if (!(await isExtensionEnabled())) {
-        await persistSyncStatus({
+        await persistSyncStatus(options.providerManifest.id, {
           status: 'paused',
           updatedAt: new Date().toISOString(),
           provider: options.providerManifest.id,
@@ -215,7 +240,11 @@ export function registerDeterministicExtensionBackground(options: {
         return
       }
 
-      await reloadMatchingTabs(options.providerManifest.matches, alarmName)
+      await reloadMatchingTabs(
+        options.providerManifest.id,
+        options.providerManifest.matches,
+        alarmName
+      )
     })()
   })
 
@@ -228,7 +257,7 @@ export function registerDeterministicExtensionBackground(options: {
 
     void (async () => {
       if (!(await isExtensionEnabled())) {
-        await persistSyncStatus({
+        await persistSyncStatus(snapshot.provider, {
           status: 'paused',
           updatedAt: new Date().toISOString(),
           provider: snapshot.provider,
@@ -244,13 +273,13 @@ export function registerDeterministicExtensionBackground(options: {
 
       try {
         await ingestSnapshot(serverUrl, options.providerManifest, snapshot)
-        await persistSyncStatus({
+        await persistSyncStatus(snapshot.provider, {
           status: 'success',
           updatedAt: new Date().toISOString(),
           provider: snapshot.provider,
         })
       } catch (error) {
-        await persistSyncStatus({
+        await persistSyncStatus(snapshot.provider, {
           status: 'error',
           updatedAt: new Date().toISOString(),
           provider: snapshot.provider,
