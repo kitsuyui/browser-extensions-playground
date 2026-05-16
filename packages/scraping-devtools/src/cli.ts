@@ -1,16 +1,17 @@
-import { LOCAL_SERVER_HTTP_ORIGIN } from '@kitsuyui/browser-extensions-scraping-server'
-
+import { getScrapingDevtoolsServerUrl } from './cli-args'
 import { createScrapingDevtoolsTools } from './index'
 
 async function main(): Promise<void> {
   const rawArgs = process.argv.slice(2).filter((arg) => arg !== '--')
   const [command = 'status', ...args] = rawArgs
-  const baseUrl = args.at(-1)?.startsWith('http')
-    ? (args.at(-1) as string)
-    : LOCAL_SERVER_HTTP_ORIGIN
-  const tools = createScrapingDevtoolsTools(baseUrl)
+  const createTools = (serverUrlArgIndex: number) =>
+    createScrapingDevtoolsTools(
+      getScrapingDevtoolsServerUrl(args, serverUrlArgIndex)
+    )
 
   if (command === 'list-providers') {
+    const tools = createTools(0)
+
     process.stdout.write(
       `${JSON.stringify(await tools.listProviders(), null, 2)}\n`
     )
@@ -18,6 +19,8 @@ async function main(): Promise<void> {
   }
 
   if (command === 'status') {
+    const tools = createTools(0)
+
     process.stdout.write(
       `${JSON.stringify(await tools.getServerStatus(), null, 2)}\n`
     )
@@ -25,6 +28,8 @@ async function main(): Promise<void> {
   }
 
   if (command === 'list-clients') {
+    const tools = createTools(0)
+
     process.stdout.write(
       `${JSON.stringify(await tools.listDevClients(), null, 2)}\n`
     )
@@ -32,6 +37,8 @@ async function main(): Promise<void> {
   }
 
   if (command === 'capture-page') {
+    const tools = createTools(0)
+
     process.stdout.write(
       `${JSON.stringify(
         await tools.runDevCommand({
@@ -53,6 +60,8 @@ async function main(): Promise<void> {
       process.stderr.write('execute-script requires a source string\n')
       process.exit(1)
     }
+
+    const tools = createTools(1)
 
     process.stdout.write(
       `${JSON.stringify(
@@ -76,6 +85,8 @@ async function main(): Promise<void> {
       process.stderr.write('fetch-json requires a url string\n')
       process.exit(1)
     }
+
+    const tools = createTools(1)
 
     process.stdout.write(
       `${JSON.stringify(
