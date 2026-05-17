@@ -1,13 +1,40 @@
+import { fileURLToPath } from 'node:url'
+
+import pkg from '../package.json'
+
 import { getScrapingDevtoolsServerUrl } from './cli-args'
 import { createScrapingDevtoolsTools } from './index'
 
-async function main(): Promise<void> {
+const USAGE = `Usage:
+  node dist/cli.mjs list-providers
+  node dist/cli.mjs status [server-url]
+  node dist/cli.mjs list-clients [server-url]
+  node dist/cli.mjs capture-page [server-url]
+  node dist/cli.mjs execute-script <source> [server-url]
+  node dist/cli.mjs fetch-json <url> [server-url]
+
+Options:
+  --help, -h   Show this help message
+  --version    Print version and exit
+`
+
+export async function main(): Promise<void> {
   const rawArgs = process.argv.slice(2).filter((arg) => arg !== '--')
   const [command = 'status', ...args] = rawArgs
   const createTools = (serverUrlArgIndex: number) =>
     createScrapingDevtoolsTools(
       getScrapingDevtoolsServerUrl(args, serverUrlArgIndex)
     )
+
+  if (command === '--help' || command === '-h') {
+    process.stdout.write(USAGE)
+    return
+  }
+
+  if (command === '--version') {
+    process.stdout.write(`${pkg.version}\n`)
+    return
+  }
 
   if (command === 'list-providers') {
     const tools = createTools(0)
@@ -103,10 +130,10 @@ async function main(): Promise<void> {
     return
   }
 
-  process.stderr.write(
-    'Usage:\n  node dist/cli.js list-providers\n  node dist/cli.js status [server-url]\n  node dist/cli.js list-clients [server-url]\n  node dist/cli.js capture-page [server-url]\n  node dist/cli.js execute-script <source> [server-url]\n  node dist/cli.js fetch-json <url> [server-url]\n'
-  )
+  process.stderr.write(USAGE)
   process.exit(1)
 }
 
-void main()
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  void main()
+}

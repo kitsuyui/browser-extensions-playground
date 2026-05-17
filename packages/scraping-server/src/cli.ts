@@ -1,10 +1,23 @@
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+import pkg from '../package.json'
 
 import {
   createScrapingServer,
   DEFAULT_SERVER_HOST,
   DEFAULT_SERVER_PORT,
 } from './index'
+
+const USAGE = `Usage: node dist/cli.mjs [options]
+
+Options:
+  --host <host>        Server host (default: ${DEFAULT_SERVER_HOST})
+  --port <port>        Server port (default: ${DEFAULT_SERVER_PORT})
+  --store-file <path>  SQLite store file path
+  --version            Print version and exit
+  --help, -h           Show this help message
+`
 
 function parseArgs(argv: readonly string[]) {
   const result = {
@@ -42,8 +55,20 @@ function resolveStoreFile(storeFile: string): string {
   return path.resolve(baseDir, storeFile)
 }
 
-async function main(): Promise<void> {
-  const args = parseArgs(process.argv.slice(2))
+export async function main(): Promise<void> {
+  const argv = process.argv.slice(2)
+
+  if (argv.includes('--help') || argv.includes('-h')) {
+    process.stdout.write(USAGE)
+    return
+  }
+
+  if (argv.includes('--version')) {
+    process.stdout.write(`${pkg.version}\n`)
+    return
+  }
+
+  const args = parseArgs(argv)
   const server = createScrapingServer({
     host: args.host,
     port: args.port,
@@ -54,4 +79,6 @@ async function main(): Promise<void> {
   process.stdout.write(`scraping server listening on ${listening.url}\n`)
 }
 
-void main()
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  void main()
+}
