@@ -48,6 +48,7 @@ type DevClientConnection = DevClientInfo & {
 }
 
 type PendingCommand = {
+  readonly clientId: string
   readonly resolve: (value: DevCommandResult) => void
   readonly reject: (error: Error) => void
   readonly timeoutId: ReturnType<typeof setTimeout>
@@ -637,6 +638,7 @@ async function executeDevCommand(
     }, 10_000)
 
     pendingCommands.set(commandId, {
+      clientId: target.clientId,
       resolve: resolveResult,
       reject: rejectResult,
       timeoutId,
@@ -653,6 +655,30 @@ async function executeDevCommand(
     ok: false,
     error: error instanceof Error ? error.message : 'unknown error',
   }))
+}
+
+function rejectPendingCommandsForClient(
+  clientId: string,
+  pendingCommands: Map<string, PendingCommand>
+): number {
+  let rejectedCount = 0
+
+  for (const [commandId, pending] of pendingCommands.entries()) {
+    if (pending.clientId !== clientId) {
+      continue
+    }
+
+    clearTimeout(pending.timeoutId)
+    pendingCommands.delete(commandId)
+    pending.reject(
+      new Error(
+        `Dev client '${clientId}' disconnected before command completed.`
+      )
+    )
+    rejectedCount += 1
+  }
+
+  return rejectedCount
 }
 
 function isClientRequestError(error: unknown): boolean {
@@ -912,9 +938,22 @@ export function createScrapingServer(options: {
     socket.on('close', () => {
       if (clientId) {
         devClients.delete(clientId)
+        const rejectedCommandCount = rejectPendingCommandsForClient(
+          clientId,
+          pendingCommands
+        )
         logger.info('[scraping-server] devtools client disconnected', {
           clientId,
         })
+        if (rejectedCommandCount > 0) {
+          logger.warn(
+            '[scraping-server] rejected pending dev commands for disconnected client',
+            {
+              clientId,
+              rejectedCommandCount,
+            }
+          )
+        }
       }
     })
   })

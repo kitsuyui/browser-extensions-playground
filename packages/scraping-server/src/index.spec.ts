@@ -364,6 +364,80 @@ describe('createScrapingServer', () => {
     client.close()
   })
 
+  it('rejects pending dev commands when the websocket client disconnects', async () => {
+    const logger = createLoggerSpy()
+    const { listening } = await createServerForTest(logger)
+    const client = new WebSocket(
+      `${listening.url.replace('http://', 'ws://')}/ws/dev`
+    )
+    let clientId = ''
+
+    const welcomed = new Promise<void>((resolvePromise) => {
+      client.on('message', (buffer) => {
+        const message = JSON.parse(buffer.toString()) as {
+          readonly type?: string
+          readonly clientId?: string
+        }
+
+        if (message.type === 'welcome' && message.clientId) {
+          clientId = message.clientId
+          resolvePromise()
+          return
+        }
+
+        if (message.type === 'run-command') {
+          client.close()
+        }
+      })
+    })
+
+    await new Promise<void>((resolvePromise) => {
+      client.once('open', () => {
+        client.send(
+          JSON.stringify({
+            type: 'hello',
+            extensionName: 'Scraping Devtools',
+            extensionVersion: '0.0.0',
+          })
+        )
+        resolvePromise()
+      })
+    })
+    await welcomed
+
+    const commandResponse = await Promise.race([
+      fetch(`${listening.url}/api/dev/commands`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          command: {
+            type: 'capture-page',
+          },
+        }),
+      }),
+      new Promise<never>((_, rejectPromise) => {
+        setTimeout(() => {
+          rejectPromise(new Error('Timed out waiting for command rejection.'))
+        }, 1_000)
+      }),
+    ])
+
+    expect(commandResponse.status).toBe(500)
+    expect(await commandResponse.json()).toMatchObject({
+      ok: false,
+      error: `Dev client '${clientId}' disconnected before command completed.`,
+    })
+    expect(logger.warn).toHaveBeenCalledWith(
+      '[scraping-server] rejected pending dev commands for disconnected client',
+      {
+        clientId,
+        rejectedCommandCount: 1,
+      }
+    )
+  })
+
   it('returns 400 for invalid JSON bodies without crashing the server', async () => {
     const { listening } = await createServerForTest()
     const response = await fetch(`${listening.url}/api/snapshots/ingest`, {
