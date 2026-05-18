@@ -127,7 +127,7 @@ const usageMetricBoundaryPattern = new RegExp(
 )
 
 const percentPattern =
-  /(?<remaining>\d+)%\s*(?:remaining|left|used|残り)?(?:\s*(?:reset(?:s)?(?:\s+at)?|リセット)[:：]?\s*(?<reset>.*?))?$/isu
+  /(?<percent>\d+)%\s*(?<qualifier>remaining|left|used|残り)?(?:\s*(?:reset(?:s)?(?:\s+at)?|リセット)[:：]?\s*(?<reset>.*?))?$/isu
 
 const ratioPattern =
   /(?<remaining>\d+(?:,\d{3})*)(?:\s*(?:\/|of)\s*)(?<limit>\d+(?:,\d{3})*)(?:\s*(?<tail>.*?))?$/isu
@@ -155,6 +155,23 @@ function parseResetAt(value: string | undefined): string | undefined {
   const trimmedValue = value.trim()
 
   return trimmedValue.length > 0 ? trimmedValue : undefined
+}
+
+function normalizeUsedPercent(
+  percent: number,
+  qualifier: string | undefined
+): number {
+  const normalizedQualifier = qualifier?.trim().toLowerCase()
+
+  if (
+    normalizedQualifier === 'remaining' ||
+    normalizedQualifier === 'left' ||
+    normalizedQualifier === '残り'
+  ) {
+    return 100 - percent
+  }
+
+  return percent
 }
 
 export const providerManifest: ProviderManifest = {
@@ -286,11 +303,16 @@ function createCodexUsageMetrics(pageText: string): readonly SnapshotMetric[] {
 
     const percentMatch = segment.match(percentPattern)
 
-    if (percentMatch?.groups?.remaining) {
+    if (percentMatch?.groups?.percent) {
+      const usedPercent = normalizeUsedPercent(
+        Number(percentMatch.groups.percent),
+        percentMatch.groups.qualifier
+      )
+
       metrics.push({
         key: definition.key,
         label: definition.label,
-        remaining: Number(percentMatch.groups.remaining),
+        remaining: usedPercent,
         limit: 100,
         unit: 'percent',
         resetsAt: parseResetAt(percentMatch.groups.reset),

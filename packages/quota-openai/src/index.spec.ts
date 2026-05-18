@@ -23,7 +23,7 @@ describe('extractSnapshot', () => {
         expect.objectContaining({
           key: 'codex_5h',
           label: 'Codex 5h',
-          remaining: 98,
+          remaining: 2,
           limit: 100,
           unit: 'percent',
           resetsAt: '21:04',
@@ -31,7 +31,7 @@ describe('extractSnapshot', () => {
         expect.objectContaining({
           key: 'codex_weekly',
           label: 'Codex weekly',
-          remaining: 97,
+          remaining: 3,
           limit: 100,
           unit: 'percent',
           resetsAt: '2026/04/08 22:42',
@@ -58,7 +58,7 @@ describe('extractSnapshot', () => {
         expect.objectContaining({
           key: 'codex_5h',
           label: 'Codex 5h',
-          remaining: 89,
+          remaining: 11,
           limit: 100,
           unit: 'percent',
           resetsAt: '9:04 PM',
@@ -66,7 +66,7 @@ describe('extractSnapshot', () => {
         expect.objectContaining({
           key: 'codex_weekly',
           label: 'Codex weekly',
-          remaining: 95,
+          remaining: 5,
           limit: 100,
           unit: 'percent',
           resetsAt: 'Apr 8, 10:42 PM',
@@ -74,7 +74,7 @@ describe('extractSnapshot', () => {
         expect.objectContaining({
           key: 'spark_5h',
           label: 'Spark 5h',
-          remaining: 95,
+          remaining: 5,
           limit: 100,
           unit: 'percent',
           resetsAt: 'Apr 5, 1:20 AM',
@@ -82,7 +82,7 @@ describe('extractSnapshot', () => {
         expect.objectContaining({
           key: 'spark_weekly',
           label: 'Spark weekly',
-          remaining: 98,
+          remaining: 2,
           limit: 100,
           unit: 'percent',
           resetsAt: 'Apr 11, 8:20 PM',
@@ -90,7 +90,7 @@ describe('extractSnapshot', () => {
         expect.objectContaining({
           key: 'code_review',
           label: 'Code review',
-          remaining: 100,
+          remaining: 0,
           limit: 100,
           unit: 'percent',
         }),
@@ -150,6 +150,26 @@ describe('extractSnapshot', () => {
           label: 'Credits remaining',
           remaining: 0,
           unit: 'credits',
+        }),
+      ])
+    )
+  })
+
+  it('keeps explicit used percentages as utilization values', () => {
+    const snapshot = extractSnapshot({
+      url: 'https://chatgpt.com/codex/settings/usage',
+      pageText: '5-hour usage 23% used reset at 9:04 PM Credits remaining 0',
+    })
+
+    expect(snapshot?.metrics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: 'codex_5h',
+          label: 'Codex 5h',
+          remaining: 23,
+          limit: 100,
+          unit: 'percent',
+          resetsAt: '9:04 PM',
         }),
       ])
     )
