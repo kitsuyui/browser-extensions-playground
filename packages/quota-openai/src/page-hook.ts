@@ -12,13 +12,31 @@
     )
   }
 
+  function toUrlString(input: unknown): string | null {
+    if (typeof input === 'string') {
+      return input.length === 0 ? null : input
+    }
+
+    if (input instanceof URL) {
+      return input.href
+    }
+
+    if (input instanceof Request) {
+      return input.url
+    }
+
+    return null
+  }
+
   function toPathname(input: unknown): string | null {
-    if (typeof input !== 'string' || input.length === 0) {
+    const url = toUrlString(input)
+
+    if (url === null) {
       return null
     }
 
     try {
-      return new URL(input, window.location.origin).pathname
+      return new URL(url, window.location.origin).pathname
     } catch {
       return null
     }
@@ -30,12 +48,7 @@
 
   window.fetch = async (...args) => {
     const response = await originalFetch(...args)
-    const url =
-      typeof args[0] === 'string'
-        ? args[0]
-        : args[0] instanceof Request
-          ? args[0].url
-          : undefined
+    const url = toUrlString(args[0]) ?? undefined
 
     if (matchesUsage(url)) {
       const clone = response.clone()
@@ -90,9 +103,10 @@
 
   XMLHttpRequest.prototype.send = function (...args) {
     this.addEventListener('load', () => {
-      const requestUrl = (
-        this as XMLHttpRequest & { __quotaOpenAiUrl?: unknown }
-      ).__quotaOpenAiUrl
+      const requestUrl = toUrlString(
+        (this as XMLHttpRequest & { __quotaOpenAiUrl?: unknown })
+          .__quotaOpenAiUrl
+      )
 
       if (matchesUsage(requestUrl) && typeof this.responseText === 'string') {
         try {
