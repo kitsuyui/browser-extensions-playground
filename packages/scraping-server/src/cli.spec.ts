@@ -50,4 +50,40 @@ describe('scraping-server CLI', () => {
     expect(stdoutOutput.join('')).toMatch(/^\d+\.\d+\.\d+/)
     expect(stderrOutput).toHaveLength(0)
   })
+
+  it('rejects a non-numeric --port value before starting the server', async () => {
+    process.argv = ['node', 'cli.mjs', '--port', 'foo']
+
+    await expect(main()).rejects.toThrow(
+      'Invalid --port value "foo". Expected an integer between 0 and 65535.'
+    )
+    expect(stdoutOutput).toHaveLength(0)
+    expect(stderrOutput).toHaveLength(0)
+  })
+
+  it('rejects another flag passed as the --port value', async () => {
+    process.argv = [
+      'node',
+      'cli.mjs',
+      '--port',
+      '--store-file',
+      '.tmp/scraping-server/deterministic.sqlite',
+    ]
+
+    await expect(main()).rejects.toThrow(
+      'Invalid --port value "--store-file". Expected an integer between 0 and 65535.'
+    )
+    expect(stdoutOutput).toHaveLength(0)
+    expect(stderrOutput).toHaveLength(0)
+  })
+
+  it('rejects --port without a value', async () => {
+    process.argv = ['node', 'cli.mjs', '--port']
+
+    await expect(main()).rejects.toThrow(
+      'Missing value for --port. Expected an integer between 0 and 65535.'
+    )
+    expect(stdoutOutput).toHaveLength(0)
+    expect(stderrOutput).toHaveLength(0)
+  })
 })
