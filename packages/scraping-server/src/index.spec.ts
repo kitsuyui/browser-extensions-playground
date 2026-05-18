@@ -1,4 +1,5 @@
 import { mkdtemp, rm } from 'node:fs/promises'
+import { request as httpRequest } from 'node:http'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -673,5 +674,49 @@ describe('createScrapingServer', () => {
     expect(await statusResponse.json()).toMatchObject({
       snapshotProviders: ['github-copilot', 'openai'],
     })
+  })
+})
+
+describe('Host header validation', () => {
+  it('rejects HTTP requests with a mismatched Host header with 421', async () => {
+    const { listening } = await createServerForTest()
+    const url = new URL(listening.url)
+
+    const statusCode = await new Promise<number>((resolve, reject) => {
+      const req = httpRequest(
+        {
+          host: url.hostname,
+          port: Number(url.port),
+          path: '/health',
+          method: 'GET',
+          headers: { Host: 'attacker.example.com:1234' },
+        },
+        (res) => {
+          resolve(res.statusCode ?? 0)
+        }
+      )
+      req.on('error', reject)
+      req.end()
+    })
+
+    expect(statusCode).toBe(421)
+  })
+
+  it('rejects WebSocket upgrades with a mismatched Host header', async () => {
+    const { listening } = await createServerForTest()
+
+    await expect(
+      new Promise<void>((resolve, reject) => {
+        const ws = new WebSocket(
+          `ws://${listening.host}:${listening.port}/ws/dev`,
+          { headers: { Host: 'attacker.example.com:1234' } }
+        )
+        ws.on('open', resolve)
+        ws.on('error', reject)
+        ws.on('unexpected-response', (_req, res) => {
+          reject(new Error(`Unexpected response: ${String(res.statusCode)}`))
+        })
+      })
+    ).rejects.toThrow()
   })
 })
