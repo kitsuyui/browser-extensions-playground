@@ -34,8 +34,23 @@ function parseArgs(argv: readonly string[]) {
       result.host = value
     }
 
-    if (token === '--port' && value) {
-      result.port = Number(value)
+    if (token === '--port') {
+      if (value === undefined) {
+        throw new Error(
+          'Missing value for --port. Expected an integer between 0 and 65535.'
+        )
+      }
+
+      const port = Number(value)
+
+      if (!Number.isInteger(port) || port < 0 || port > 65_535) {
+        throw new Error(
+          `Invalid --port value "${value}". Expected an integer between 0 and 65535.`
+        )
+      }
+
+      result.port = port
+      index += 1
     }
 
     if (token === '--store-file' && value) {
