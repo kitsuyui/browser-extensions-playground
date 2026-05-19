@@ -26,6 +26,7 @@ const PAGE_MESSAGE_TYPE = 'quota-openai:wham-usage'
 const WHAM_HOOK_STATE_KEY = 'openAiWhamUsageHookState'
 const MAX_HOOK_EVENTS = 5
 let hasObservedNetworkSnapshot = false
+let hookStateQueue: Promise<void> = Promise.resolve()
 
 type WhamHookMeta = {
   readonly url?: string
@@ -105,32 +106,34 @@ function registerWhamUsageListener(): void {
     const meta = toWhamHookMeta((event.data as { meta?: unknown }).meta)
     const updatedAt = new Date().toISOString()
 
-    void (async () => {
-      const record = (await chrome?.storage?.local?.get?.(
-        WHAM_HOOK_STATE_KEY
-      )) as Record<string, unknown> | undefined
-      const previousState = (record?.[WHAM_HOOK_STATE_KEY] ??
-        null) as WhamHookState | null
-      const previousEvents = Array.isArray(previousState?.events)
-        ? previousState.events
-        : []
+    hookStateQueue = hookStateQueue
+      .then(async () => {
+        const record = (await chrome?.storage?.local?.get?.(
+          WHAM_HOOK_STATE_KEY
+        )) as Record<string, unknown> | undefined
+        const previousState = (record?.[WHAM_HOOK_STATE_KEY] ??
+          null) as WhamHookState | null
+        const previousEvents = Array.isArray(previousState?.events)
+          ? previousState.events
+          : []
 
-      await chrome?.storage?.local?.set?.({
-        [WHAM_HOOK_STATE_KEY]: {
-          updatedAt,
-          received: Boolean(payload),
-          meta,
-          payload,
-          events: [
-            ...previousEvents,
-            {
-              updatedAt,
-              meta,
-            },
-          ].slice(-MAX_HOOK_EVENTS),
-        } satisfies WhamHookState,
+        await chrome?.storage?.local?.set?.({
+          [WHAM_HOOK_STATE_KEY]: {
+            updatedAt,
+            received: Boolean(payload),
+            meta,
+            payload,
+            events: [
+              ...previousEvents,
+              {
+                updatedAt,
+                meta,
+              },
+            ].slice(-MAX_HOOK_EVENTS),
+          } satisfies WhamHookState,
+        })
       })
-    })()
+      .catch(() => {})
 
     const snapshot = payload
       ? extractSnapshotFromWhamUsageResponse(payload, {
