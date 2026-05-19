@@ -816,6 +816,17 @@ async function handleScrapingRoute(
   }
 }
 
+function isValidHost(
+  hostHeader: string | undefined,
+  host: string,
+  port: number
+): boolean {
+  if (!hostHeader) return false
+  if (hostHeader === `${host}:${port}`) return true
+  if (host === '127.0.0.1' && hostHeader === `localhost:${port}`) return true
+  return false
+}
+
 export function createScrapingServer(options: {
   readonly host?: string
   readonly port?: number
@@ -824,18 +835,24 @@ export function createScrapingServer(options: {
 }) {
   const host = options.host ?? DEFAULT_SERVER_HOST
   const port = options.port ?? DEFAULT_SERVER_PORT
+  let actualPort = port
   const store = new PrismaScrapedDataStore(resolve(options.storeFile))
   const devClients = new Map<string, DevClientConnection>()
   const pendingCommands = new Map<string, PendingCommand>()
   const logger = createLogger(options.logger)
 
   const httpServer = createServer(async (request, response) => {
+    if (!isValidHost(request.headers['host'], host, actualPort)) {
+      writeJson(response, 421, { error: 'Misdirected Request' })
+      return
+    }
+
     const startedAt = Date.now()
     const method = request.method ?? 'GET'
     let pathname = '/'
 
     try {
-      const url = new URL(request.url ?? '/', `http://${host}:${port}`)
+      const url = new URL(request.url ?? '/', `http://${host}:${actualPort}`)
       pathname = url.pathname
       await handleScrapingRoute(
         resolveScrapingRoute(method, url),
@@ -959,7 +976,12 @@ export function createScrapingServer(options: {
   })
 
   httpServer.on('upgrade', (request, socket, head) => {
-    const url = new URL(request.url ?? '/', `http://${host}:${port}`)
+    if (!isValidHost(request.headers['host'], host, actualPort)) {
+      socket.destroy()
+      return
+    }
+
+    const url = new URL(request.url ?? '/', `http://${host}:${actualPort}`)
 
     if (url.pathname !== '/ws/dev') {
       socket.destroy()
@@ -988,6 +1010,8 @@ export function createScrapingServer(options: {
       if (!address || typeof address === 'string') {
         throw new Error('Expected an address object after listen().')
       }
+
+      actualPort = address.port
 
       const listening = {
         host,
