@@ -1,3 +1,7 @@
+import {
+  type IsoTimestampClock,
+  resolveIsoTimestampClock,
+} from '@kitsuyui/browser-extensions-scraping-platform'
 import { extractSnapshot, providerManifest } from './index'
 
 declare const chrome:
@@ -24,14 +28,18 @@ function getPageText(): string {
   return (document.body?.innerText ?? '').trim().slice(0, 20_000)
 }
 
-async function emitSnapshot(): Promise<boolean> {
+async function emitSnapshot(
+  clock: IsoTimestampClock = resolveIsoTimestampClock()
+): Promise<boolean> {
   if (hasSentSnapshot) {
     return true
   }
 
+  const capturedAt = clock.nowIso()
+
   await chrome?.storage?.local?.set?.({
     [CAPTURE_STATE_KEY]: {
-      updatedAt: new Date().toISOString(),
+      updatedAt: capturedAt,
       received: true,
       pageUrl: window.location.href,
     },
@@ -40,6 +48,7 @@ async function emitSnapshot(): Promise<boolean> {
   const snapshot = extractSnapshot({
     url: window.location.href,
     pageText: getPageText(),
+    capturedAt,
   })
 
   if (!snapshot) {
@@ -55,10 +64,12 @@ async function emitSnapshot(): Promise<boolean> {
   return true
 }
 
-function startCaptureLoop(): void {
+function startCaptureLoop(
+  clock: IsoTimestampClock = resolveIsoTimestampClock()
+): void {
   let attempts = 0
   const observer = new MutationObserver(() => {
-    void emitSnapshot().then((sent) => {
+    void emitSnapshot(clock).then((sent) => {
       if (sent) {
         observer.disconnect()
       }
@@ -74,7 +85,7 @@ function startCaptureLoop(): void {
   const attemptCapture = () => {
     attempts += 1
 
-    void emitSnapshot().then((sent) => {
+    void emitSnapshot(clock).then((sent) => {
       if (sent || attempts >= MAX_CAPTURE_ATTEMPTS) {
         observer.disconnect()
         return

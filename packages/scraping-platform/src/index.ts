@@ -10,6 +10,7 @@ import {
 export * from './deterministic-extension'
 export * from './model'
 export * from './server-config'
+export * from './time'
 
 export function collectDomProbeMatches(
   doc: Document,

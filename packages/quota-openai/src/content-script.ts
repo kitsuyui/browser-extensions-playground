@@ -1,4 +1,8 @@
 import {
+  type IsoTimestampClock,
+  resolveIsoTimestampClock,
+} from '@kitsuyui/browser-extensions-scraping-platform'
+import {
   extractSnapshot,
   extractSnapshotFromWhamUsageResponse,
   type OpenAIWhamUsageResponse,
@@ -83,14 +87,19 @@ async function emitSnapshot(
   })
 }
 
-function createDomSnapshot() {
+function createDomSnapshot(
+  clock: IsoTimestampClock = resolveIsoTimestampClock()
+) {
   return extractSnapshot({
     url: window.location.href,
     pageText: document.body?.innerText?.trim().slice(0, 20_000) ?? '',
+    capturedAt: clock.nowIso(),
   })
 }
 
-function registerWhamUsageListener(): void {
+function registerWhamUsageListener(
+  clock: IsoTimestampClock = resolveIsoTimestampClock()
+): void {
   window.addEventListener('message', (event) => {
     if (
       event.source !== window ||
@@ -104,7 +113,7 @@ function registerWhamUsageListener(): void {
     const payload = (event.data as { payload?: OpenAIWhamUsageResponse })
       .payload
     const meta = toWhamHookMeta((event.data as { meta?: unknown }).meta)
-    const updatedAt = new Date().toISOString()
+    const updatedAt = clock.nowIso()
 
     hookStateQueue = hookStateQueue
       .then(async () => {
