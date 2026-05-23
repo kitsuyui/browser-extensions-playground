@@ -70,7 +70,13 @@ export type DomProbe = {
 }
 
 export type DomProbeMatch = DomProbe & {
+  /** Trimmed inner text of the matched element, up to 1000 characters. */
   readonly text: string
+  /**
+   * Trimmed outer HTML of the matched element, up to 1000 characters.
+   * Both `text` and `htmlSnippet` apply `.trim()` before slicing, so
+   * leading/trailing whitespace is absent in both fields.
+   */
   readonly htmlSnippet?: string
 }
 
