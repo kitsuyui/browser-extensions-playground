@@ -611,6 +611,14 @@ function resolveScrapingRoute(method: string, url: URL): ScrapingRoute {
   }
 }
 
+/**
+ * Resolves the devtools client to receive a command.
+ *
+ * When `targetClientId` is provided, returns that specific client (or undefined if
+ * not found). When omitted, falls back to the first connected client by insertion
+ * order — callers that need deterministic targeting should provide `targetClientId`
+ * explicitly, discoverable via the `list_clients` endpoint.
+ */
 function resolveDevCommandTarget(
   targetClientId: string | undefined,
   devClients: Map<string, DevClientConnection>

@@ -46,7 +46,9 @@ const TOOLS = [
   {
     name: 'capture_page',
     description:
-      'Run capture-page through a connected devtools browser client.',
+      'Run capture-page through a connected devtools browser client. ' +
+      'When targetClientId is omitted, the command is dispatched to the first connected client (insertion order). ' +
+      'Use list_clients to discover available client IDs when multiple browsers are connected.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -59,7 +61,9 @@ const TOOLS = [
   {
     name: 'execute_script',
     description:
-      'Run an arbitrary script through a connected devtools browser client.',
+      'Run an arbitrary script through a connected devtools browser client. ' +
+      'When targetClientId is omitted, the command is dispatched to the first connected client (insertion order). ' +
+      'Use list_clients to discover available client IDs when multiple browsers are connected.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -74,7 +78,9 @@ const TOOLS = [
   {
     name: 'fetch_json',
     description:
-      'Fetch a JSON endpoint through a connected devtools browser client.',
+      'Fetch a JSON endpoint through a connected devtools browser client. ' +
+      'When targetClientId is omitted, the command is dispatched to the first connected client (insertion order). ' +
+      'Use list_clients to discover available client IDs when multiple browsers are connected.',
     inputSchema: {
       type: 'object',
       properties: {
