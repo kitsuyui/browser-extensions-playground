@@ -36,7 +36,7 @@ export function collectDomProbeMatches(
       {
         ...probe,
         text: elementLike.innerText.trim().slice(0, 1_000),
-        htmlSnippet: elementLike.outerHTML.slice(0, 1_000),
+        htmlSnippet: elementLike.outerHTML.trim().slice(0, 1_000),
       },
     ]
   })
@@ -46,6 +46,12 @@ function getPageText(doc: Document): string {
   return (doc.body?.innerText ?? '').trim().slice(0, 20_000)
 }
 
+/**
+ * @param capturedAt - ISO 8601 timestamp for the capture. Defaults to
+ * `new Date().toISOString()` evaluated at call time, so two calls without an
+ * explicit value will produce different timestamps even for the same page.
+ * Pass a shared timestamp when comparing or deduplicating captures.
+ */
 export function createDomCaptureFromDocument(
   provider: ProviderExtractor,
   doc: Document,
@@ -61,6 +67,11 @@ export function createDomCaptureFromDocument(
   })
 }
 
+/**
+ * @param capturedAt - ISO 8601 timestamp for the capture. Defaults to
+ * `new Date().toISOString()` evaluated at call time. Pass an explicit value
+ * when the timestamp must be shared with other captures in the same session.
+ */
 export function createExtensionCaptureFromDocument(
   provider: ProviderExtractor,
   doc: Document,

@@ -67,6 +67,31 @@ describe('collectDomProbeMatches', () => {
       },
     ])
   })
+
+  it('trims whitespace from both text and htmlSnippet', () => {
+    const fakeDocument = {
+      querySelector(selector: string) {
+        if (selector === '[data-testid="padded"]') {
+          return {
+            innerText: '  padded text  ',
+            outerHTML: '  <span data-testid="padded">padded text</span>  ',
+          }
+        }
+
+        return null
+      },
+    } as unknown as Document
+
+    const matches = collectDomProbeMatches(fakeDocument, [
+      { key: 'padded', label: 'Padded', selector: '[data-testid="padded"]' },
+    ])
+
+    expect(matches).toHaveLength(1)
+    expect(matches[0].text).toBe('padded text')
+    expect(matches[0].htmlSnippet).toBe(
+      '<span data-testid="padded">padded text</span>'
+    )
+  })
 })
 
 describe('createExtensionCaptureFromDocument', () => {
