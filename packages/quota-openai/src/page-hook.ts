@@ -61,7 +61,16 @@
             status: response.status,
           })
         })
-        .catch(() => {})
+        .catch((e: unknown) => {
+          console.debug(
+            '[quota-openai] failed to parse WHAM usage fetch response as JSON',
+            {
+              url,
+              status: response.status,
+              error: e,
+            }
+          )
+        })
     }
 
     return response
@@ -115,7 +124,16 @@
             url: requestUrl,
             status: this.status,
           })
-        } catch {}
+        } catch (e: unknown) {
+          console.debug(
+            '[quota-openai] failed to parse WHAM usage XHR response as JSON',
+            {
+              url: requestUrl,
+              status: this.status,
+              error: e,
+            }
+          )
+        }
       }
     })
 
