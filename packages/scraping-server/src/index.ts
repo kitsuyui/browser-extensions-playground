@@ -471,11 +471,11 @@ async function readJsonBody<T>(request: IncomingMessage): Promise<T> {
   const chunks: Uint8Array[] = []
   let totalBytes = 0
 
-  for await (const chunk of request) {
+  for await (const chunk of request.iterator({ destroyOnReturn: false })) {
     const buf = typeof chunk === 'string' ? Buffer.from(chunk) : chunk
     totalBytes += buf.byteLength
     if (totalBytes > MAX_BODY_BYTES) {
-      request.destroy()
+      request.resume()
       throw new BodyTooLargeError()
     }
     chunks.push(buf)
