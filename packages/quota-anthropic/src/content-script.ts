@@ -38,11 +38,16 @@ function collectUnique(values: readonly string[]): readonly string[] {
   return [...new Set(values)]
 }
 
+const MAX_TRAVERSAL_NODES = 1_000
+
 function collectOrganizationIdsFromUnknown(value: unknown): readonly string[] {
   const matches = new Set<string>()
   const queue: unknown[] = [value]
+  let visited = 0
 
   while (queue.length > 0) {
+    if (visited >= MAX_TRAVERSAL_NODES) break
+    visited++
     const current = queue.shift()
 
     if (typeof current === 'string') {
