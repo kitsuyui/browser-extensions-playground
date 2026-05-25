@@ -520,6 +520,7 @@ type ScrapingRequestContext = {
   readonly devClients: Map<string, DevClientConnection>
   readonly pendingCommands: Map<string, PendingCommand>
   readonly logger: ScrapingServerLogger
+  readonly requestId: string
 }
 
 function serializeDevClients(
@@ -763,6 +764,7 @@ async function handleScrapingRoute(
         body.snapshot
       )
       context.logger.info('[scraping-server] snapshot ingested', {
+        requestId: context.requestId,
         provider: body.snapshot.provider,
         rawVersion: body.snapshot.rawVersion,
         metricCount: body.snapshot.metrics.length,
@@ -797,6 +799,7 @@ async function handleScrapingRoute(
       }
 
       context.logger.info('[scraping-server] dev command dispatched', {
+        requestId: context.requestId,
         type: body.command.type,
         targetClientId: target.clientId,
       })
@@ -808,6 +811,7 @@ async function handleScrapingRoute(
       )
 
       context.logger.info('[scraping-server] dev command completed', {
+        requestId: context.requestId,
         commandId: result.commandId,
         ok: result.ok,
         error: result.error,
@@ -856,6 +860,7 @@ export function createScrapingServer(options: {
     }
 
     const startedAt = Date.now()
+    const requestId = randomUUID()
     const method = request.method ?? 'GET'
     let pathname = '/'
 
@@ -871,6 +876,7 @@ export function createScrapingServer(options: {
           devClients,
           pendingCommands,
           logger,
+          requestId,
         }
       )
     } catch (error) {
@@ -879,6 +885,7 @@ export function createScrapingServer(options: {
           error instanceof Error ? error.message : 'Internal server error.',
       })
       logger.error('[scraping-server] request failed', {
+        requestId,
         method,
         pathname,
         statusCode: response.statusCode,
@@ -888,6 +895,7 @@ export function createScrapingServer(options: {
       return
     } finally {
       logger.info('[scraping-server] request completed', {
+        requestId,
         method,
         pathname,
         statusCode: response.statusCode,
