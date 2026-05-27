@@ -2,6 +2,7 @@ import {
   createDeterministicExtensionManifest,
   createProviderSnapshot,
   type ExtractionContext,
+  normalizeResetTimestamp,
   type ProviderExtractor,
   type ProviderManifest,
   type SnapshotMetric,
@@ -79,7 +80,7 @@ function createSnapshotMetrics(pageText: string): readonly SnapshotMetric[] {
   const resetMatch = pageText.match(resetPattern)
 
   const metrics: SnapshotMetric[] = []
-  const resetsAt = resetMatch?.groups?.reset?.trim() || undefined
+  const resetsAt = normalizeResetTimestamp(resetMatch?.groups?.reset)
   const usedPercent =
     parseNumber(usageMatch?.groups?.usedPercent) ??
     parseNumber(usageMatch?.groups?.usedPercentLeading)
@@ -100,7 +101,7 @@ function createSnapshotMetrics(pageText: string): readonly SnapshotMetric[] {
       remaining: inferredUsedPercent,
       limit: 100,
       unit: 'percent',
-      resetsAt,
+      ...(resetsAt ? { resetsAt } : {}),
     })
   }
 

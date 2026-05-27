@@ -2,6 +2,7 @@ import {
   createDeterministicExtensionManifest,
   createProviderSnapshot,
   type ExtractionContext,
+  normalizeResetTimestamp,
   type ProviderExtractor,
   type ProviderManifest,
   type SnapshotMetric,
@@ -271,6 +272,14 @@ export function extractSnapshot(context: ExtractionContext) {
   })
 }
 
+function resetTimestampFields(
+  value: string | null
+): Partial<Pick<SnapshotMetric, 'resetsAt'>> {
+  const resetsAt = normalizeResetTimestamp(value)
+
+  return resetsAt ? { resetsAt } : {}
+}
+
 export function extractSnapshotFromUsageResponse(
   usage: AnthropicUsageResponse,
   options: {
@@ -287,7 +296,7 @@ export function extractSnapshotFromUsageResponse(
       remaining: usage.five_hour.utilization,
       limit: 100,
       unit: 'percent',
-      resetsAt: usage.five_hour.resets_at ?? undefined,
+      ...resetTimestampFields(usage.five_hour.resets_at),
     })
   }
 
@@ -298,7 +307,7 @@ export function extractSnapshotFromUsageResponse(
       remaining: usage.seven_day.utilization,
       limit: 100,
       unit: 'percent',
-      resetsAt: usage.seven_day.resets_at ?? undefined,
+      ...resetTimestampFields(usage.seven_day.resets_at),
     })
   }
 
