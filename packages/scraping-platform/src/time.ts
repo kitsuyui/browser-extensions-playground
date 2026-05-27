@@ -8,6 +8,8 @@ export const systemIsoTimestampClock: IsoTimestampClock = {
 
 export const isoTimestampClockGlobalKey = '__browserExtensionsIsoTimestampClock'
 
+const explicitTimeZoneSuffixPattern = /(?:z|UTC|GMT|[+-]\d{2}:?\d{2})$/iu
+
 type IsoTimestampClockGlobal = {
   readonly [isoTimestampClockGlobalKey]?: IsoTimestampClock
 }
@@ -28,4 +30,22 @@ export function resolveIsoTimestampClock(
   }
 
   return systemIsoTimestampClock
+}
+
+export function normalizeResetTimestamp(
+  value: string | null | undefined
+): string | undefined {
+  const trimmedValue = value?.trim()
+
+  if (!trimmedValue || !explicitTimeZoneSuffixPattern.test(trimmedValue)) {
+    return undefined
+  }
+
+  const timestamp = new Date(trimmedValue)
+
+  if (!Number.isFinite(timestamp.getTime())) {
+    return undefined
+  }
+
+  return timestamp.toISOString()
 }

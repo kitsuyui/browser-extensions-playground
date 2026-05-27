@@ -2,6 +2,7 @@ import {
   createDeterministicExtensionManifest,
   createProviderSnapshot,
   type ExtractionContext,
+  normalizeResetTimestamp,
   type ProviderExtractor,
   type ProviderManifest,
   type SnapshotMetric,
@@ -149,12 +150,18 @@ function parseResetAt(value: string | undefined): string | undefined {
   const resetMatch = value.match(resetPattern)
 
   if (resetMatch?.groups?.reset) {
-    return resetMatch.groups.reset.trim()
+    return normalizeResetTimestamp(resetMatch.groups.reset)
   }
 
-  const trimmedValue = value.trim()
+  return normalizeResetTimestamp(value)
+}
 
-  return trimmedValue.length > 0 ? trimmedValue : undefined
+function resetTimestampFields(
+  value: string | undefined
+): Partial<Pick<SnapshotMetric, 'resetsAt'>> {
+  const resetsAt = parseResetAt(value)
+
+  return resetsAt ? { resetsAt } : {}
 }
 
 function normalizeUsedPercent(
@@ -315,7 +322,7 @@ function createCodexUsageMetrics(pageText: string): readonly SnapshotMetric[] {
         remaining: usedPercent,
         limit: 100,
         unit: 'percent',
-        resetsAt: parseResetAt(percentMatch.groups.reset),
+        ...resetTimestampFields(percentMatch.groups.reset),
       })
       continue
     }
@@ -339,7 +346,7 @@ function createCodexUsageMetrics(pageText: string): readonly SnapshotMetric[] {
       remaining: Math.round((remaining / limit) * 100),
       limit: 100,
       unit: 'percent',
-      resetsAt: parseResetAt(ratioMatch.groups.tail),
+      ...resetTimestampFields(ratioMatch.groups.tail),
     })
   }
 

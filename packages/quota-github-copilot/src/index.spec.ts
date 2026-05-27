@@ -40,7 +40,7 @@ describe('extractSnapshot', () => {
           remaining: 8,
           limit: 100,
           unit: 'percent',
-          resetsAt: 'May 1, 2026 12:00 AM UTC',
+          resetsAt: '2026-05-01T00:00:00.000Z',
         }),
       ]),
     })

@@ -29,6 +29,7 @@ export type SnapshotMetric = {
    */
   readonly limit?: number
   readonly unit: MetricUnit
+  /** UTC ISO 8601 timestamp from `Date.prototype.toISOString()`. */
   readonly resetsAt?: string
 }
 

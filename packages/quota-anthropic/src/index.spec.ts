@@ -101,7 +101,7 @@ describe('extractSnapshot', () => {
     const usage = {
       five_hour: {
         utilization: 12,
-        resets_at: '2026-04-04T12:00:00.000Z',
+        resets_at: '2026-04-04T21:00:00+09:00',
       },
       seven_day: {
         utilization: 34,
@@ -193,6 +193,30 @@ describe('extractSnapshot', () => {
       ],
     })
     expect(snapshot?.metrics).toHaveLength(1)
+  })
+
+  it('omits ambiguous API reset timestamps', () => {
+    const usage = {
+      five_hour: {
+        utilization: 12,
+        resets_at: '2026-04-04T12:00:00',
+      },
+      seven_day: null,
+      extra_usage: null,
+    }
+
+    expect(isAnthropicUsageResponse(usage)).toBe(true)
+
+    const snapshot = extractSnapshotFromUsageResponse(usage, {
+      capturedAt: '2026-04-04T11:38:20.000Z',
+    })
+
+    expect(snapshot?.metrics[0]).toMatchObject({
+      key: 'five_hour',
+      remaining: 12,
+      limit: 100,
+    })
+    expect(snapshot?.metrics[0]).not.toHaveProperty('resetsAt')
   })
 })
 
