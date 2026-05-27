@@ -1045,6 +1045,10 @@ export function createScrapingServer(options: {
       return listening
     },
     async close() {
+      for (const client of devClients.values()) {
+        client.socket.terminate()
+      }
+
       await new Promise<void>((resolvePromise, rejectPromise) => {
         httpServer.close((error) => {
           if (error) {

@@ -439,6 +439,54 @@ describe('createScrapingServer', () => {
     )
   })
 
+  it('closes promptly when a devtools WebSocket client is still connected', async () => {
+    const resource = await createServerForTest()
+    const { server, listening } = resource
+    const client = new WebSocket(
+      `${listening.url.replace('http://', 'ws://')}/ws/dev`
+    )
+
+    await new Promise<void>((resolvePromise) => {
+      client.on('message', (buffer) => {
+        const message = JSON.parse(buffer.toString()) as { type?: string }
+        if (message.type === 'welcome') {
+          resolvePromise()
+        }
+      })
+      client.once('open', () => {
+        client.send(
+          JSON.stringify({
+            type: 'hello',
+            extensionName: 'Scraping Devtools',
+            extensionVersion: '0.0.0',
+          })
+        )
+      })
+    })
+
+    const idx = servers.indexOf(resource)
+    if (idx !== -1) {
+      servers.splice(idx, 1)
+    }
+
+    try {
+      await expect(
+        Promise.race([
+          server.close(),
+          new Promise<never>((_, rejectPromise) => {
+            setTimeout(() => {
+              rejectPromise(
+                new Error('server.close() timed out with connected client')
+              )
+            }, 1_000)
+          }),
+        ])
+      ).resolves.toBeUndefined()
+    } finally {
+      await rm(resource.tempDir, { recursive: true, force: true })
+    }
+  })
+
   it('returns 400 for invalid JSON bodies without crashing the server', async () => {
     const { listening } = await createServerForTest()
     const response = await fetch(`${listening.url}/api/snapshots/ingest`, {
