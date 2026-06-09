@@ -62,6 +62,35 @@ bun run test
 bun run playwright:test
 ```
 
+## Development
+
+This repository uses [lefthook](https://github.com/evilmartians/lefthook) to run the same checks as CI locally before commits and pushes. This brings feedback earlier without changing what CI runs.
+
+Install the hooks once after cloning:
+
+```sh
+bunx lefthook install
+```
+
+### Hooks
+
+**pre-commit** — runs on every `git commit`:
+
+| Check | Command |
+|-------|---------|
+| Lint | `bun run lint` |
+| Typecheck | `bun run typecheck` |
+
+**pre-push** — runs on every `git push`:
+
+| Check | Command |
+|-------|---------|
+| Lint | `bun run lint` |
+| Typecheck | `bun run typecheck` |
+| Unit tests | `bun run test` |
+
+Playwright / end-to-end tests are intentionally excluded from hooks because they require a browser environment; CI still runs the full suite.
+
 ## License
 
 MIT
