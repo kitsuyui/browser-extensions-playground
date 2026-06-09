@@ -59,6 +59,12 @@ export default defineConfig({
       include: ['**/src/**/*.ts'],
       exclude: ['**/src/**/*.spec.ts'],
       reporter: ['text', 'html', 'lcov'],
+      thresholds: {
+        lines: 45,
+        functions: 50,
+        branches: 40,
+        statements: 45,
+      },
     },
     exclude: ['**/e2e/**', '**/node_modules/**'],
   },
