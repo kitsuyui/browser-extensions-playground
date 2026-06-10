@@ -2,6 +2,7 @@
 coverage:
   paths:
     - coverage/lcov.info
+  acceptable: 40%
 codeToTestRatio:
   code:
     - '**/src/**/*.ts'
