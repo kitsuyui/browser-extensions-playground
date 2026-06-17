@@ -368,10 +368,10 @@ function isRateLimitWindow(value: unknown): value is OpenAIRateLimitWindow {
   const candidate = value as Partial<OpenAIRateLimitWindow>
 
   return (
-    typeof candidate.used_percent === 'number' &&
-    typeof candidate.limit_window_seconds === 'number' &&
-    typeof candidate.reset_after_seconds === 'number' &&
-    typeof candidate.reset_at === 'number'
+    Number.isFinite(candidate.used_percent) &&
+    Number.isFinite(candidate.limit_window_seconds) &&
+    Number.isFinite(candidate.reset_after_seconds) &&
+    Number.isFinite(candidate.reset_at)
   )
 }
 
@@ -441,7 +441,7 @@ export function isOpenAIWhamUsageResponse(
 }
 
 function toIsoFromUnixSeconds(value: number | undefined): string | undefined {
-  if (typeof value !== 'number') {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
     return undefined
   }
 

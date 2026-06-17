@@ -321,6 +321,34 @@ describe('extractSnapshot', () => {
     })
   })
 
+  it('rejects non-finite WHAM rate limit window values', () => {
+    const malformedUsage = {
+      user_id: 'user-1',
+      account_id: 'user-1',
+      rate_limit: {
+        allowed: true,
+        limit_reached: false,
+        primary_window: {
+          used_percent: Number.NaN,
+          limit_window_seconds: 18_000,
+          reset_after_seconds: 17_390,
+          reset_at: Number.POSITIVE_INFINITY,
+        },
+        secondary_window: null,
+      },
+    }
+
+    expect(isOpenAIWhamUsageResponse(malformedUsage)).toBe(false)
+    expect(
+      extractSnapshotFromWhamUsageResponse(
+        malformedUsage as unknown as OpenAIWhamUsageResponse,
+        {
+          capturedAt: '2026-04-04T12:00:00.000Z',
+        }
+      )
+    ).toBeNull()
+  })
+
   it('rejects malformed WHAM credits payloads', () => {
     const malformedUsage = {
       user_id: 'user-1',
