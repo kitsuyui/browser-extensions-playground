@@ -26,6 +26,9 @@ const stubProvider: ProviderExtractor = {
   }),
 }
 
+// U+1F389 PARTY POPPER is encoded as two UTF-16 code units: 0xD83C 0xDF89
+const EMOJI_PARTY = '🎉' // 🎉, length === 2
+
 describe('provider snapshot helpers', () => {
   it('preserves capturedAt when provided', () => {
     const snapshot = createProviderSnapshot({
@@ -55,6 +58,33 @@ describe('provider snapshot helpers', () => {
 })
 
 describe('collectDomProbeMatches', () => {
+  it('does not split a surrogate pair at the slice boundary', () => {
+    // Build a string of 999 ASCII chars followed by an emoji (2 UTF-16 units).
+    // A plain .slice(0, 1_000) would keep the high surrogate and discard the
+    // low surrogate; sliceSafe must step back to 999 instead.
+    const base = 'a'.repeat(999)
+    const innerText = base + EMOJI_PARTY + ' extra'
+    const fakeDocument = {
+      querySelector(selector: string) {
+        if (selector === '[data-testid="emoji"]') {
+          return { innerText, outerHTML: `<span>${innerText}</span>` }
+        }
+        return null
+      },
+    } as unknown as Document
+
+    const matches = collectDomProbeMatches(fakeDocument, [
+      { key: 'emoji', label: 'Emoji', selector: '[data-testid="emoji"]' },
+    ])
+
+    expect(matches).toHaveLength(1)
+    // Result must not end with an orphaned high surrogate
+    const text = matches[0].text as string
+    const lastCode = text.charCodeAt(text.length - 1)
+    expect(lastCode).not.toBeGreaterThanOrEqual(0xd800)
+    expect(text).toBe(base) // stepped back to 999 chars
+  })
+
   it('captures text for matching selectors', () => {
     const fakeDocument = {
       querySelector(selector: string) {
