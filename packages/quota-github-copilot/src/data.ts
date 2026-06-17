@@ -10,6 +10,9 @@ export function createQuotaGithubCopilotTools(
       url.searchParams.set('provider', 'github-copilot')
 
       const response = await fetch(url)
+      if (!response.ok) {
+        return null
+      }
       return (await response.json()) as ProviderSnapshot | null
     },
   }

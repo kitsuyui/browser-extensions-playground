@@ -8,6 +8,9 @@ export function createQuotaAnthropicTools(baseUrl = LOCAL_SERVER_HTTP_ORIGIN) {
       url.searchParams.set('provider', 'anthropic')
 
       const response = await fetch(url)
+      if (!response.ok) {
+        return null
+      }
       return (await response.json()) as ProviderSnapshot | null
     },
   }

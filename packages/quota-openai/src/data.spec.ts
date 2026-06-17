@@ -71,4 +71,14 @@ describe('createQuotaOpenAITools', () => {
       },
     })
   })
+
+  it('returns null when the server responds with an HTTP error', async () => {
+    globalThis.fetch = vi.fn(
+      async () => new Response('Service Unavailable', { status: 503 })
+    ) as typeof fetch
+
+    const tools = createQuotaOpenAITools('http://127.0.0.1:3929')
+    await expect(tools.getLatestSnapshot()).resolves.toBeNull()
+    await expect(tools.getStableUsageSnapshot()).resolves.toBeNull()
+  })
 })

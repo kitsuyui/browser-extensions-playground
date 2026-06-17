@@ -59,6 +59,9 @@ export function createQuotaOpenAITools(baseUrl = LOCAL_SERVER_HTTP_ORIGIN) {
     url.searchParams.set('provider', 'openai')
 
     const response = await fetch(url)
+    if (!response.ok) {
+      return null
+    }
     return (await response.json()) as ProviderSnapshot | null
   }
 

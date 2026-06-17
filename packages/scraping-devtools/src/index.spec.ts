@@ -98,6 +98,22 @@ describe('createScrapingDevtoolsTools', () => {
     })
   })
 
+  it('throws on HTTP error responses', async () => {
+    globalThis.fetch = vi.fn(
+      async () => new Response('Internal Server Error', { status: 500 })
+    ) as typeof fetch
+
+    const tools = createScrapingDevtoolsTools('http://127.0.0.1:3929')
+    await expect(tools.getServerStatus()).rejects.toThrow('HTTP 500')
+    await expect(tools.listProviders()).rejects.toThrow('HTTP 500')
+    await expect(tools.listDevClients()).rejects.toThrow('HTTP 500')
+    await expect(
+      tools.runDevCommand({
+        command: { type: 'fetch-json', url: 'https://example.com' },
+      })
+    ).rejects.toThrow('HTTP 500')
+  })
+
   it('exposes the same devtools operations through MCP tool handlers', async () => {
     await expect(
       callScrapingDevtoolsTool('get_status', {})
