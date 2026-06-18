@@ -69,11 +69,15 @@ function startCaptureLoop(
 ): void {
   let attempts = 0
   const observer = new MutationObserver(() => {
-    void emitSnapshot(clock).then((sent) => {
-      if (sent) {
+    void emitSnapshot(clock)
+      .then((sent) => {
+        if (sent) {
+          observer.disconnect()
+        }
+      })
+      .catch(() => {
         observer.disconnect()
-      }
-    })
+      })
   })
 
   observer.observe(document.documentElement, {
@@ -85,14 +89,18 @@ function startCaptureLoop(
   const attemptCapture = () => {
     attempts += 1
 
-    void emitSnapshot(clock).then((sent) => {
-      if (sent || attempts >= MAX_CAPTURE_ATTEMPTS) {
-        observer.disconnect()
-        return
-      }
+    void emitSnapshot(clock)
+      .then((sent) => {
+        if (sent || attempts >= MAX_CAPTURE_ATTEMPTS) {
+          observer.disconnect()
+          return
+        }
 
-      window.setTimeout(attemptCapture, RETRY_DELAY_MS)
-    })
+        window.setTimeout(attemptCapture, RETRY_DELAY_MS)
+      })
+      .catch(() => {
+        observer.disconnect()
+      })
   }
 
   attemptCapture()
