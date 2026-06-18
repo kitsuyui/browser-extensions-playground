@@ -657,21 +657,46 @@ function resolveScrapingRoute(method: string, url: URL): ScrapingRoute {
   }
 }
 
+type DevCommandTargetResolution =
+  | { readonly found: true; readonly client: DevClientConnection }
+  | {
+      readonly found: false
+      readonly reason: 'client-not-connected'
+      readonly clientId: string
+    }
+  | { readonly found: false; readonly reason: 'no-clients' }
+
 /**
  * Resolves the devtools client to receive a command.
  *
- * When `targetClientId` is provided, returns that specific client (or undefined if
- * not found). When omitted, falls back to the first connected client by insertion
- * order — callers that need deterministic targeting should provide `targetClientId`
- * explicitly, discoverable via the `list_clients` endpoint.
+ * When `targetClientId` is provided, returns that specific client or a
+ * `client-not-connected` failure. When omitted, falls back to the first connected
+ * client by insertion order — callers that need deterministic targeting should
+ * provide `targetClientId` explicitly, discoverable via the `list_clients` endpoint.
+ * Returns `no-clients` when no clients are connected and no target was specified.
  */
 function resolveDevCommandTarget(
   targetClientId: string | undefined,
   devClients: Map<string, DevClientConnection>
-): DevClientConnection | undefined {
-  return targetClientId !== undefined
-    ? devClients.get(targetClientId)
-    : devClients.values().next().value
+): DevCommandTargetResolution {
+  if (targetClientId !== undefined) {
+    const client = devClients.get(targetClientId)
+    if (client !== undefined) {
+      return { found: true, client }
+    }
+    return {
+      found: false,
+      reason: 'client-not-connected',
+      clientId: targetClientId,
+    }
+  }
+  const client = devClients.values().next().value as
+    | DevClientConnection
+    | undefined
+  if (client !== undefined) {
+    return { found: true, client }
+  }
+  return { found: false, reason: 'no-clients' }
 }
 
 async function executeDevCommand(
@@ -825,15 +850,15 @@ async function handleScrapingRoute(
       const body = validateDevCommandRequest(
         await readJsonBody<DevCommandRequest>(request)
       )
-      const target = resolveDevCommandTarget(
+      const resolution = resolveDevCommandTarget(
         body.targetClientId,
         context.devClients
       )
 
-      if (!target) {
-        if (body.targetClientId) {
+      if (!resolution.found) {
+        if (resolution.reason === 'client-not-connected') {
           writeJson(response, 404, {
-            error: `Dev client '${body.targetClientId}' is not connected.`,
+            error: `Dev client '${resolution.clientId}' is not connected.`,
           })
         } else {
           writeJson(response, 409, {
@@ -846,11 +871,11 @@ async function handleScrapingRoute(
       context.logger.info('[scraping-server] dev command dispatched', {
         requestId: context.requestId,
         type: body.command.type,
-        targetClientId: target.clientId,
+        targetClientId: resolution.client.clientId,
       })
 
       const result = await executeDevCommand(
-        target,
+        resolution.client,
         body.command,
         context.pendingCommands
       )

@@ -466,6 +466,41 @@ describe('createScrapingServer', () => {
     )
   })
 
+  it('returns 404 when targetClientId is provided but the client is not connected', async () => {
+    const { listening } = await createServerForTest()
+
+    const response = await fetch(`${listening.url}/api/dev/commands`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        targetClientId: 'nonexistent-client-id',
+        command: { type: 'capture-page' },
+      }),
+    })
+
+    expect(response.status).toBe(404)
+    expect(await response.json()).toMatchObject({
+      error: "Dev client 'nonexistent-client-id' is not connected.",
+    })
+  })
+
+  it('returns 409 when no targetClientId is given and no clients are connected', async () => {
+    const { listening } = await createServerForTest()
+
+    const response = await fetch(`${listening.url}/api/dev/commands`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        command: { type: 'capture-page' },
+      }),
+    })
+
+    expect(response.status).toBe(409)
+    expect(await response.json()).toMatchObject({
+      error: 'No devtool websocket clients are connected.',
+    })
+  })
+
   it('rejects pending dev commands when the websocket client disconnects', async () => {
     const logger = createLoggerSpy()
     const { listening } = await createServerForTest(logger)
