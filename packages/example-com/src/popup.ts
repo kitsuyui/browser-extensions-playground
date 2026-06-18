@@ -1,48 +1,15 @@
 import {
-  getDeterministicExtensionStorageKeys,
-  LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS,
   LOCAL_SERVER_HTTP_ORIGIN,
+  loadDeterministicExtensionStorageState,
 } from '@kitsuyui/browser-extensions-scraping-platform'
 
 import { providerManifest } from './index'
-
-declare const chrome:
-  | {
-      storage?: {
-        local?: {
-          get: (
-            keys: string[] | string
-          ) => Promise<Record<string, unknown>> | Record<string, unknown>
-        }
-      }
-    }
-  | undefined
-
-const providerStorageKeys = getDeterministicExtensionStorageKeys(
-  providerManifest.id
-)
 
 async function loadState(): Promise<{
   readonly latestSnapshot: unknown
   readonly syncStatus: unknown
 }> {
-  const record = (await chrome?.storage?.local?.get?.([
-    providerStorageKeys.latestSnapshot,
-    providerStorageKeys.syncStatus,
-    LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.latestSnapshot,
-    LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.syncStatus,
-  ])) as Record<string, unknown> | undefined
-
-  return {
-    latestSnapshot:
-      record?.[providerStorageKeys.latestSnapshot] ??
-      record?.[LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.latestSnapshot] ??
-      null,
-    syncStatus:
-      record?.[providerStorageKeys.syncStatus] ??
-      record?.[LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.syncStatus] ??
-      null,
-  }
+  return loadDeterministicExtensionStorageState(providerManifest.id)
 }
 
 async function loadServerRiskWarning(): Promise<string> {

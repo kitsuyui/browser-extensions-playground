@@ -1,7 +1,6 @@
 import {
   DETERMINISTIC_EXTENSION_ENABLED_KEY,
-  getDeterministicExtensionStorageKeys,
-  LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS,
+  loadDeterministicExtensionStorageState,
 } from '@kitsuyui/browser-extensions-scraping-platform'
 
 import { providerManifest } from './index'
@@ -40,40 +39,25 @@ type CaptureState = {
   readonly pageUrl?: string
 }
 
-const providerStorageKeys = getDeterministicExtensionStorageKeys(
-  providerManifest.id
-)
-
 async function loadState(): Promise<{
   readonly latestSnapshot: Snapshot | null
   readonly syncStatus: Record<string, unknown> | null
   readonly enabled: boolean
   readonly captureState: CaptureState | null
 }> {
-  const record = (await chrome?.storage?.local?.get?.([
-    providerStorageKeys.latestSnapshot,
-    providerStorageKeys.syncStatus,
-    LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.latestSnapshot,
-    LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.syncStatus,
-    DETERMINISTIC_EXTENSION_ENABLED_KEY,
-    'githubCopilotCaptureState',
-  ])) as Record<string, unknown> | undefined
+  const [record, deterministicState] = await Promise.all([
+    chrome?.storage?.local?.get?.([
+      DETERMINISTIC_EXTENSION_ENABLED_KEY,
+      'githubCopilotCaptureState',
+    ]),
+    loadDeterministicExtensionStorageState(providerManifest.id),
+  ])
 
   return {
     latestSnapshot:
-      (record?.[providerStorageKeys.latestSnapshot] as Snapshot | undefined) ??
-      (record?.[LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.latestSnapshot] as
-        | Snapshot
-        | undefined) ??
-      null,
+      (deterministicState.latestSnapshot as Snapshot | null) ?? null,
     syncStatus:
-      (record?.[providerStorageKeys.syncStatus] as
-        | Record<string, unknown>
-        | undefined) ??
-      (record?.[LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.syncStatus] as
-        | Record<string, unknown>
-        | undefined) ??
-      null,
+      (deterministicState.syncStatus as Record<string, unknown> | null) ?? null,
     enabled: record?.[DETERMINISTIC_EXTENSION_ENABLED_KEY] !== false,
     captureState:
       (record?.githubCopilotCaptureState as CaptureState | undefined) ?? null,

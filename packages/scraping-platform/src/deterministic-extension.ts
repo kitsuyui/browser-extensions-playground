@@ -37,6 +37,7 @@ declare const chrome:
             keys: string[] | string
           ) => Promise<Record<string, unknown>> | Record<string, unknown>
           set: (items: Record<string, unknown>) => Promise<void> | void
+          remove?: (keys: string[] | string) => Promise<void> | void
         }
       }
       tabs?: {
@@ -54,6 +55,10 @@ export const DETERMINISTIC_EXTENSION_ENABLED_KEY =
 export const LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS = {
   latestSnapshot: 'latestSnapshot',
   syncStatus: 'syncStatus',
+} as const
+export const LEGACY_DETERMINISTIC_EXTENSION_STORAGE_MIGRATION = {
+  removalCondition:
+    'Remove a legacy key after a value for the same provider is copied or written to its provider-scoped replacement.',
 } as const
 
 export function getDeterministicExtensionStorageKeys(provider: string): {
@@ -96,13 +101,114 @@ export function createDeterministicExtensionManifest(options: {
   }
 }
 
+function hasProvider(value: unknown, provider: string): boolean {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    (value as { readonly provider?: unknown }).provider === provider
+  )
+}
+
+async function loadLegacyMigrationRecord(
+  provider: string
+): Promise<Record<string, unknown>> {
+  const storageKeys = getDeterministicExtensionStorageKeys(provider)
+
+  return ((await chrome?.storage?.local?.get?.([
+    storageKeys.latestSnapshot,
+    storageKeys.syncStatus,
+    LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.latestSnapshot,
+    LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.syncStatus,
+  ])) ?? {}) as Record<string, unknown>
+}
+
+async function removeProviderLegacyStorageKeys(
+  provider: string,
+  record?: Record<string, unknown>
+): Promise<void> {
+  const migrationRecord = record ?? (await loadLegacyMigrationRecord(provider))
+  const keysToRemove: string[] = []
+
+  if (
+    hasProvider(
+      migrationRecord[
+        LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.latestSnapshot
+      ],
+      provider
+    )
+  ) {
+    keysToRemove.push(
+      LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.latestSnapshot
+    )
+  }
+
+  if (
+    hasProvider(
+      migrationRecord[LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.syncStatus],
+      provider
+    )
+  ) {
+    keysToRemove.push(LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.syncStatus)
+  }
+
+  if (keysToRemove.length > 0) {
+    await chrome?.storage?.local?.remove?.(keysToRemove)
+  }
+}
+
+export async function loadDeterministicExtensionStorageState(
+  provider: string
+): Promise<{
+  readonly latestSnapshot: unknown
+  readonly syncStatus: unknown
+}> {
+  const storageKeys = getDeterministicExtensionStorageKeys(provider)
+  const record = await loadLegacyMigrationRecord(provider)
+  const legacyLatestSnapshot =
+    record[LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.latestSnapshot]
+  const legacySyncStatus =
+    record[LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.syncStatus]
+  const latestSnapshot =
+    record[storageKeys.latestSnapshot] ??
+    (hasProvider(legacyLatestSnapshot, provider) ? legacyLatestSnapshot : null)
+  const syncStatus =
+    record[storageKeys.syncStatus] ??
+    (hasProvider(legacySyncStatus, provider) ? legacySyncStatus : null)
+  const migratedEntries: Record<string, unknown> = {}
+
+  if (
+    record[storageKeys.latestSnapshot] === undefined &&
+    hasProvider(legacyLatestSnapshot, provider)
+  ) {
+    migratedEntries[storageKeys.latestSnapshot] = legacyLatestSnapshot
+  }
+
+  if (
+    record[storageKeys.syncStatus] === undefined &&
+    hasProvider(legacySyncStatus, provider)
+  ) {
+    migratedEntries[storageKeys.syncStatus] = legacySyncStatus
+  }
+
+  if (Object.keys(migratedEntries).length > 0) {
+    await chrome?.storage?.local?.set?.(migratedEntries)
+  }
+
+  await removeProviderLegacyStorageKeys(provider, record)
+
+  return {
+    latestSnapshot,
+    syncStatus,
+  }
+}
+
 async function persistSnapshot(snapshot: ProviderSnapshot): Promise<void> {
   const storageKeys = getDeterministicExtensionStorageKeys(snapshot.provider)
 
   await chrome?.storage?.local?.set?.({
     [storageKeys.latestSnapshot]: snapshot,
-    [LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.latestSnapshot]: snapshot,
   })
+  await removeProviderLegacyStorageKeys(snapshot.provider)
 }
 
 async function persistSyncStatus(
@@ -113,8 +219,8 @@ async function persistSyncStatus(
 
   await chrome?.storage?.local?.set?.({
     [storageKeys.syncStatus]: status,
-    [LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.syncStatus]: status,
   })
+  await removeProviderLegacyStorageKeys(provider)
 }
 
 async function isExtensionEnabled(): Promise<boolean> {

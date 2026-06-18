@@ -1,11 +1,17 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
   createDeterministicExtensionManifest,
   DEFAULT_PERIODIC_CAPTURE_INTERVAL_MINUTES,
   getDeterministicExtensionStorageKeys,
   LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS,
+  LEGACY_DETERMINISTIC_EXTENSION_STORAGE_MIGRATION,
+  loadDeterministicExtensionStorageState,
 } from './deterministic-extension'
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
 
 describe('createDeterministicExtensionManifest', () => {
   it('creates a deterministic extension manifest with limited permissions', () => {
@@ -52,5 +58,80 @@ describe('getDeterministicExtensionStorageKeys', () => {
       latestSnapshot: 'latestSnapshot',
       syncStatus: 'syncStatus',
     })
+  })
+
+  it('documents when legacy storage keys are removed', () => {
+    expect(
+      LEGACY_DETERMINISTIC_EXTENSION_STORAGE_MIGRATION.removalCondition
+    ).toContain('provider-scoped replacement')
+  })
+
+  it('migrates provider-owned legacy values to scoped keys and removes legacy keys', async () => {
+    const latestSnapshot = {
+      provider: 'openai',
+      capturedAt: '2026-06-18T00:00:00.000Z',
+      source: 'dom',
+      confidence: 'high',
+      rawVersion: 'test',
+      metrics: [],
+    }
+    const syncStatus = {
+      provider: 'openai',
+      status: 'success',
+    }
+    const localSet = vi.fn().mockResolvedValue(undefined)
+    const localRemove = vi.fn().mockResolvedValue(undefined)
+
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: vi.fn().mockResolvedValue({
+            latestSnapshot,
+            syncStatus,
+          }),
+          set: localSet,
+          remove: localRemove,
+        },
+      },
+    })
+
+    await expect(
+      loadDeterministicExtensionStorageState('openai')
+    ).resolves.toEqual({
+      latestSnapshot,
+      syncStatus,
+    })
+    expect(localSet).toHaveBeenCalledWith({
+      'deterministicExtension:openai:latestSnapshot': latestSnapshot,
+      'deterministicExtension:openai:syncStatus': syncStatus,
+    })
+    expect(localRemove).toHaveBeenCalledWith(['latestSnapshot', 'syncStatus'])
+  })
+
+  it('leaves legacy values for other providers untouched', async () => {
+    const localSet = vi.fn().mockResolvedValue(undefined)
+    const localRemove = vi.fn().mockResolvedValue(undefined)
+
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: vi.fn().mockResolvedValue({
+            latestSnapshot: { provider: 'anthropic' },
+            syncStatus: { provider: 'anthropic', status: 'success' },
+          }),
+          set: localSet,
+          remove: localRemove,
+        },
+      },
+    })
+
+    await expect(
+      loadDeterministicExtensionStorageState('openai')
+    ).resolves.toEqual({
+      latestSnapshot: null,
+      syncStatus: null,
+    })
+    expect(localSet).not.toHaveBeenCalled()
+    expect(localRemove).not.toHaveBeenCalled()
   })
 })
