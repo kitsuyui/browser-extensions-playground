@@ -27,6 +27,7 @@ declare const chrome:
 
 const USAGE_API_STATE_KEY = 'anthropicUsageApiState'
 const MAX_USAGE_API_EVENTS = 5
+let storageUpdateQueue: Promise<void> = Promise.resolve()
 
 const uuidPattern =
   /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/giu
@@ -84,42 +85,47 @@ async function fetchJson(
   })
 
   const updatedAt = clock.nowIso()
-  const record = (await chrome?.storage?.local?.get?.(USAGE_API_STATE_KEY)) as
-    | Record<string, unknown>
-    | undefined
-  const previousState = (record?.[USAGE_API_STATE_KEY] ?? null) as {
-    readonly events?: readonly {
-      readonly updatedAt?: string
-      readonly meta?: {
-        readonly url?: string
-        readonly status?: number
-      }
-    }[]
-  } | null
-  const previousEvents = Array.isArray(previousState?.events)
-    ? previousState.events
-    : []
+  storageUpdateQueue = storageUpdateQueue
+    .then(async () => {
+      const record = (await chrome?.storage?.local?.get?.(
+        USAGE_API_STATE_KEY
+      )) as Record<string, unknown> | undefined
+      const previousState = (record?.[USAGE_API_STATE_KEY] ?? null) as {
+        readonly events?: readonly {
+          readonly updatedAt?: string
+          readonly meta?: {
+            readonly url?: string
+            readonly status?: number
+          }
+        }[]
+      } | null
+      const previousEvents = Array.isArray(previousState?.events)
+        ? previousState.events
+        : []
 
-  await chrome?.storage?.local?.set?.({
-    [USAGE_API_STATE_KEY]: {
-      updatedAt,
-      received: response.ok,
-      meta: {
-        url: new URL(url, window.location.origin).toString(),
-        status: response.status,
-      },
-      events: [
-        ...previousEvents,
-        {
+      await chrome?.storage?.local?.set?.({
+        [USAGE_API_STATE_KEY]: {
           updatedAt,
+          received: response.ok,
           meta: {
             url: new URL(url, window.location.origin).toString(),
             status: response.status,
           },
+          events: [
+            ...previousEvents,
+            {
+              updatedAt,
+              meta: {
+                url: new URL(url, window.location.origin).toString(),
+                status: response.status,
+              },
+            },
+          ].slice(-MAX_USAGE_API_EVENTS),
         },
-      ].slice(-MAX_USAGE_API_EVENTS),
-    },
-  })
+      })
+    })
+    .catch(() => {})
+  await storageUpdateQueue
 
   if (!response.ok) {
     return null
