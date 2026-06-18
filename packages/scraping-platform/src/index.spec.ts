@@ -1,4 +1,3 @@
-import { providerExtractor as openAiProvider } from '@kitsuyui/browser-extensions-quota-openai'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -6,7 +5,26 @@ import {
   createExtensionCaptureFromDocument,
   createProviderSnapshot,
   isProviderSnapshot,
+  type ProviderExtractor,
 } from './index'
+
+const stubProvider: ProviderExtractor = {
+  manifest: {
+    id: 'openai',
+    displayName: 'OpenAI (stub)',
+    matches: ['https://chatgpt.com/*'],
+    capabilities: ['usage'],
+    debugSelectors: [],
+  },
+  extractSnapshot: (ctx) => ({
+    provider: 'openai',
+    capturedAt: ctx.capturedAt ?? new Date().toISOString(),
+    source: 'dom',
+    confidence: 'medium',
+    rawVersion: 'stub-v1',
+    metrics: [],
+  }),
+}
 
 describe('provider snapshot helpers', () => {
   it('preserves capturedAt when provided', () => {
@@ -111,7 +129,7 @@ describe('createExtensionCaptureFromDocument', () => {
     } as unknown as Document
 
     expect(
-      createExtensionCaptureFromDocument(openAiProvider, fakeDocument)
+      createExtensionCaptureFromDocument(stubProvider, fakeDocument)
     ).toMatchObject({
       domCapture: {
         provider: 'openai',
