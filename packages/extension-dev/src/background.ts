@@ -311,13 +311,10 @@ chrome?.runtime?.onMessage?.addListener((message, _sender, sendResponse) => {
   }
 
   void (async () => {
-    await persistState({
-      [DEVTOOLS_EXTENSION_ENABLED_KEY]: message.enabled !== false,
-    })
-
     if (message.enabled === false) {
       disconnectSocket()
       await persistState({
+        [DEVTOOLS_EXTENSION_ENABLED_KEY]: false,
         devtoolsConnectionState: 'disconnected',
       })
       sendResponse({
@@ -327,6 +324,9 @@ chrome?.runtime?.onMessage?.addListener((message, _sender, sendResponse) => {
       return
     }
 
+    await persistState({
+      [DEVTOOLS_EXTENSION_ENABLED_KEY]: true,
+    })
     reconnectDelayMs = RECONNECT_INITIAL_DELAY_MS
     await connect()
     sendResponse({
