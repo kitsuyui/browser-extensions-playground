@@ -39,6 +39,7 @@
     "@kitsuyui/browser-extensions-scraping-platform": "workspace:*"
   },
   "devDependencies": {
+    "@kitsuyui/browser-extensions-scraping-devtools": "workspace:*",
     "@kitsuyui/browser-extensions-scraping-server": "workspace:*"
   }
 }
