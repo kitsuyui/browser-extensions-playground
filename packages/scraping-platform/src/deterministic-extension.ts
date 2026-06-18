@@ -66,6 +66,32 @@ export function getDeterministicExtensionStorageKeys(provider: string): {
   }
 }
 
+function serializeError(
+  error: unknown,
+  fallback: string
+): {
+  readonly error: string
+  readonly errorName?: string
+  readonly errorStack?: string
+} {
+  if (error instanceof Error) {
+    return {
+      error: error.message,
+      errorName: error.name,
+      errorStack: error.stack,
+    }
+  }
+
+  return {
+    error:
+      error === null || error === undefined
+        ? fallback
+        : typeof error === 'string' && error.length > 0
+          ? error
+          : String(error),
+  }
+}
+
 export function createDeterministicExtensionManifest(options: {
   readonly name: string
   readonly description: string
@@ -192,8 +218,7 @@ async function reloadMatchingTabs(
             updatedAt: new Date().toISOString(),
             provider,
             alarmName,
-            error:
-              error instanceof Error ? error.message : 'unknown reload error',
+            ...serializeError(error, 'unknown reload error'),
           })
         }),
       ]
@@ -283,7 +308,7 @@ export function registerDeterministicExtensionBackground(options: {
           status: 'error',
           updatedAt: new Date().toISOString(),
           provider: snapshot.provider,
-          error: error instanceof Error ? error.message : 'unknown error',
+          ...serializeError(error, 'unknown error'),
         })
       }
 

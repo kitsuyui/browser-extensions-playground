@@ -9,6 +9,10 @@ type JsonRpcResponse = {
   readonly error?: {
     readonly code: number
     readonly message: string
+    readonly data?: {
+      readonly name?: string
+      readonly stack?: string
+    }
   }
 }
 
@@ -192,6 +196,30 @@ describe('startStdioMcpServer', () => {
         arguments_: {
           hello: 'world',
         },
+      },
+    })
+  })
+
+  it('returns tool execution failures with error details', async () => {
+    startServer(async () => {
+      throw new Error('Tool exploded.')
+    })
+
+    const response = await sendRequest({
+      jsonrpc: '2.0',
+      id: 6,
+      method: 'tools/call',
+      params: {
+        name: 'echo',
+      },
+    })
+
+    expect(response.error).toEqual({
+      code: -32000,
+      message: 'Tool exploded.',
+      data: {
+        name: 'Error',
+        stack: expect.stringContaining('Tool exploded.'),
       },
     })
   })

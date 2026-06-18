@@ -96,4 +96,6 @@ export type DevCommandResult = {
   readonly ok: boolean
   readonly result?: unknown
   readonly error?: string
+  readonly errorName?: string
+  readonly errorStack?: string
 }

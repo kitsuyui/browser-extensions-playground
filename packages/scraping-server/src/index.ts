@@ -56,6 +56,51 @@ type PendingCommand = {
 
 const MAX_BODY_BYTES = 10 * 1024 * 1024 // 10 MB
 
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error) {
+    return error.message
+  }
+
+  return fallback
+}
+
+function getLogError(error: unknown, fallback: string): Error | string {
+  if (error instanceof Error) {
+    return error
+  }
+
+  if (typeof error === 'string' && error.length > 0) {
+    return error
+  }
+
+  return error === null || error === undefined ? fallback : String(error)
+}
+
+function getUnknownErrorMessage(error: unknown, fallback: string): string {
+  if (typeof error === 'string' && error.length > 0) {
+    return error
+  }
+
+  return error === null || error === undefined ? fallback : String(error)
+}
+
+function serializeCommandError(
+  error: unknown,
+  fallback: string
+): Pick<DevCommandResult, 'error' | 'errorName' | 'errorStack'> {
+  if (error instanceof Error) {
+    return {
+      error: error.message,
+      errorName: error.name,
+      errorStack: error.stack,
+    }
+  }
+
+  return {
+    error: getUnknownErrorMessage(error, fallback),
+  }
+}
+
 class InvalidJsonBodyError extends Error {
   constructor() {
     super('Request body must be valid JSON.')
@@ -451,7 +496,7 @@ function parseDevtoolsMessage(buffer: RawData, logger: ScrapingServerLogger) {
   } catch (e) {
     logger.warn('[scraping-server] ignored malformed devtools message', {
       reason: 'json-parse-error',
-      error: e instanceof Error ? e.message : String(e),
+      error: getLogError(e, 'Failed to parse devtools message.'),
     })
     return null
   }
@@ -461,7 +506,7 @@ function parseDevtoolsMessage(buffer: RawData, logger: ScrapingServerLogger) {
   } catch (e) {
     logger.warn('[scraping-server] ignored malformed devtools message', {
       reason: 'schema-validation-error',
-      error: e instanceof Error ? e.message : String(e),
+      error: getLogError(e, 'Failed to validate devtools message.'),
     })
     return null
   }
@@ -662,7 +707,7 @@ async function executeDevCommand(
   }).catch((error) => ({
     commandId,
     ok: false,
-    error: error instanceof Error ? error.message : 'unknown error',
+    ...serializeCommandError(error, 'unknown error'),
   }))
 }
 
@@ -881,16 +926,14 @@ export function createScrapingServer(options: {
       )
     } catch (error) {
       writeJson(response, isClientRequestError(error) ? 400 : 500, {
-        error:
-          error instanceof Error ? error.message : 'Internal server error.',
+        error: getErrorMessage(error, 'Internal server error.'),
       })
       logger.error('[scraping-server] request failed', {
         requestId,
         method,
         pathname,
         statusCode: response.statusCode,
-        error:
-          error instanceof Error ? error.message : 'Internal server error.',
+        error: getLogError(error, 'Internal server error.'),
       })
       return
     } finally {
