@@ -539,7 +539,7 @@ export function extractSnapshotFromWhamUsageResponse(
 
   return createProviderSnapshot({
     provider: providerManifest.id,
-    accountLabel: options.accountLabel ?? usage.email,
+    accountLabel: options.accountLabel,
     source: 'network',
     confidence: 'high',
     rawVersion: 'openai-wham-usage-v1',
