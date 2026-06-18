@@ -440,8 +440,19 @@ export function isOpenAIWhamUsageResponse(
   )
 }
 
+const MAX_VALID_UNIX_SECONDS = 8_640_000_000_000
+const MIN_VALID_UNIX_SECONDS = -8_640_000_000_000
+
 function toIsoFromUnixSeconds(value: number | undefined): string | undefined {
   if (typeof value !== 'number') {
+    return undefined
+  }
+
+  if (
+    !Number.isFinite(value) ||
+    value < MIN_VALID_UNIX_SECONDS ||
+    value > MAX_VALID_UNIX_SECONDS
+  ) {
     return undefined
   }
 

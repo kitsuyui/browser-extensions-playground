@@ -363,6 +363,70 @@ describe('extractSnapshot', () => {
       )
     ).toBeNull()
   })
+
+  it('returns undefined resetsAt for out-of-range reset_at values', () => {
+    const outOfRangeValues = [
+      Number.MAX_SAFE_INTEGER,
+      -Number.MAX_SAFE_INTEGER,
+      8_640_000_000_001,
+      -8_640_000_000_001,
+      Number.POSITIVE_INFINITY,
+      Number.NEGATIVE_INFINITY,
+      Number.NaN,
+    ]
+
+    for (const resetAt of outOfRangeValues) {
+      const usage: OpenAIWhamUsageResponse = {
+        user_id: 'user-1',
+        account_id: 'user-1',
+        rate_limit: {
+          allowed: true,
+          limit_reached: false,
+          primary_window: {
+            used_percent: 0,
+            limit_window_seconds: 18_000,
+            reset_after_seconds: 1_000,
+            reset_at: resetAt,
+          },
+          secondary_window: null,
+        },
+      }
+
+      const snapshot = extractSnapshotFromWhamUsageResponse(usage, {
+        capturedAt: '2026-04-04T12:00:00.000Z',
+      })
+
+      expect(snapshot).not.toBeNull()
+      const codex5h = snapshot?.metrics.find((m) => m.key === 'codex_5h')
+      expect(codex5h?.resetsAt).toBeUndefined()
+    }
+  })
+
+  it('preserves valid boundary reset_at values', () => {
+    const usage: OpenAIWhamUsageResponse = {
+      user_id: 'user-1',
+      account_id: 'user-1',
+      rate_limit: {
+        allowed: true,
+        limit_reached: false,
+        primary_window: {
+          used_percent: 0,
+          limit_window_seconds: 18_000,
+          reset_after_seconds: 1_000,
+          reset_at: 8_640_000_000_000,
+        },
+        secondary_window: null,
+      },
+    }
+
+    const snapshot = extractSnapshotFromWhamUsageResponse(usage, {
+      capturedAt: '2026-04-04T12:00:00.000Z',
+    })
+
+    expect(snapshot).not.toBeNull()
+    const codex5h = snapshot?.metrics.find((m) => m.key === 'codex_5h')
+    expect(codex5h?.resetsAt).toBe('+275760-09-13T00:00:00.000Z')
+  })
 })
 
 describe('createExtensionManifest', () => {
