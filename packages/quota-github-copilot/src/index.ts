@@ -30,7 +30,13 @@ export const providerManifest: ProviderManifest = {
         rawVersion: 'github-copilot-dom-v1',
         source: 'dom',
         description:
-          'Usage derived from rendered premium request counters on GitHub settings pages.',
+          'Usage derived from percentage text (e.g. "8.7%") on GitHub Copilot settings pages.',
+      },
+      {
+        rawVersion: 'github-copilot-dom-v2',
+        source: 'dom',
+        description:
+          'Usage derived from ratio text (e.g. "4 / 50") on GitHub Copilot settings pages.',
       },
     ],
     metrics: [
@@ -74,7 +80,10 @@ function toUsedPercent(used: number, limit: number): number | undefined {
   return Math.round((used / limit) * 1_000) / 10
 }
 
-function createSnapshotMetrics(pageText: string): readonly SnapshotMetric[] {
+function createSnapshotMetrics(pageText: string): {
+  metrics: readonly SnapshotMetric[]
+  rawVersion: string
+} {
   const usageMatch = pageText.match(premiumRequestsUsagePercentPattern)
   const ratioMatch = pageText.match(premiumRequestsUsedRatioPattern)
   const resetMatch = pageText.match(resetPattern)
@@ -93,6 +102,9 @@ function createSnapshotMetrics(pageText: string): readonly SnapshotMetric[] {
   const inferredUsedPercent =
     usedPercent ??
     toUsedPercent(ratioUsed ?? Number.NaN, ratioLimit ?? Number.NaN)
+  const rawVersion = Number.isFinite(usedPercent)
+    ? 'github-copilot-dom-v1'
+    : 'github-copilot-dom-v2'
 
   if (Number.isFinite(inferredUsedPercent)) {
     metrics.push({
@@ -105,11 +117,11 @@ function createSnapshotMetrics(pageText: string): readonly SnapshotMetric[] {
     })
   }
 
-  return metrics
+  return { metrics, rawVersion }
 }
 
 export function extractSnapshot(context: ExtractionContext) {
-  const metrics = createSnapshotMetrics(context.pageText)
+  const { metrics, rawVersion } = createSnapshotMetrics(context.pageText)
 
   if (metrics.length === 0) {
     return null
@@ -120,7 +132,7 @@ export function extractSnapshot(context: ExtractionContext) {
     accountLabel: context.accountLabel,
     source: 'dom',
     confidence: 'medium',
-    rawVersion: 'github-copilot-dom-v1',
+    rawVersion,
     capturedAt: context.capturedAt ?? new Date().toISOString(),
     metrics,
   })
