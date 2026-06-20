@@ -7,6 +7,7 @@ import {
   isSupportedProviderUrl,
   SUPPORTED_PROVIDER_MATCH_PATTERNS,
 } from './providers'
+import { isCurrentOpenSocket } from './socket'
 
 declare const chrome:
   | {
@@ -285,12 +286,14 @@ async function connect(): Promise<void> {
         void persistState({
           devtoolsLastCommandResult: result,
         })
-        nextSocket.send(
-          JSON.stringify({
-            type: 'command-result',
-            ...result,
-          })
-        )
+        if (isCurrentOpenSocket(socket, nextSocket)) {
+          nextSocket.send(
+            JSON.stringify({
+              type: 'command-result',
+              ...result,
+            })
+          )
+        }
       })
     })
   } finally {

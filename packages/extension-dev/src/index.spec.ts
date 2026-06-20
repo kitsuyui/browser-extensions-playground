@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { createExtensionManifest } from './index'
 import { SUPPORTED_PROVIDER_MATCH_PATTERNS } from './providers'
 import { createPopupHtml } from './runtime'
+import { isCurrentOpenSocket } from './socket'
 
 describe('createExtensionManifest', () => {
   it('includes localhost and websocket permissions for server integration', () => {
@@ -28,5 +29,17 @@ describe('createPopupHtml', () => {
     expect(html).toContain('Copy JSON')
     expect(html).toContain('Remote control enabled')
     expect(html).toContain('type="checkbox"')
+  })
+})
+
+describe('isCurrentOpenSocket', () => {
+  it('accepts only the current open socket', () => {
+    const openSocket = { readyState: WebSocket.OPEN } as WebSocket
+    const closedSocket = { readyState: WebSocket.CLOSED } as WebSocket
+
+    expect(isCurrentOpenSocket(openSocket, openSocket)).toBe(true)
+    expect(isCurrentOpenSocket(null, openSocket)).toBe(false)
+    expect(isCurrentOpenSocket(openSocket, closedSocket)).toBe(false)
+    expect(isCurrentOpenSocket(closedSocket, closedSocket)).toBe(false)
   })
 })
