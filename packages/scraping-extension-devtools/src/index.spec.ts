@@ -34,8 +34,8 @@ describe('createPopupHtml', () => {
 
 describe('isCurrentOpenSocket', () => {
   it('accepts only the current open socket', () => {
-    const openSocket = { readyState: WebSocket.OPEN } as WebSocket
-    const closedSocket = { readyState: WebSocket.CLOSED } as WebSocket
+    const openSocket = { readyState: 1 } as WebSocket
+    const closedSocket = { readyState: 3 } as WebSocket
 
     expect(isCurrentOpenSocket(openSocket, openSocket)).toBe(true)
     expect(isCurrentOpenSocket(null, openSocket)).toBe(false)
