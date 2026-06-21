@@ -128,7 +128,7 @@ export const test = base.extend<{
       path.dirname(fileURLToPath(import.meta.url)),
       '..',
       '..',
-      'extension-dev',
+      'scraping-extension-devtools',
       'dist'
     )
     const exampleComPath = path.resolve(

@@ -12,7 +12,7 @@ const aliasEntries = [
   ],
   [
     '@kitsuyui/browser-extensions-scraping-extension-devtools',
-    './packages/extension-dev/src/index.ts',
+    './packages/scraping-extension-devtools/src/index.ts',
   ],
   [
     '@kitsuyui/browser-extensions-example-com',

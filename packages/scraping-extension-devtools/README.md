@@ -1,4 +1,4 @@
-# extension-dev
+# scraping-extension-devtools
 
 Dangerous developer-oriented browser extension for remote browser control and DOM capture.
 
@@ -18,7 +18,7 @@ The popup can enable or disable the connection explicitly.
 
 ## Security Warning
 
-While extension-dev is enabled, the local scraping server exposes an **unauthenticated** HTTP endpoint:
+While scraping-extension-devtools is enabled, the local scraping server exposes an **unauthenticated** HTTP endpoint:
 
 ```
 POST http://127.0.0.1:3929/api/dev/commands
