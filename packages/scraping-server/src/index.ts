@@ -839,6 +839,22 @@ function isValidHost(
   return false
 }
 
+function isValidOrigin(
+  originHeader: string | undefined,
+  host: string,
+  port: number
+): boolean {
+  // Non-browser clients (ws CLI, Node.js) omit Origin — allow
+  if (!originHeader) return true
+  // Browser extensions use chrome-extension:// origins — allow
+  if (originHeader.startsWith('chrome-extension://')) return true
+  // Localhost origins are acceptable for local dev tooling
+  if (originHeader === `http://${host}:${port}`) return true
+  if (host === '127.0.0.1' && originHeader === `http://localhost:${port}`)
+    return true
+  return false
+}
+
 export function createScrapingServer(options: {
   readonly host?: string
   readonly port?: number
@@ -993,6 +1009,11 @@ export function createScrapingServer(options: {
 
   httpServer.on('upgrade', (request, socket, head) => {
     if (!isValidHost(request.headers['host'], host, actualPort)) {
+      socket.destroy()
+      return
+    }
+
+    if (!isValidOrigin(request.headers['origin'], host, actualPort)) {
       socket.destroy()
       return
     }

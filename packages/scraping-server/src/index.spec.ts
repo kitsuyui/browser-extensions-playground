@@ -767,4 +767,41 @@ describe('Host header validation', () => {
       })
     ).rejects.toThrow()
   })
+
+  it('rejects WebSocket upgrades with a cross-site Origin header', async () => {
+    const { listening } = await createServerForTest()
+
+    await expect(
+      new Promise<void>((resolve, reject) => {
+        const ws = new WebSocket(
+          `ws://${listening.host}:${listening.port}/ws/dev`,
+          { headers: { Origin: 'http://evil.example.com' } }
+        )
+        ws.on('open', resolve)
+        ws.on('error', reject)
+        ws.on('unexpected-response', (_req, res) => {
+          reject(new Error(`Unexpected response: ${String(res.statusCode)}`))
+        })
+      })
+    ).rejects.toThrow()
+  })
+
+  it('accepts WebSocket upgrades with a chrome-extension:// Origin header', async () => {
+    const { listening } = await createServerForTest()
+
+    const ws = new WebSocket(
+      `ws://${listening.host}:${listening.port}/ws/dev`,
+      {
+        headers: {
+          Origin: 'chrome-extension://abcdefghijklmnopabcdefghijklmnop',
+        },
+      }
+    )
+
+    await new Promise<void>((resolve, reject) => {
+      ws.on('open', resolve)
+      ws.on('error', reject)
+    })
+    ws.close()
+  })
 })
