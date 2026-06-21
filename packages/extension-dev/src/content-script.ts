@@ -2,7 +2,9 @@ import {
   collectDomProbeMatches,
   createDomCapture,
   createExtensionCaptureFromDocument,
+  type IsoTimestampClock,
   type ProviderExtractor,
+  resolveIsoTimestampClock,
 } from '@kitsuyui/browser-extensions-scraping-platform'
 import type {
   DevCommand,
@@ -121,13 +123,15 @@ function findKnownProviderExtractor(url: string): ProviderExtractor | null {
   )
 }
 
-function createGenericCaptureFromDocument(): {
+function createGenericCaptureFromDocument(
+  clock: IsoTimestampClock = resolveIsoTimestampClock()
+): {
   readonly snapshot: ReturnType<
     typeof createExtensionCaptureFromDocument
   >['snapshot']
   readonly domCapture: ReturnType<typeof createDomCapture>
 } {
-  const capturedAt = new Date().toISOString()
+  const capturedAt = clock.nowIso()
   const providerExtractor = findKnownProviderExtractor(window.location.href)
 
   if (providerExtractor) {
