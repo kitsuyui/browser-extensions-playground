@@ -14,6 +14,11 @@ async function loadPopup(): Promise<void> {
   await import('./popup.ts')
 }
 
+async function settleRender(): Promise<void> {
+  await Promise.resolve()
+  await Promise.resolve()
+}
+
 describe('popup', () => {
   it('re-renders when chrome.storage.local changes', async () => {
     const onChangedListeners: StorageChangedCallback[] = []
@@ -34,12 +39,14 @@ describe('popup', () => {
     vi.stubGlobal('document', { querySelector: vi.fn().mockReturnValue(null) })
 
     await loadPopup()
+    await settleRender()
 
     expect(onChangedListeners).toHaveLength(1)
 
     localGet.mockClear()
     onChangedListeners[0]({}, 'local')
-    expect(localGet).toHaveBeenCalledOnce()
+    await settleRender()
+    expect(localGet).toHaveBeenCalledTimes(2)
   })
 
   it('does not re-render for non-local storage changes', async () => {
@@ -61,9 +68,11 @@ describe('popup', () => {
     vi.stubGlobal('document', { querySelector: vi.fn().mockReturnValue(null) })
 
     await loadPopup()
+    await settleRender()
 
     localGet.mockClear()
     onChangedListeners[0]({}, 'sync')
+    await settleRender()
     expect(localGet).not.toHaveBeenCalled()
   })
 })
