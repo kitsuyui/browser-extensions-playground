@@ -149,6 +149,21 @@ describe('createScrapedDataTools', () => {
     ])
   })
 
+  it('returns null for getLatestSnapshot and describeProvider on HTTP error, throws for others', async () => {
+    globalThis.fetch = vi.fn(
+      async () => new Response('Internal Server Error', { status: 500 })
+    ) as typeof fetch
+
+    const tools = createScrapedDataTools('http://127.0.0.1:3929')
+    await expect(tools.getLatestSnapshot('openai')).resolves.toBeNull()
+    await expect(tools.describeProvider('openai')).resolves.toBeNull()
+    await expect(tools.getServerStatus()).rejects.toThrow('HTTP 500')
+    await expect(tools.listProviders()).rejects.toThrow('HTTP 500')
+    await expect(
+      tools.getSnapshotHistory({ provider: 'openai' })
+    ).rejects.toThrow('HTTP 500')
+  })
+
   it('exposes the same operations through MCP tool handlers', async () => {
     await expect(callScrapedDataTool('get_status', {})).resolves.toMatchObject({
       riskLevel: 'normal',

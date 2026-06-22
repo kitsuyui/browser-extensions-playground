@@ -32,4 +32,13 @@ describe('createQuotaAnthropicTools', () => {
       provider: 'anthropic',
     })
   })
+
+  it('returns null when the server responds with an HTTP error', async () => {
+    globalThis.fetch = vi.fn(
+      async () => new Response('Not Found', { status: 404 })
+    ) as typeof fetch
+
+    const tools = createQuotaAnthropicTools('http://127.0.0.1:3929')
+    await expect(tools.getLatestSnapshot()).resolves.toBeNull()
+  })
 })
