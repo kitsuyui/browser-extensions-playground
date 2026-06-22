@@ -13,6 +13,7 @@ import { providerExtractor as anthropicProviderExtractor } from '../../quota-ant
 import { providerExtractor as githubCopilotProviderExtractor } from '../../quota-github-copilot/src/index'
 import { providerExtractor as openAiProviderExtractor } from '../../quota-openai/src/index'
 import { inferProviderId } from './providers'
+import { isExtensionSender } from './sender'
 
 const KNOWN_PROVIDER_EXTRACTORS: readonly ProviderExtractor[] = [
   openAiProviderExtractor,
@@ -24,6 +25,7 @@ const KNOWN_PROVIDER_EXTRACTORS: readonly ProviderExtractor[] = [
 declare const chrome:
   | {
       runtime?: {
+        id?: string
         onMessage?: {
           addListener: (
             callback: (
@@ -164,7 +166,7 @@ function createGenericCaptureFromDocument(): {
   }
 }
 
-chrome?.runtime?.onMessage?.addListener((message, _sender, sendResponse) => {
+chrome?.runtime?.onMessage?.addListener((message, sender, sendResponse) => {
   const commandId = message.commandId
 
   if (
@@ -185,6 +187,10 @@ chrome?.runtime?.onMessage?.addListener((message, _sender, sendResponse) => {
   }
 
   if (message.command.type === 'execute-script') {
+    if (!isExtensionSender(sender, chrome?.runtime?.id)) {
+      sendResponse(createResult(commandId, false, { error: 'unauthorized' }))
+      return
+    }
     try {
       const result = runDangerousScript(message.command.source)
       sendResponse(
