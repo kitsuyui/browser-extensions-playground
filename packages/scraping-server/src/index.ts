@@ -1070,29 +1070,31 @@ export function createScrapingServer(options: {
         client.socket.terminate()
       }
 
-      await new Promise<void>((resolvePromise, rejectPromise) => {
-        httpServer.close((error) => {
-          if (error) {
-            rejectPromise(error)
-            return
-          }
+      try {
+        await new Promise<void>((resolvePromise, rejectPromise) => {
+          httpServer.close((error) => {
+            if (error) {
+              rejectPromise(error)
+              return
+            }
 
-          resolvePromise()
+            resolvePromise()
+          })
         })
-      })
 
-      await new Promise<void>((resolvePromise, rejectPromise) => {
-        webSocketServer.close((error) => {
-          if (error) {
-            rejectPromise(error)
-            return
-          }
+        await new Promise<void>((resolvePromise, rejectPromise) => {
+          webSocketServer.close((error) => {
+            if (error) {
+              rejectPromise(error)
+              return
+            }
 
-          resolvePromise()
+            resolvePromise()
+          })
         })
-      })
-
-      await store.close()
+      } finally {
+        await store.close()
+      }
     },
   }
 }

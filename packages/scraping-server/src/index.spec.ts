@@ -6,9 +6,9 @@ import path from 'node:path'
 import { providerManifest as openAiProviderManifest } from '@kitsuyui/browser-extensions-quota-openai'
 import type { ProviderSnapshot } from '@kitsuyui/browser-extensions-scraping-platform'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { WebSocket } from 'ws'
+import { WebSocket, WebSocketServer } from 'ws'
 
-import { createScrapingServer } from './index'
+import { createScrapingServer, PrismaScrapedDataStore } from './index'
 
 const servers: Array<Awaited<ReturnType<typeof createServerForTest>>> = []
 
@@ -483,6 +483,37 @@ describe('createScrapingServer', () => {
         ])
       ).resolves.toBeUndefined()
     } finally {
+      await rm(resource.tempDir, { recursive: true, force: true })
+    }
+  })
+
+  it('closes the store when WebSocket shutdown fails', async () => {
+    const closeError = new Error('WebSocket server close failed.')
+    const originalClose = WebSocketServer.prototype.close
+    const webSocketCloseSpy = vi
+      .spyOn(WebSocketServer.prototype, 'close')
+      .mockImplementation(function closeWithError(
+        this: WebSocketServer,
+        callback?: (error?: Error) => void
+      ) {
+        originalClose.call(this, () => {
+          callback?.(closeError)
+        })
+      })
+    const storeCloseSpy = vi.spyOn(PrismaScrapedDataStore.prototype, 'close')
+    const resource = await createServerForTest()
+
+    const idx = servers.indexOf(resource)
+    if (idx !== -1) {
+      servers.splice(idx, 1)
+    }
+
+    try {
+      await expect(resource.server.close()).rejects.toThrow(closeError)
+      expect(storeCloseSpy).toHaveBeenCalledTimes(1)
+    } finally {
+      webSocketCloseSpy.mockRestore()
+      storeCloseSpy.mockRestore()
       await rm(resource.tempDir, { recursive: true, force: true })
     }
   })
