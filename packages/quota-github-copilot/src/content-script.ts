@@ -23,18 +23,15 @@ const RETRY_DELAY_MS = 1_000
 const OBSERVER_TIMEOUT_MS = 20_000
 
 let hasSentSnapshot = false
+let snapshotEmission: Promise<boolean> | undefined
 
 function getPageText(): string {
   return (document.body?.innerText ?? '').trim().slice(0, 20_000)
 }
 
-async function emitSnapshot(
+async function publishSnapshot(
   clock: IsoTimestampClock = resolveIsoTimestampClock()
 ): Promise<boolean> {
-  if (hasSentSnapshot) {
-    return true
-  }
-
   const capturedAt = clock.nowIso()
 
   await chrome?.storage?.local?.set?.({
@@ -62,6 +59,22 @@ async function emitSnapshot(
 
   hasSentSnapshot = true
   return true
+}
+
+export async function emitSnapshot(
+  clock: IsoTimestampClock = resolveIsoTimestampClock()
+): Promise<boolean> {
+  if (hasSentSnapshot) {
+    return true
+  }
+
+  snapshotEmission ??= publishSnapshot(clock)
+
+  try {
+    return await snapshotEmission
+  } finally {
+    snapshotEmission = undefined
+  }
 }
 
 function startCaptureLoop(
