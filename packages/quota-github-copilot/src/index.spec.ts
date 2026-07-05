@@ -34,6 +34,7 @@ describe('extractSnapshot', () => {
 
     expect(snapshot).toMatchObject({
       provider: 'github-copilot',
+      rawVersion: 'github-copilot-dom-v2',
       metrics: expect.arrayContaining([
         expect.objectContaining({
           key: 'premium_requests_used_percent',
