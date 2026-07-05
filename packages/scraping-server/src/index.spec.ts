@@ -3,12 +3,45 @@ import { request as httpRequest } from 'node:http'
 import os from 'node:os'
 import path from 'node:path'
 
-import { providerManifest as openAiProviderManifest } from '@kitsuyui/browser-extensions-quota-openai'
-import type { ProviderSnapshot } from '@kitsuyui/browser-extensions-scraping-platform'
+import type {
+  ProviderManifest,
+  ProviderSnapshot,
+} from '@kitsuyui/browser-extensions-scraping-platform'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { WebSocket, WebSocketServer } from 'ws'
 
 import { createScrapingServer, PrismaScrapedDataStore } from './index'
+
+const openAiProviderManifest: ProviderManifest = {
+  id: 'openai',
+  displayName: 'OpenAI',
+  matches: ['https://chatgpt.com/*', 'https://chat.openai.com/*'],
+  capabilities: ['usage'],
+  debugSelectors: [],
+  snapshotSchema: {
+    description: 'Usage and quota metrics for OpenAI (test fixture).',
+    rawVersions: [
+      {
+        rawVersion: 'openai-wham-usage-v1',
+        source: 'network',
+        description: 'Network usage response.',
+      },
+      {
+        rawVersion: 'openai-dom-v2',
+        source: 'dom',
+        description: 'DOM fallback.',
+      },
+    ],
+    metrics: [
+      {
+        key: 'codex_5h',
+        label: 'Codex 5h',
+        unit: 'percent',
+        description: 'Percent used in the 5-hour Codex window.',
+      },
+    ],
+  },
+}
 
 const servers: Array<Awaited<ReturnType<typeof createServerForTest>>> = []
 
