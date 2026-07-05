@@ -17,6 +17,14 @@ declare const chrome:
           ) => Promise<Record<string, unknown>> | Record<string, unknown>
           set: (items: Record<string, unknown>) => Promise<void> | void
         }
+        onChanged?: {
+          addListener: (
+            callback: (
+              changes: Record<string, unknown>,
+              areaName: string
+            ) => void
+          ) => void
+        }
       }
     }
   | undefined
@@ -190,3 +198,9 @@ if (toggle instanceof HTMLInputElement) {
     })()
   })
 }
+
+chrome?.storage?.onChanged?.addListener((_changes, areaName) => {
+  if (areaName === 'local') {
+    void render()
+  }
+})
