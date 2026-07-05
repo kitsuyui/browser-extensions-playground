@@ -269,7 +269,6 @@ describe('extractSnapshot', () => {
       source: 'network',
       confidence: 'high',
       rawVersion: 'openai-wham-usage-v1',
-      accountLabel: 'openai-quota-fixture@example.invalid',
       metrics: [
         {
           key: 'codex_5h',
@@ -319,6 +318,34 @@ describe('extractSnapshot', () => {
         },
       ],
     })
+    expect(snapshot?.accountLabel).toBeUndefined()
+  })
+
+  it('uses explicit accountLabel when provided to WHAM snapshot extraction', () => {
+    const usage = {
+      user_id: 'user-1',
+      account_id: 'user-1',
+      email: 'openai-quota-fixture@example.invalid',
+      plan_type: 'pro',
+      rate_limit: {
+        allowed: true,
+        limit_reached: false,
+        primary_window: {
+          used_percent: 0,
+          limit_window_seconds: 18_000,
+          reset_after_seconds: 17_390,
+          reset_at: 1_775_322_281,
+        },
+        secondary_window: null,
+      },
+    }
+
+    const snapshot = extractSnapshotFromWhamUsageResponse(usage, {
+      capturedAt: '2026-04-04T12:00:00.000Z',
+      accountLabel: 'my-team',
+    })
+
+    expect(snapshot?.accountLabel).toBe('my-team')
   })
 
   it('rejects non-finite WHAM rate limit window values', () => {
