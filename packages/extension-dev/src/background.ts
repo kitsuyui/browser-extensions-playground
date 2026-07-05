@@ -241,10 +241,10 @@ async function connect(): Promise<void> {
       stopHeartbeat()
       if (socket === nextSocket) {
         socket = null
+        void persistState({
+          devtoolsConnectionState: 'disconnected',
+        })
       }
-      void persistState({
-        devtoolsConnectionState: 'disconnected',
-      })
       void isExtensionEnabled().then((enabled) => {
         if (enabled) {
           scheduleReconnect()
@@ -256,10 +256,10 @@ async function connect(): Promise<void> {
       stopHeartbeat()
       if (socket === nextSocket) {
         socket = null
+        void persistState({
+          devtoolsConnectionState: 'disconnected',
+        })
       }
-      void persistState({
-        devtoolsConnectionState: 'disconnected',
-      })
       void isExtensionEnabled().then((enabled) => {
         if (enabled) {
           scheduleReconnect()
