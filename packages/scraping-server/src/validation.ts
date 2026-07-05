@@ -111,6 +111,8 @@ const devCommandResultSchema = z.object({
   ok: z.boolean(),
   result: z.unknown().optional(),
   error: z.string().optional(),
+  errorName: z.string().optional(),
+  errorStack: z.string().optional(),
 })
 
 const devtoolsHelloMessageSchema = z.object({

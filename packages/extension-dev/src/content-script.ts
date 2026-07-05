@@ -100,12 +100,40 @@ function createResult(
   payload: {
     readonly result?: unknown
     readonly error?: string
+    readonly errorName?: string
+    readonly errorStack?: string
   }
 ): DevCommandResult {
   return {
     commandId,
     ok,
     ...payload,
+  }
+}
+
+function serializeError(
+  error: unknown,
+  fallback: string
+): {
+  readonly error: string
+  readonly errorName?: string
+  readonly errorStack?: string
+} {
+  if (error instanceof Error) {
+    return {
+      error: error.message,
+      errorName: error.name,
+      errorStack: error.stack,
+    }
+  }
+
+  return {
+    error:
+      error === null || error === undefined
+        ? fallback
+        : typeof error === 'string' && error.length > 0
+          ? error
+          : String(error),
   }
 }
 
@@ -201,7 +229,7 @@ chrome?.runtime?.onMessage?.addListener((message, sender, sendResponse) => {
     } catch (error) {
       sendResponse(
         createResult(commandId, false, {
-          error: error instanceof Error ? error.message : 'unknown error',
+          ...serializeError(error, 'unknown error'),
         })
       )
     }
@@ -219,7 +247,7 @@ chrome?.runtime?.onMessage?.addListener((message, sender, sendResponse) => {
       .catch((error) => {
         sendResponse(
           createResult(commandId, false, {
-            error: error instanceof Error ? error.message : 'unknown error',
+            ...serializeError(error, 'unknown error'),
           })
         )
       })

@@ -398,6 +398,74 @@ describe('createScrapingServer', () => {
     client.close()
   })
 
+  it('logs malformed devtools messages with error details', async () => {
+    const logger = createLoggerSpy()
+    const { listening } = await createServerForTest(logger)
+    const client = new WebSocket(
+      `${listening.url.replace('http://', 'ws://')}/ws/dev`
+    )
+
+    await new Promise<void>((resolvePromise) => {
+      client.once('open', () => {
+        client.send('{')
+        resolvePromise()
+      })
+    })
+    await new Promise((resolvePromise) => setTimeout(resolvePromise, 10))
+
+    const warnCall = logger.warn.mock.calls.find(
+      ([message]) =>
+        message === '[scraping-server] ignored malformed devtools message'
+    )
+    const payload = warnCall?.[1] as { readonly error?: unknown } | undefined
+
+    expect(payload).toEqual(
+      expect.objectContaining({
+        reason: 'json-parse-error',
+        error: expect.any(Error),
+      })
+    )
+    expect((payload?.error as Error).stack).toContain(
+      (payload?.error as Error).message
+    )
+
+    client.close()
+  })
+
+  it('logs request failures with error details', async () => {
+    const logger = createLoggerSpy()
+    const { listening } = await createServerForTest(logger)
+
+    const response = await fetch(`${listening.url}/api/snapshots/ingest`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: '{',
+    })
+
+    expect(response.status).toBe(400)
+    expect(await response.json()).toMatchObject({
+      error: 'Request body must be valid JSON.',
+    })
+
+    const errorCall = logger.error.mock.calls.find(
+      ([message]) => message === '[scraping-server] request failed'
+    )
+    const payload = errorCall?.[1] as { readonly error?: unknown } | undefined
+
+    expect(payload).toEqual(
+      expect.objectContaining({
+        pathname: '/api/snapshots/ingest',
+        statusCode: 400,
+        error: expect.any(Error),
+      })
+    )
+    expect((payload?.error as Error).stack).toContain(
+      'Request body must be valid JSON.'
+    )
+  })
+
   it('rejects pending dev commands when the websocket client disconnects', async () => {
     const logger = createLoggerSpy()
     const { listening } = await createServerForTest(logger)

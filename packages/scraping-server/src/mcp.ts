@@ -13,6 +13,11 @@ type McpToolDefinition = {
   readonly inputSchema: Record<string, unknown>
 }
 
+type JsonRpcErrorData = {
+  readonly name?: string
+  readonly stack?: string
+}
+
 function writeMessage(message: unknown): void {
   const body = JSON.stringify(message)
   process.stdout.write(
@@ -28,14 +33,42 @@ function createSuccessResponse(id: JsonRpcId, result: unknown) {
   }
 }
 
-function createErrorResponse(id: JsonRpcId, code: number, message: string) {
+function createErrorResponse(
+  id: JsonRpcId,
+  code: number,
+  message: string,
+  data?: JsonRpcErrorData
+) {
   return {
     jsonrpc: '2.0' as const,
     id,
     error: {
       code,
       message,
+      ...(data ? { data } : {}),
     },
+  }
+}
+
+function serializeError(error: unknown, fallback: string) {
+  if (error instanceof Error) {
+    return {
+      message: error.message,
+      data: {
+        name: error.name,
+        stack: error.stack,
+      },
+    }
+  }
+
+  return {
+    message:
+      error === null || error === undefined
+        ? fallback
+        : typeof error === 'string' && error.length > 0
+          ? error
+          : String(error),
+    data: undefined,
   }
 }
 
@@ -154,11 +187,16 @@ async function writeToolCallResponse(
       createSuccessResponse(request.id ?? null, createMcpTextResult(result))
     )
   } catch (error) {
+    const serializedError = serializeError(
+      error,
+      'Unknown tool execution error.'
+    )
     writeMessage(
       createErrorResponse(
         request.id ?? null,
         -32000,
-        error instanceof Error ? error.message : 'Unknown tool execution error.'
+        serializedError.message,
+        serializedError.data
       )
     )
   }
