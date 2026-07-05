@@ -111,31 +111,35 @@
   } as XMLHttpRequest['open']
 
   XMLHttpRequest.prototype.send = function (...args) {
-    this.addEventListener('load', () => {
-      const requestUrl = toUrlString(
-        (this as XMLHttpRequest & { __quotaOpenAiUrl?: unknown })
-          .__quotaOpenAiUrl
-      )
+    this.addEventListener(
+      'load',
+      () => {
+        const requestUrl = toUrlString(
+          (this as XMLHttpRequest & { __quotaOpenAiUrl?: unknown })
+            .__quotaOpenAiUrl
+        )
 
-      if (matchesUsage(requestUrl) && typeof this.responseText === 'string') {
-        try {
-          postPayload(JSON.parse(this.responseText), {
-            transport: 'xhr',
-            url: requestUrl,
-            status: this.status,
-          })
-        } catch (e: unknown) {
-          console.debug(
-            '[quota-openai] failed to parse WHAM usage XHR response as JSON',
-            {
+        if (matchesUsage(requestUrl) && typeof this.responseText === 'string') {
+          try {
+            postPayload(JSON.parse(this.responseText), {
+              transport: 'xhr',
               url: requestUrl,
               status: this.status,
-              error: e,
-            }
-          )
+            })
+          } catch (e: unknown) {
+            console.debug(
+              '[quota-openai] failed to parse WHAM usage XHR response as JSON',
+              {
+                url: requestUrl,
+                status: this.status,
+                error: e,
+              }
+            )
+          }
         }
-      }
-    })
+      },
+      { once: true }
+    )
 
     return originalSend.call(this, ...args)
   }
