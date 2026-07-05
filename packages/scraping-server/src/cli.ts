@@ -19,6 +19,13 @@ Options:
   --help, -h           Show this help message
 `
 
+class CliUsageError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'CliUsageError'
+  }
+}
+
 function parseArgs(argv: readonly string[]) {
   const result = {
     host: DEFAULT_SERVER_HOST,
@@ -36,7 +43,7 @@ function parseArgs(argv: readonly string[]) {
 
     if (token === '--port') {
       if (value === undefined) {
-        throw new Error(
+        throw new CliUsageError(
           'Missing value for --port. Expected an integer between 0 and 65535.'
         )
       }
@@ -44,7 +51,7 @@ function parseArgs(argv: readonly string[]) {
       const port = Number(value)
 
       if (!Number.isInteger(port) || port < 0 || port > 65_535) {
-        throw new Error(
+        throw new CliUsageError(
           `Invalid --port value "${value}". Expected an integer between 0 and 65535.`
         )
       }
@@ -94,6 +101,19 @@ export async function main(): Promise<void> {
   process.stdout.write(`scraping server listening on ${listening.url}\n`)
 }
 
+export async function runCli(): Promise<void> {
+  try {
+    await main()
+  } catch (error) {
+    if (error instanceof CliUsageError) {
+      process.stderr.write(`${error.message}\n`)
+      process.exit(1)
+    }
+
+    throw error
+  }
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  void main()
+  void runCli()
 }
