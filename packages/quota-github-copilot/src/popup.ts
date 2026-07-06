@@ -53,22 +53,20 @@ async function loadState(): Promise<{
   readonly enabled: boolean
   readonly captureState: CaptureState | null
 }> {
-  const [record, deterministicState] = await Promise.all([
-    chrome?.storage?.local?.get?.([
-      DETERMINISTIC_EXTENSION_ENABLED_KEY,
-      'githubCopilotCaptureState',
-    ]),
-    loadDeterministicExtensionStorageState(providerManifest.id),
-  ])
+  const deterministicState = await loadDeterministicExtensionStorageState(
+    providerManifest.id
+  )
 
   return {
     latestSnapshot:
       (deterministicState.latestSnapshot as Snapshot | null) ?? null,
     syncStatus:
       (deterministicState.syncStatus as Record<string, unknown> | null) ?? null,
-    enabled: record?.[DETERMINISTIC_EXTENSION_ENABLED_KEY] !== false,
+    enabled: deterministicState.enabled,
     captureState:
-      (record?.githubCopilotCaptureState as CaptureState | undefined) ?? null,
+      (deterministicState.record.githubCopilotCaptureState as
+        | CaptureState
+        | undefined) ?? null,
   }
 }
 
