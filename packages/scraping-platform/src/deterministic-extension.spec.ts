@@ -98,6 +98,11 @@ describe('getDeterministicExtensionStorageKeys', () => {
     await expect(
       loadDeterministicExtensionStorageState('openai')
     ).resolves.toEqual({
+      enabled: true,
+      record: {
+        latestSnapshot,
+        syncStatus,
+      },
       latestSnapshot,
       syncStatus,
     })
@@ -128,6 +133,11 @@ describe('getDeterministicExtensionStorageKeys', () => {
     await expect(
       loadDeterministicExtensionStorageState('openai')
     ).resolves.toEqual({
+      enabled: true,
+      record: {
+        latestSnapshot: { provider: 'anthropic' },
+        syncStatus: { provider: 'anthropic', status: 'success' },
+      },
       latestSnapshot: null,
       syncStatus: null,
     })
