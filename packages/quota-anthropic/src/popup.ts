@@ -63,22 +63,20 @@ async function loadState(): Promise<{
   readonly enabled: boolean
   readonly usageApiState: UsageApiState | null
 }> {
-  const [record, deterministicState] = await Promise.all([
-    chrome?.storage?.local?.get?.([
-      DETERMINISTIC_EXTENSION_ENABLED_KEY,
-      'anthropicUsageApiState',
-    ]),
-    loadDeterministicExtensionStorageState(providerManifest.id),
-  ])
+  const deterministicState = await loadDeterministicExtensionStorageState(
+    providerManifest.id
+  )
 
   return {
     latestSnapshot:
       (deterministicState.latestSnapshot as Snapshot | null) ?? null,
     syncStatus:
       (deterministicState.syncStatus as Record<string, unknown> | null) ?? null,
-    enabled: record?.[DETERMINISTIC_EXTENSION_ENABLED_KEY] !== false,
+    enabled: deterministicState.enabled,
     usageApiState:
-      (record?.anthropicUsageApiState as UsageApiState | undefined) ?? null,
+      (deterministicState.record.anthropicUsageApiState as
+        | UsageApiState
+        | undefined) ?? null,
   }
 }
 

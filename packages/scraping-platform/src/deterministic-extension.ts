@@ -185,6 +185,8 @@ async function removeProviderLegacyStorageKeys(
 export async function loadDeterministicExtensionStorageState(
   provider: string
 ): Promise<{
+  readonly enabled: boolean
+  readonly record: Record<string, unknown>
   readonly latestSnapshot: unknown
   readonly syncStatus: unknown
 }> {
@@ -200,6 +202,7 @@ export async function loadDeterministicExtensionStorageState(
   const syncStatus =
     record[storageKeys.syncStatus] ??
     (hasProvider(legacySyncStatus, provider) ? legacySyncStatus : null)
+  const enabled = record[DETERMINISTIC_EXTENSION_ENABLED_KEY] !== false
   const migratedEntries: Record<string, unknown> = {}
 
   if (
@@ -223,6 +226,8 @@ export async function loadDeterministicExtensionStorageState(
   await removeProviderLegacyStorageKeys(provider, record)
 
   return {
+    enabled,
+    record,
     latestSnapshot,
     syncStatus,
   }
