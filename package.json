@@ -19,7 +19,7 @@
     "test": "bun run prisma:generate && vitest run --coverage",
     "validate": "bun run --workspaces --if-present --sequential validate",
     "typecheck": "bun run prisma:generate && tsc --strict -p tsconfig.json --noEmit --skipLibCheck --downlevelIteration",
-    "typedoc": "typedoc --out build/typedocs --treatValidationWarningsAsErrors --treatWarningsAsErrors",
+    "typedoc": "bun run prisma:generate && typedoc --out build/typedocs --treatValidationWarningsAsErrors --treatWarningsAsErrors",
     "typedoc:server": "python3 -m http.server --directory build/typedocs"
   },
   "devDependencies": {

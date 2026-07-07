@@ -371,7 +371,7 @@ function isRateLimitWindow(value: unknown): value is OpenAIRateLimitWindow {
     Number.isFinite(candidate.used_percent) &&
     Number.isFinite(candidate.limit_window_seconds) &&
     Number.isFinite(candidate.reset_after_seconds) &&
-    Number.isFinite(candidate.reset_at)
+    typeof candidate.reset_at === 'number'
   )
 }
 
