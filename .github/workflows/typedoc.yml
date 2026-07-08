@@ -39,10 +39,6 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
-      - name: Generate Prisma client
-        working-directory: packages/scraping-server
-        run: bunx prisma generate
-
       - run: bun run typedoc
 
       - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
