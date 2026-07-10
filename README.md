@@ -13,7 +13,7 @@ This workspace centers on a single local scraping server.
 
 - [packages/scraping-server](./packages/scraping-server/README.md): unified HTTP and WebSocket server
 - [packages/scraping-platform](./packages/scraping-platform/README.md): provider manifests and shared scraping helpers
-- [packages/extension-dev](./packages/extension-dev/README.md): dangerous developer extension for remote browser control
+- [packages/scraping-extension-devtools](./packages/scraping-extension-devtools/README.md): dangerous developer extension for remote browser control
 - [packages/example-com](./packages/example-com/README.md): deterministic example.com extension used for automated end-to-end testing
 - [packages/scraped-data](./packages/scraped-data/README.md): generic read-only accessors over server API
 - [packages/scraping-devtools](./packages/scraping-devtools/README.md): CLI/MCP client for the server-side devtools control API

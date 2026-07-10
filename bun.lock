@@ -31,20 +31,7 @@
         "@kitsuyui/browser-extensions-scraping-platform": "workspace:*",
       },
       "devDependencies": {
-        "@kitsuyui/browser-extensions-scraping-server": "workspace:*",
-      },
-    },
-    "packages/extension-dev": {
-      "name": "@kitsuyui/browser-extensions-scraping-extension-devtools",
-      "version": "0.0.0",
-      "dependencies": {
-        "@kitsuyui/browser-extensions-example-com": "workspace:*",
-        "@kitsuyui/browser-extensions-quota-anthropic": "workspace:*",
-        "@kitsuyui/browser-extensions-quota-github-copilot": "workspace:*",
-        "@kitsuyui/browser-extensions-quota-openai": "workspace:*",
-        "@kitsuyui/browser-extensions-scraping-platform": "workspace:*",
-      },
-      "devDependencies": {
+        "@kitsuyui/browser-extensions-scraping-devtools": "workspace:*",
         "@kitsuyui/browser-extensions-scraping-server": "workspace:*",
       },
     },
@@ -92,6 +79,20 @@
       },
       "dependencies": {
         "@kitsuyui/browser-extensions-scraping-platform": "workspace:*",
+        "@kitsuyui/browser-extensions-scraping-server": "workspace:*",
+      },
+    },
+    "packages/scraping-extension-devtools": {
+      "name": "@kitsuyui/browser-extensions-scraping-extension-devtools",
+      "version": "0.0.0",
+      "dependencies": {
+        "@kitsuyui/browser-extensions-example-com": "workspace:*",
+        "@kitsuyui/browser-extensions-quota-anthropic": "workspace:*",
+        "@kitsuyui/browser-extensions-quota-github-copilot": "workspace:*",
+        "@kitsuyui/browser-extensions-quota-openai": "workspace:*",
+        "@kitsuyui/browser-extensions-scraping-platform": "workspace:*",
+      },
+      "devDependencies": {
         "@kitsuyui/browser-extensions-scraping-server": "workspace:*",
       },
     },
@@ -236,7 +237,7 @@
 
     "@kitsuyui/browser-extensions-scraping-devtools": ["@kitsuyui/browser-extensions-scraping-devtools@workspace:packages/scraping-devtools"],
 
-    "@kitsuyui/browser-extensions-scraping-extension-devtools": ["@kitsuyui/browser-extensions-scraping-extension-devtools@workspace:packages/extension-dev"],
+    "@kitsuyui/browser-extensions-scraping-extension-devtools": ["@kitsuyui/browser-extensions-scraping-extension-devtools@workspace:packages/scraping-extension-devtools"],
 
     "@kitsuyui/browser-extensions-scraping-platform": ["@kitsuyui/browser-extensions-scraping-platform@workspace:packages/scraping-platform"],
 

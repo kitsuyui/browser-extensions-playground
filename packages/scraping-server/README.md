@@ -49,7 +49,7 @@ bun run --filter @kitsuyui/browser-extensions-scraping-server start -- --store-f
 
 - `ws://127.0.0.1:3929/ws/dev`
 
-Used by [extension-dev](../extension-dev/README.md).
+Used by [scraping-extension-devtools](../scraping-extension-devtools/README.md).
 
 ## Latest Queries
 
