@@ -12,6 +12,16 @@ export * from './model'
 export * from './server-config'
 export * from './time'
 
+// Slice by UTF-16 code units while avoiding splitting a surrogate pair.
+// If the cut point lands on a high surrogate (0xD800–0xDBFF), step back by one
+// so the paired low surrogate is not orphaned in the result.
+function sliceSafe(str: string, maxLen: number): string {
+  if (str.length <= maxLen) return str
+  const code = str.charCodeAt(maxLen - 1)
+  const end = code >= 0xd800 && code <= 0xdbff ? maxLen - 1 : maxLen
+  return str.slice(0, end)
+}
+
 export function collectDomProbeMatches(
   doc: Document,
   probes: readonly DomProbe[]
@@ -35,15 +45,15 @@ export function collectDomProbeMatches(
     return [
       {
         ...probe,
-        text: elementLike.innerText.trim().slice(0, 1_000),
-        htmlSnippet: elementLike.outerHTML.trim().slice(0, 1_000),
+        text: sliceSafe(elementLike.innerText.trim(), 1_000),
+        htmlSnippet: sliceSafe(elementLike.outerHTML.trim(), 1_000),
       },
     ]
   })
 }
 
 function getPageText(doc: Document): string {
-  return (doc.body?.innerText ?? '').trim().slice(0, 20_000)
+  return sliceSafe((doc.body?.innerText ?? '').trim(), 20_000)
 }
 
 /**
