@@ -26,7 +26,14 @@ POST http://127.0.0.1:3929/api/dev/commands
 
 Any process running on your machine can POST to this endpoint and cause the extension to execute arbitrary JavaScript in provider tabs (Claude.ai, ChatGPT, GitHub Copilot settings, etc.) or fetch authenticated API responses via `credentials: 'include'`.
 
-The server binds only to `127.0.0.1`, so remote attackers are blocked, but local processes — including other browser extensions, scripts, or malware — are not.
+The server accepts only `application/json` requests and rejects browser `Origin`
+values other than the local scraping server itself or the extension origin.
+That blocks blind cross-site POSTs from arbitrary web pages, but the endpoint
+still remains unauthenticated for local processes that can connect to
+`127.0.0.1`.
+
+Remote attackers on the network are blocked by the loopback bind, but local
+processes — including other browser extensions, scripts, or malware — are not.
 
 **Disable the extension when not actively developing.** Do not leave it enabled in a browser used for daily work.
 

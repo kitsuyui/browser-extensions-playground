@@ -501,6 +501,65 @@ describe('createScrapingServer', () => {
     })
   })
 
+  it('rejects cross-site browser origins for /api/dev/commands', async () => {
+    const { listening } = await createServerForTest()
+
+    const response = await fetch(`${listening.url}/api/dev/commands`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        origin: 'https://evil.example',
+      },
+      body: JSON.stringify({
+        command: { type: 'capture-page' },
+      }),
+    })
+
+    expect(response.status).toBe(403)
+    expect(await response.json()).toMatchObject({
+      error: 'Cross-origin browser requests are not allowed for this endpoint.',
+    })
+  })
+
+  it('accepts localhost browser origins for /api/dev/commands', async () => {
+    const { listening } = await createServerForTest()
+
+    const response = await fetch(`${listening.url}/api/dev/commands`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        origin: listening.url,
+      },
+      body: JSON.stringify({
+        command: { type: 'capture-page' },
+      }),
+    })
+
+    expect(response.status).toBe(409)
+    expect(await response.json()).toMatchObject({
+      error: 'No devtool websocket clients are connected.',
+    })
+  })
+
+  it('returns 415 when /api/dev/commands does not use application/json', async () => {
+    const { listening } = await createServerForTest()
+
+    const response = await fetch(`${listening.url}/api/dev/commands`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'text/plain',
+      },
+      body: JSON.stringify({
+        command: { type: 'capture-page' },
+      }),
+    })
+
+    expect(response.status).toBe(415)
+    expect(await response.json()).toMatchObject({
+      error: 'Request body must use Content-Type: application/json.',
+    })
+  })
+
   it('rejects pending dev commands when the websocket client disconnects', async () => {
     const logger = createLoggerSpy()
     const { listening } = await createServerForTest(logger)
