@@ -65,21 +65,9 @@ export type ScrapingServerStatus = {
   readonly devClients: readonly DevClientInfo[]
 }
 
-export type DevCommand =
-  | {
-      readonly type: 'capture-page'
-    }
-  | {
-      readonly type: 'execute-script'
-      readonly source: string
-    }
-  | {
-      readonly type: 'fetch-json'
-      readonly url: string
-      readonly method?: 'GET' | 'POST'
-      readonly headers?: Record<string, string>
-      readonly body?: string
-    }
+export type DevCommand = {
+  readonly type: 'capture-page'
+}
 
 export type DevCommandRequest = {
   readonly targetClientId?: string

@@ -58,40 +58,6 @@ const TOOLS = [
       additionalProperties: false,
     },
   },
-  {
-    name: 'execute_script',
-    description:
-      'Run an arbitrary script through a connected devtools browser client. ' +
-      'When targetClientId is omitted, the command is dispatched to the first connected client (insertion order). ' +
-      'Use list_clients to discover available client IDs when multiple browsers are connected.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        source: { type: 'string' },
-        serverUrl: { type: 'string' },
-        targetClientId: { type: 'string' },
-      },
-      required: ['source'],
-      additionalProperties: false,
-    },
-  },
-  {
-    name: 'fetch_json',
-    description:
-      'Fetch a JSON endpoint through a connected devtools browser client. ' +
-      'When targetClientId is omitted, the command is dispatched to the first connected client (insertion order). ' +
-      'Use list_clients to discover available client IDs when multiple browsers are connected.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        url: { type: 'string' },
-        serverUrl: { type: 'string' },
-        targetClientId: { type: 'string' },
-      },
-      required: ['url'],
-      additionalProperties: false,
-    },
-  },
 ] as const
 
 function resolveBaseUrl(args: Record<string, unknown> | undefined): string {
@@ -122,32 +88,6 @@ export async function callScrapingDevtoolsTool(
           type: 'capture-page',
         },
       })
-    case 'execute_script': {
-      if (typeof args?.source !== 'string') {
-        throw new Error('execute_script requires a source string')
-      }
-
-      return tools.runDevCommand({
-        targetClientId,
-        command: {
-          type: 'execute-script',
-          source: args.source,
-        },
-      })
-    }
-    case 'fetch_json': {
-      if (typeof args?.url !== 'string') {
-        throw new Error('fetch_json requires a url string')
-      }
-
-      return tools.runDevCommand({
-        targetClientId,
-        command: {
-          type: 'fetch-json',
-          url: args.url,
-        },
-      })
-    }
     default:
       throw new Error(`Unknown scraping-devtools tool: ${name}`)
   }

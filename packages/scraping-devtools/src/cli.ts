@@ -10,8 +10,6 @@ const USAGE = `Usage:
   node dist/cli.mjs status [server-url]
   node dist/cli.mjs list-clients [server-url]
   node dist/cli.mjs capture-page [server-url]
-  node dist/cli.mjs execute-script <source> [server-url]
-  node dist/cli.mjs fetch-json <url> [server-url]
 
 Options:
   --help, -h   Show this help message
@@ -71,56 +69,6 @@ export async function main(): Promise<void> {
         await tools.runDevCommand({
           command: {
             type: 'capture-page',
-          },
-        }),
-        null,
-        2
-      )}\n`
-    )
-    return
-  }
-
-  if (command === 'execute-script') {
-    const source = args[0]
-
-    if (!source) {
-      process.stderr.write('execute-script requires a source string\n')
-      process.exit(1)
-    }
-
-    const tools = createTools(1)
-
-    process.stdout.write(
-      `${JSON.stringify(
-        await tools.runDevCommand({
-          command: {
-            type: 'execute-script',
-            source,
-          },
-        }),
-        null,
-        2
-      )}\n`
-    )
-    return
-  }
-
-  if (command === 'fetch-json') {
-    const url = args[0]
-
-    if (!url) {
-      process.stderr.write('fetch-json requires a url string\n')
-      process.exit(1)
-    }
-
-    const tools = createTools(1)
-
-    process.stdout.write(
-      `${JSON.stringify(
-        await tools.runDevCommand({
-          command: {
-            type: 'fetch-json',
-            url,
           },
         }),
         null,

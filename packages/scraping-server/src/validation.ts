@@ -82,23 +82,10 @@ const deterministicIngestRequestSchema = z
     'providerManifest.id must match snapshot.provider.'
   )
 
-const fetchJsonCommandSchema = z.object({
-  type: z.literal('fetch-json'),
-  url: z.string(),
-  method: z.enum(['GET', 'POST']).optional(),
-  headers: z.record(z.string(), z.string()).optional(),
-  body: z.string().optional(),
-})
-
 const devCommandSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('capture-page'),
   }),
-  z.object({
-    type: z.literal('execute-script'),
-    source: z.string(),
-  }),
-  fetchJsonCommandSchema,
 ])
 
 const devCommandRequestSchema = z.object({

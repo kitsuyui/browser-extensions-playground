@@ -15,7 +15,6 @@ import { providerExtractor as anthropicProviderExtractor } from '../../quota-ant
 import { providerExtractor as githubCopilotProviderExtractor } from '../../quota-github-copilot/src/index'
 import { providerExtractor as openAiProviderExtractor } from '../../quota-openai/src/index'
 import { inferProviderId } from './providers'
-import { isExtensionSender } from './sender'
 
 const KNOWN_PROVIDER_EXTRACTORS: readonly ProviderExtractor[] = [
   openAiProviderExtractor,
@@ -45,57 +44,6 @@ declare const chrome:
     }
   | undefined
 
-function serializeValue(value: unknown): unknown {
-  if (value === undefined) {
-    return null
-  }
-
-  try {
-    return JSON.parse(JSON.stringify(value))
-  } catch {
-    return String(value)
-  }
-}
-
-function runDangerousScript(source: string): unknown {
-  const execute = new Function('document', 'window', source)
-  return execute(document, window)
-}
-
-async function fetchJsonFromPage(
-  command: Extract<DevCommand, { type: 'fetch-json' }>
-): Promise<unknown> {
-  const response = await fetch(command.url, {
-    method: command.method ?? 'GET',
-    headers: command.headers,
-    body: command.body,
-    credentials: 'include',
-  })
-
-  const text = await response.text()
-  let json: unknown = null
-
-  try {
-    json = JSON.parse(text)
-  } catch {
-    json = null
-  }
-
-  const headers: Record<string, string> = {}
-  response.headers.forEach((value, key) => {
-    headers[key] = value
-  })
-
-  return {
-    ok: response.ok,
-    status: response.status,
-    statusText: response.statusText,
-    url: response.url,
-    headers,
-    body: json ?? text,
-  }
-}
-
 function createResult(
   commandId: string,
   ok: boolean,
@@ -110,32 +58,6 @@ function createResult(
     commandId,
     ok,
     ...payload,
-  }
-}
-
-function serializeError(
-  error: unknown,
-  fallback: string
-): {
-  readonly error: string
-  readonly errorName?: string
-  readonly errorStack?: string
-} {
-  if (error instanceof Error) {
-    return {
-      error: error.message,
-      errorName: error.name,
-      errorStack: error.stack,
-    }
-  }
-
-  return {
-    error:
-      error === null || error === undefined
-        ? fallback
-        : typeof error === 'string' && error.length > 0
-          ? error
-          : String(error),
   }
 }
 
@@ -198,7 +120,7 @@ function createGenericCaptureFromDocument(
   }
 }
 
-chrome?.runtime?.onMessage?.addListener((message, sender, sendResponse) => {
+chrome?.runtime?.onMessage?.addListener((message, _sender, sendResponse) => {
   const commandId = message.commandId
 
   if (
@@ -216,45 +138,6 @@ chrome?.runtime?.onMessage?.addListener((message, sender, sendResponse) => {
       })
     )
     return
-  }
-
-  if (message.command.type === 'execute-script') {
-    if (!isExtensionSender(sender, chrome?.runtime?.id)) {
-      sendResponse(createResult(commandId, false, { error: 'unauthorized' }))
-      return
-    }
-    try {
-      const result = runDangerousScript(message.command.source)
-      sendResponse(
-        createResult(commandId, true, {
-          result: serializeValue(result),
-        })
-      )
-    } catch (error) {
-      sendResponse(
-        createResult(commandId, false, {
-          ...serializeError(error, 'unknown error'),
-        })
-      )
-    }
-  }
-
-  if (message.command.type === 'fetch-json') {
-    void fetchJsonFromPage(message.command)
-      .then((result) => {
-        sendResponse(
-          createResult(commandId, true, {
-            result: serializeValue(result),
-          })
-        )
-      })
-      .catch((error) => {
-        sendResponse(
-          createResult(commandId, false, {
-            ...serializeError(error, 'unknown error'),
-          })
-        )
-      })
   }
 
   return true
