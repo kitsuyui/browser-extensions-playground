@@ -51,6 +51,20 @@ bun run --filter @kitsuyui/browser-extensions-scraping-server start -- --store-f
 
 Used by [scraping-extension-devtools](../scraping-extension-devtools/README.md).
 
+## Dev Command Boundary
+
+`POST /api/dev/commands` is intentionally unauthenticated for local development,
+but it is not open to arbitrary web pages.
+
+- browser requests must present an allowed `Origin` (`chrome-extension://...`
+  or the local server origin)
+- command requests must use `Content-Type: application/json`
+- non-browser local clients may omit `Origin`, so local processes still remain
+  in the trust boundary
+
+This keeps the endpoint usable for local tooling while blocking blind cross-site
+simple requests from unrelated sites opened in the browser.
+
 ## Latest Queries
 
 `GET /api/snapshots/latest` accepts:

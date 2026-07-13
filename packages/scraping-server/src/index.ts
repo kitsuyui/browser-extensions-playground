@@ -129,6 +129,20 @@ class InvalidDevCommandRequestError extends Error {
   }
 }
 
+class InvalidContentTypeError extends Error {
+  constructor() {
+    super('Request body must use Content-Type: application/json.')
+    this.name = 'InvalidContentTypeError'
+  }
+}
+
+class InvalidOriginError extends Error {
+  constructor() {
+    super('Cross-origin browser requests are not allowed for this endpoint.')
+    this.name = 'InvalidOriginError'
+  }
+}
+
 class InvalidDeterministicHistoryQueryError extends Error {
   constructor(message: string) {
     super(message)
@@ -512,6 +526,21 @@ function parseDevtoolsMessage(buffer: RawData, logger: ScrapingServerLogger) {
   }
 }
 
+function hasJsonContentType(contentTypeHeader: string | undefined): boolean {
+  if (!contentTypeHeader) {
+    return false
+  }
+
+  const mediaType = contentTypeHeader.split(';', 1)[0]?.trim().toLowerCase()
+  return mediaType === 'application/json'
+}
+
+function requireJsonContentType(request: IncomingMessage): void {
+  if (!hasJsonContentType(request.headers['content-type'])) {
+    throw new InvalidContentTypeError()
+  }
+}
+
 async function readJsonBody<T>(request: IncomingMessage): Promise<T> {
   const chunks: Uint8Array[] = []
   let totalBytes = 0
@@ -566,6 +595,8 @@ type ScrapingRequestContext = {
   readonly pendingCommands: Map<string, PendingCommand>
   readonly logger: ScrapingServerLogger
   readonly requestId: string
+  readonly host: string
+  readonly port: number
 }
 
 function serializeDevClients(
@@ -766,10 +797,24 @@ function isClientRequestError(error: unknown): boolean {
     error instanceof BodyTooLargeError ||
     error instanceof InvalidDeterministicIngestError ||
     error instanceof InvalidDevCommandRequestError ||
+    error instanceof InvalidContentTypeError ||
+    error instanceof InvalidOriginError ||
     error instanceof InvalidDeterministicHistoryQueryError ||
     error instanceof InvalidDeterministicLatestQueryError ||
     error instanceof URIError
   )
+}
+
+function getClientRequestStatusCode(error: unknown): number {
+  if (error instanceof InvalidOriginError) {
+    return 403
+  }
+
+  if (error instanceof InvalidContentTypeError) {
+    return 415
+  }
+
+  return 400
 }
 
 async function handleScrapingRoute(
@@ -847,6 +892,11 @@ async function handleScrapingRoute(
       writeJson(response, 200, serializeDevClients(context.devClients))
       return
     case 'devCommands': {
+      if (!isValidOrigin(request.headers.origin, context.host, context.port)) {
+        throw new InvalidOriginError()
+      }
+      requireJsonContentType(request)
+
       const body = validateDevCommandRequest(
         await readJsonBody<DevCommandRequest>(request)
       )
@@ -940,7 +990,7 @@ export function createScrapingServer(options: {
   const logger = createLogger(options.logger)
 
   const httpServer = createServer(async (request, response) => {
-    if (!isValidHost(request.headers['host'], host, actualPort)) {
+    if (!isValidHost(request.headers.host, host, actualPort)) {
       writeJson(response, 421, { error: 'Misdirected Request' })
       return
     }
@@ -963,12 +1013,18 @@ export function createScrapingServer(options: {
           pendingCommands,
           logger,
           requestId,
+          host,
+          port: actualPort,
         }
       )
     } catch (error) {
-      writeJson(response, isClientRequestError(error) ? 400 : 500, {
-        error: getErrorMessage(error, 'Internal server error.'),
-      })
+      writeJson(
+        response,
+        isClientRequestError(error) ? getClientRequestStatusCode(error) : 500,
+        {
+          error: getErrorMessage(error, 'Internal server error.'),
+        }
+      )
       logger.error('[scraping-server] request failed', {
         requestId,
         method,
@@ -1076,12 +1132,12 @@ export function createScrapingServer(options: {
   })
 
   httpServer.on('upgrade', (request, socket, head) => {
-    if (!isValidHost(request.headers['host'], host, actualPort)) {
+    if (!isValidHost(request.headers.host, host, actualPort)) {
       socket.destroy()
       return
     }
 
-    if (!isValidOrigin(request.headers['origin'], host, actualPort)) {
+    if (!isValidOrigin(request.headers.origin, host, actualPort)) {
       socket.destroy()
       return
     }
