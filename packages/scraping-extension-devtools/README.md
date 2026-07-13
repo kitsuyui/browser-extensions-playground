@@ -24,7 +24,7 @@ While scraping-extension-devtools is enabled, the local scraping server exposes 
 POST http://127.0.0.1:3929/api/dev/commands
 ```
 
-Any process running on your machine can POST to this endpoint and cause the extension to execute arbitrary JavaScript in provider tabs (Claude.ai, ChatGPT, GitHub Copilot settings, etc.) or fetch authenticated API responses via `credentials: 'include'`.
+Any process running on your machine can POST to this endpoint and ask the extension to capture DOM content from the provider tab currently connected to the local devtools server.
 
 The server accepts only `application/json` requests and rejects browser `Origin`
 values other than the local scraping server itself or the extension origin.

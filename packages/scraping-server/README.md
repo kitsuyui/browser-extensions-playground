@@ -7,7 +7,7 @@ Unified local HTTP and WebSocket server for browser scraping workflows.
 - accept normalized usage snapshots over HTTP
 - preserve historical snapshots in SQLite
 - expose latest and history APIs to downstream tools
-- broker devtools WebSocket commands for the dangerous developer extension
+- broker page-capture commands for the dangerous developer extension
 
 ## Storage
 

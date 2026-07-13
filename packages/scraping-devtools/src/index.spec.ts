@@ -89,8 +89,7 @@ describe('createScrapingDevtoolsTools', () => {
     await expect(
       tools.runDevCommand({
         command: {
-          type: 'fetch-json',
-          url: 'https://claude.ai/api/example',
+          type: 'capture-page',
         },
       })
     ).resolves.toMatchObject({
@@ -109,7 +108,7 @@ describe('createScrapingDevtoolsTools', () => {
     await expect(tools.listDevClients()).rejects.toThrow('HTTP 500')
     await expect(
       tools.runDevCommand({
-        command: { type: 'fetch-json', url: 'https://example.com' },
+        command: { type: 'capture-page' },
       })
     ).rejects.toThrow('HTTP 500')
   })
@@ -129,9 +128,7 @@ describe('createScrapingDevtoolsTools', () => {
       ok: true,
     })
     await expect(
-      callScrapingDevtoolsTool('fetch_json', {
-        url: 'https://claude.ai/api/example',
-      })
+      callScrapingDevtoolsTool('capture_page', {})
     ).resolves.toMatchObject({
       ok: true,
     })
