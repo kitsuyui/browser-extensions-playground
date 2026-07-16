@@ -3,9 +3,37 @@ on:
   schedule:
     # daily at 00:00
     - cron: '0 0 * * *'
+  workflow_dispatch:
 permissions:
   contents: write
-  pull-requests: write
+  pull-requests: read
 jobs:
   update-gitignore:
-    uses: kitsuyui/gh-actions-workflows/.github/workflows/gitignore-in.yml@0b691527a4dde052c79eae22706131a7726a2bba
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: gitignore-in/install-gibo@v0.1.0
+
+      - name: Install gitignore.in
+        run: |
+          tmpdir=$(mktemp -d)
+          cd "${tmpdir}"
+          version=v0.2.0
+          target=gitignore-in-x86_64-unknown-linux-gnu-v0.2.0.tar.gz
+          url="https://github.com/gitignore-in/gitignore-in/releases/download/${version}/${target}"
+          wget "${url}"
+          tar -xzf "${target}"
+          cp gitignore.in /usr/local/bin
+          chmod +x /usr/local/bin/gitignore.in
+          rm -rf "${tmpdir}"
+
+      - name: Run gitignore.in
+        run: gitignore.in
+
+      - name: Update gitignore branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/update-gitignore-branch.sh
