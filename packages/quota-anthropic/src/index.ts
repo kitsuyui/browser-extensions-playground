@@ -79,8 +79,7 @@ export const providerManifest: ProviderManifest = {
         key: 'extra_usage_credits',
         label: 'Extra usage',
         unit: 'credits',
-        description:
-          'Consumed or remaining extra-usage credits from the monthly cap.',
+        description: 'Remaining extra-usage credits from the monthly cap.',
       },
       {
         key: 'usage',
@@ -312,13 +311,14 @@ export function extractSnapshotFromUsageResponse(
   }
 
   if (usage.extra_usage) {
-    const remaining =
-      typeof usage.extra_usage.used_credits === 'number'
-        ? usage.extra_usage.used_credits
-        : undefined
     const limit =
       typeof usage.extra_usage.monthly_limit === 'number'
         ? usage.extra_usage.monthly_limit
+        : undefined
+    const remaining =
+      typeof limit === 'number' &&
+      typeof usage.extra_usage.used_credits === 'number'
+        ? Math.max(limit - usage.extra_usage.used_credits, 0)
         : undefined
 
     if (typeof remaining === 'number' || typeof limit === 'number') {

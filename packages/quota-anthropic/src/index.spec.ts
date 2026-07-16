@@ -145,7 +145,7 @@ describe('extractSnapshot', () => {
         {
           key: 'extra_usage_credits',
           label: 'Extra usage',
-          remaining: 56,
+          remaining: 1944,
           limit: 2000,
           unit: 'credits',
         },
@@ -193,6 +193,27 @@ describe('extractSnapshot', () => {
       ],
     })
     expect(snapshot?.metrics).toHaveLength(1)
+  })
+
+  it('does not store used credits as remaining when the API omits the limit', () => {
+    const usage = {
+      five_hour: null,
+      seven_day: null,
+      extra_usage: {
+        is_enabled: true,
+        monthly_limit: null,
+        used_credits: 56,
+        utilization: null,
+      },
+    }
+
+    expect(isAnthropicUsageResponse(usage)).toBe(true)
+
+    const snapshot = extractSnapshotFromUsageResponse(usage, {
+      capturedAt: '2026-04-04T11:38:20.000Z',
+    })
+
+    expect(snapshot).toBeNull()
   })
 
   it('omits ambiguous API reset timestamps', () => {
