@@ -18,17 +18,7 @@ jobs:
       - uses: gitignore-in/install-gibo@v0.1.0
 
       - name: Install gitignore.in
-        run: |
-          tmpdir=$(mktemp -d)
-          cd "${tmpdir}"
-          version=v0.2.0
-          target=gitignore-in-x86_64-unknown-linux-gnu-v0.2.0.tar.gz
-          url="https://github.com/gitignore-in/gitignore-in/releases/download/${version}/${target}"
-          wget "${url}"
-          tar -xzf "${target}"
-          cp gitignore.in /usr/local/bin
-          chmod +x /usr/local/bin/gitignore.in
-          rm -rf "${tmpdir}"
+        run: bash scripts/install-gitignore-in.sh
 
       - name: Run gitignore.in
         run: gitignore.in

@@ -9,9 +9,18 @@ if ! git diff --name-only -- .gitignore | grep -q .; then
   exit 0
 fi
 
-if ! git diff -- .gitignore \
-  | grep '^[+-][^+-]' \
-  | grep -vq -e '^[+-][[:space:]]*#' -e '^$'; then
+if ! git diff --unified=0 -- .gitignore \
+  | awk '
+      /^[+-]/ && $0 !~ /^(\+\+\+|---)/ {
+        line = substr($0, 2)
+        if (line !~ /^[[:space:]]*#/ && line !~ /^[[:space:]]*$/) {
+          found = 1
+        }
+      }
+      END {
+        exit(found ? 0 : 1)
+      }
+    '; then
   echo "changed=false" >> "${GITHUB_OUTPUT:-/dev/stdout}"
   exit 0
 fi
