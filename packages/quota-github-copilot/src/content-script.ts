@@ -1,5 +1,6 @@
 import {
   type IsoTimestampClock,
+  logExtensionWarning,
   resolveIsoTimestampClock,
 } from '@kitsuyui/browser-extensions-scraping-platform'
 import { extractSnapshot, providerManifest } from './index'
@@ -21,6 +22,7 @@ const CAPTURE_STATE_KEY = 'githubCopilotCaptureState'
 const MAX_CAPTURE_ATTEMPTS = 20
 const RETRY_DELAY_MS = 1_000
 const OBSERVER_TIMEOUT_MS = 20_000
+const LOG_SCOPE = 'quota-github-copilot'
 
 let hasSentSnapshot = false
 let snapshotEmission: Promise<boolean> | undefined
@@ -88,7 +90,12 @@ function startCaptureLoop(
           observer.disconnect()
         }
       })
-      .catch(() => {
+      .catch((error: unknown) => {
+        logExtensionWarning(
+          LOG_SCOPE,
+          'failed to emit snapshot from mutation observer',
+          error
+        )
         observer.disconnect()
       })
   })
@@ -111,7 +118,13 @@ function startCaptureLoop(
 
         window.setTimeout(attemptCapture, RETRY_DELAY_MS)
       })
-      .catch(() => {
+      .catch((error: unknown) => {
+        logExtensionWarning(
+          LOG_SCOPE,
+          'failed to emit snapshot during retry capture',
+          error,
+          { attempts }
+        )
         observer.disconnect()
       })
   }

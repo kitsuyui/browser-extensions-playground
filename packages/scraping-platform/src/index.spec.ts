@@ -1,11 +1,13 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import {
   collectDomProbeMatches,
   createExtensionCaptureFromDocument,
   createProviderSnapshot,
   isProviderSnapshot,
+  logExtensionWarning,
   type ProviderExtractor,
+  serializeLoggedError,
 } from './index'
 
 const stubProvider: ProviderExtractor = {
@@ -30,6 +32,41 @@ const stubProvider: ProviderExtractor = {
 const EMOJI_PARTY = '🎉' // 🎉, length === 2
 
 describe('provider snapshot helpers', () => {
+  it('serializes Error objects for extension logs', () => {
+    const error = new TypeError('bad input')
+
+    expect(serializeLoggedError(error, 'fallback')).toMatchObject({
+      error: 'bad input',
+      errorName: 'TypeError',
+    })
+  })
+
+  it('logs warnings with the provided context', () => {
+    const warn = console.warn
+    const warnSpy = vi.fn()
+    console.warn = warnSpy
+
+    try {
+      logExtensionWarning(
+        'test-scope',
+        'failed to read state',
+        new Error('boom'),
+        { provider: 'openai' }
+      )
+    } finally {
+      console.warn = warn
+    }
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[test-scope] failed to read state',
+      expect.objectContaining({
+        provider: 'openai',
+        error: 'boom',
+        errorName: 'Error',
+      })
+    )
+  })
+
   it('preserves capturedAt when provided', () => {
     const snapshot = createProviderSnapshot({
       provider: 'openai',
@@ -63,7 +100,7 @@ describe('collectDomProbeMatches', () => {
     // A plain .slice(0, 1_000) would keep the high surrogate and discard the
     // low surrogate; sliceSafe must step back to 999 instead.
     const base = 'a'.repeat(999)
-    const innerText = base + EMOJI_PARTY + ' extra'
+    const innerText = `${base}${EMOJI_PARTY} extra`
     const fakeDocument = {
       querySelector(selector: string) {
         if (selector === '[data-testid="emoji"]') {

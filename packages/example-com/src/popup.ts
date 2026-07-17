@@ -1,6 +1,7 @@
 import {
   LOCAL_SERVER_HTTP_ORIGIN,
   loadDeterministicExtensionStorageState,
+  logExtensionWarning,
 } from '@kitsuyui/browser-extensions-scraping-platform'
 
 import { providerManifest } from './index'
@@ -30,7 +31,13 @@ async function loadServerRiskWarning(): Promise<string> {
     }
 
     return status.warnings[0]
-  } catch {
+  } catch (error: unknown) {
+    logExtensionWarning(
+      'example-com',
+      'failed to read scraping server status',
+      error,
+      { endpoint: `${LOCAL_SERVER_HTTP_ORIGIN}/api/status` }
+    )
     return 'Unable to reach scraping server.'
   }
 }

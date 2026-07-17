@@ -1,5 +1,6 @@
 import {
   type IsoTimestampClock,
+  logExtensionWarning,
   resolveIsoTimestampClock,
 } from '@kitsuyui/browser-extensions-scraping-platform'
 import {
@@ -27,6 +28,7 @@ declare const chrome:
 
 const USAGE_API_STATE_KEY = 'anthropicUsageApiState'
 const MAX_USAGE_API_EVENTS = 5
+const LOG_SCOPE = 'quota-anthropic'
 let storageUpdateQueue: Promise<void> = Promise.resolve()
 
 const uuidPattern =
@@ -124,7 +126,14 @@ async function fetchJson(
         },
       })
     })
-    .catch(() => {})
+    .catch((error: unknown) => {
+      logExtensionWarning(
+        LOG_SCOPE,
+        'failed to persist usage API state',
+        error,
+        { url }
+      )
+    })
   await storageUpdateQueue
 
   if (!response.ok) {
@@ -147,7 +156,12 @@ async function resolveOrganizationIds(
   try {
     const organizations = await fetchJson('/api/organizations', clock)
     idsFromOrganizationsApi = collectOrganizationIdsFromUnknown(organizations)
-  } catch {
+  } catch (error: unknown) {
+    logExtensionWarning(
+      LOG_SCOPE,
+      'failed to resolve organization IDs from organizations API',
+      error
+    )
     idsFromOrganizationsApi = []
   }
 
@@ -183,7 +197,14 @@ async function extractSnapshotFromUsageApi(
       if (snapshot) {
         return snapshot
       }
-    } catch {}
+    } catch (error: unknown) {
+      logExtensionWarning(
+        LOG_SCOPE,
+        'failed to extract snapshot from usage API response',
+        error,
+        { organizationId }
+      )
+    }
   }
 
   return null

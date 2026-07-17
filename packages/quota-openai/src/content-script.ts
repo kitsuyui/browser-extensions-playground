@@ -1,5 +1,6 @@
 import {
   type IsoTimestampClock,
+  logExtensionWarning,
   resolveIsoTimestampClock,
 } from '@kitsuyui/browser-extensions-scraping-platform'
 import {
@@ -29,6 +30,7 @@ declare const chrome:
 const PAGE_MESSAGE_TYPE = 'quota-openai:wham-usage'
 const WHAM_HOOK_STATE_KEY = 'openAiWhamUsageHookState'
 const MAX_HOOK_EVENTS = 5
+const LOG_SCOPE = 'quota-openai'
 let hasObservedNetworkSnapshot = false
 let hookStateQueue: Promise<void> = Promise.resolve()
 
@@ -142,7 +144,13 @@ function registerWhamUsageListener(
           } satisfies WhamHookState,
         })
       })
-      .catch(() => {})
+      .catch((error: unknown) => {
+        logExtensionWarning(
+          LOG_SCOPE,
+          'failed to persist WHAM hook state',
+          error
+        )
+      })
 
     const snapshot = payload
       ? extractSnapshotFromWhamUsageResponse(payload, {

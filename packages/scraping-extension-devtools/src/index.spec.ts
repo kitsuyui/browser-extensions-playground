@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { createExtensionManifest } from './index'
-import { SUPPORTED_PROVIDER_MATCH_PATTERNS } from './providers'
+import { inferProviderId, SUPPORTED_PROVIDER_MATCH_PATTERNS } from './providers'
 import { createPopupHtml } from './runtime'
 import { isCurrentOpenSocket } from './socket'
 
@@ -41,5 +41,26 @@ describe('isCurrentOpenSocket', () => {
     expect(isCurrentOpenSocket(null, openSocket)).toBe(false)
     expect(isCurrentOpenSocket(openSocket, closedSocket)).toBe(false)
     expect(isCurrentOpenSocket(closedSocket, closedSocket)).toBe(false)
+  })
+})
+
+describe('inferProviderId', () => {
+  it('logs and falls back to unknown for invalid URLs', () => {
+    const warn = console.warn
+    const warnSpy = vi.fn()
+    console.warn = warnSpy
+
+    try {
+      expect(inferProviderId('not a valid URL')).toBe('unknown')
+    } finally {
+      console.warn = warn
+    }
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[scraping-extension-devtools] failed to infer provider ID from URL',
+      expect.objectContaining({
+        url: 'not a valid URL',
+      })
+    )
   })
 })
