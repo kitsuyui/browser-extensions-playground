@@ -7,6 +7,7 @@ import {
   LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS,
   LEGACY_DETERMINISTIC_EXTENSION_STORAGE_MIGRATION,
   loadDeterministicExtensionStorageState,
+  registerDeterministicExtensionBackground,
 } from './deterministic-extension'
 
 afterEach(() => {
@@ -143,5 +144,222 @@ describe('getDeterministicExtensionStorageKeys', () => {
     })
     expect(localSet).not.toHaveBeenCalled()
     expect(localRemove).not.toHaveBeenCalled()
+  })
+})
+
+describe('registerDeterministicExtensionBackground', () => {
+  function createStorageLocal(record: Record<string, unknown>) {
+    return {
+      get: vi.fn().mockImplementation(async (keys: string[] | string) => {
+        const keyList = Array.isArray(keys) ? keys : [keys]
+
+        return Object.fromEntries(
+          keyList
+            .filter((key) => key in record)
+            .map((key) => [key, record[key]])
+        )
+      }),
+      set: vi
+        .fn()
+        .mockImplementation(
+          async (items: Record<string, unknown>): Promise<void> => {
+            Object.assign(record, items)
+          }
+        ),
+      remove: vi.fn().mockImplementation(async (keys: string[] | string) => {
+        const keyList = Array.isArray(keys) ? keys : [keys]
+
+        for (const key of keyList) {
+          delete record[key]
+        }
+      }),
+    }
+  }
+
+  function createSnapshot(capturedAt: string) {
+    return {
+      provider: 'openai',
+      capturedAt,
+      source: 'dom' as const,
+      confidence: 'high' as const,
+      rawVersion: 'test',
+      metrics: [],
+    }
+  }
+
+  function createRuntimeListenerHarness() {
+    let messageListener:
+      | ((
+          message: {
+            type?: string
+            snapshot?: ReturnType<typeof createSnapshot>
+          },
+          sender: unknown,
+          sendResponse: (response: unknown) => void
+        ) => boolean | undefined)
+      | undefined
+
+    return {
+      runtime: {
+        onInstalled: { addListener: vi.fn() },
+        onStartup: { addListener: vi.fn() },
+        onMessage: {
+          addListener: vi.fn().mockImplementation((listener) => {
+            messageListener = listener
+          }),
+        },
+      },
+      alarms: {
+        create: vi.fn(),
+        onAlarm: { addListener: vi.fn() },
+      },
+      getMessageListener() {
+        if (!messageListener) {
+          throw new Error('message listener not registered')
+        }
+
+        return messageListener
+      },
+    }
+  }
+
+  async function dispatchSnapshotMessage(
+    listener: (
+      message: { type?: string; snapshot?: ReturnType<typeof createSnapshot> },
+      sender: unknown,
+      sendResponse: (response: unknown) => void
+    ) => boolean | undefined,
+    snapshot: ReturnType<typeof createSnapshot>
+  ): Promise<unknown> {
+    return await new Promise((resolve) => {
+      listener(
+        {
+          type: 'scraped-data:snapshot',
+          snapshot,
+        },
+        undefined,
+        resolve
+      )
+    })
+  }
+
+  it('skips stale snapshots that arrive after a newer snapshot', async () => {
+    const record: Record<string, unknown> = {}
+    const storageLocal = createStorageLocal(record)
+    const runtimeHarness = createRuntimeListenerHarness()
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      headers: { get: () => 'application/json' },
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+    vi.stubGlobal('chrome', {
+      runtime: runtimeHarness.runtime,
+      alarms: runtimeHarness.alarms,
+      storage: {
+        local: storageLocal,
+      },
+    })
+
+    registerDeterministicExtensionBackground({
+      providerManifest: {
+        id: 'openai',
+        displayName: 'OpenAI',
+        matches: ['https://example.com/*'],
+        capabilities: ['usage'],
+        debugSelectors: [],
+      },
+    })
+
+    const listener = runtimeHarness.getMessageListener()
+    const newerSnapshot = createSnapshot('2026-07-10T00:00:05.000Z')
+    const olderSnapshot = createSnapshot('2026-07-10T00:00:00.000Z')
+
+    await expect(
+      dispatchSnapshotMessage(listener, newerSnapshot)
+    ).resolves.toEqual({ ok: true })
+    await expect(
+      dispatchSnapshotMessage(listener, olderSnapshot)
+    ).resolves.toEqual({ ok: true, skipped: 'stale' })
+
+    const storageKeys = getDeterministicExtensionStorageKeys('openai')
+
+    expect(record[storageKeys.latestSnapshot]).toEqual(newerSnapshot)
+    expect(record[storageKeys.syncStatus]).toMatchObject({
+      provider: 'openai',
+      status: 'success',
+      snapshotCapturedAt: newerSnapshot.capturedAt,
+    })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps the newest snapshot after concurrent messages complete', async () => {
+    const record: Record<string, unknown> = {}
+    const storageLocal = createStorageLocal(record)
+    const runtimeHarness = createRuntimeListenerHarness()
+    let fetchCallCount = 0
+    let resolveFirstFetchStarted!: () => void
+    let resolveFirstFetch!: () => void
+    const firstFetchStarted = new Promise<void>((resolve) => {
+      resolveFirstFetchStarted = resolve
+    })
+    const firstFetch = new Promise<void>((resolve) => {
+      resolveFirstFetch = resolve
+    })
+    const fetchMock = vi.fn().mockImplementation(async () => {
+      fetchCallCount += 1
+
+      if (fetchCallCount === 1) {
+        resolveFirstFetchStarted()
+        await firstFetch
+      }
+
+      return {
+        ok: true,
+        headers: { get: () => 'application/json' },
+      }
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+    vi.stubGlobal('chrome', {
+      runtime: runtimeHarness.runtime,
+      alarms: runtimeHarness.alarms,
+      storage: {
+        local: storageLocal,
+      },
+    })
+
+    registerDeterministicExtensionBackground({
+      providerManifest: {
+        id: 'openai',
+        displayName: 'OpenAI',
+        matches: ['https://example.com/*'],
+        capabilities: ['usage'],
+        debugSelectors: [],
+      },
+    })
+
+    const listener = runtimeHarness.getMessageListener()
+    const olderSnapshot = createSnapshot('2026-07-10T00:00:00.000Z')
+    const newerSnapshot = createSnapshot('2026-07-10T00:00:05.000Z')
+    const olderPromise = dispatchSnapshotMessage(listener, olderSnapshot)
+    const newerPromise = dispatchSnapshotMessage(listener, newerSnapshot)
+
+    await firstFetchStarted
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    resolveFirstFetch()
+
+    await expect(olderPromise).resolves.toEqual({ ok: true })
+    await expect(newerPromise).resolves.toEqual({ ok: true })
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+
+    const storageKeys = getDeterministicExtensionStorageKeys('openai')
+
+    expect(record[storageKeys.latestSnapshot]).toEqual(newerSnapshot)
+    expect(record[storageKeys.syncStatus]).toMatchObject({
+      provider: 'openai',
+      status: 'success',
+      snapshotCapturedAt: newerSnapshot.capturedAt,
+    })
   })
 })

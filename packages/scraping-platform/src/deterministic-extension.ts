@@ -60,6 +60,7 @@ export const LEGACY_DETERMINISTIC_EXTENSION_STORAGE_MIGRATION = {
   removalCondition:
     'Remove a legacy key after a value for the same provider is copied or written to its provider-scoped replacement.',
 } as const
+const providerProcessingQueues = new Map<string, Promise<void>>()
 
 export function getDeterministicExtensionStorageKeys(provider: string): {
   readonly latestSnapshot: string
@@ -133,6 +134,68 @@ function hasProvider(value: unknown, provider: string): boolean {
     value !== null &&
     (value as { readonly provider?: unknown }).provider === provider
   )
+}
+
+function parseTimestamp(value: unknown): number | null {
+  if (typeof value !== 'string') {
+    return null
+  }
+
+  const timestamp = Date.parse(value)
+
+  return Number.isFinite(timestamp) ? timestamp : null
+}
+
+function getSnapshotCapturedAt(snapshot: unknown): string | null {
+  if (typeof snapshot !== 'object' || snapshot === null) {
+    return null
+  }
+
+  return typeof (snapshot as { readonly capturedAt?: unknown }).capturedAt ===
+    'string'
+    ? (snapshot as { readonly capturedAt: string }).capturedAt
+    : null
+}
+
+function isSnapshotAtLeastAsRecent(
+  incomingSnapshot: ProviderSnapshot,
+  currentSnapshot: unknown
+): boolean {
+  const incomingCapturedAt = parseTimestamp(incomingSnapshot.capturedAt)
+  const currentCapturedAt = parseTimestamp(
+    getSnapshotCapturedAt(currentSnapshot)
+  )
+
+  if (incomingCapturedAt === null || currentCapturedAt === null) {
+    return true
+  }
+
+  return incomingCapturedAt >= currentCapturedAt
+}
+
+async function runProviderExclusive<T>(
+  provider: string,
+  operation: () => Promise<T>
+): Promise<T> {
+  const previous = providerProcessingQueues.get(provider) ?? Promise.resolve()
+  let resolveCurrent!: () => void
+  const current = new Promise<void>((resolve) => {
+    resolveCurrent = resolve
+  })
+  const queued = previous.catch(() => undefined).then(() => current)
+
+  providerProcessingQueues.set(provider, queued)
+  await previous.catch(() => undefined)
+
+  try {
+    return await operation()
+  } finally {
+    resolveCurrent()
+
+    if (providerProcessingQueues.get(provider) === queued) {
+      providerProcessingQueues.delete(provider)
+    }
+  }
 }
 
 async function loadLegacyMigrationRecord(
@@ -233,13 +296,22 @@ export async function loadDeterministicExtensionStorageState(
   }
 }
 
-async function persistSnapshot(snapshot: ProviderSnapshot): Promise<void> {
+async function persistSnapshot(snapshot: ProviderSnapshot): Promise<boolean> {
   const storageKeys = getDeterministicExtensionStorageKeys(snapshot.provider)
+  const currentRecord = ((await chrome?.storage?.local?.get?.(
+    storageKeys.latestSnapshot
+  )) ?? {}) as Record<string, unknown>
+  const currentSnapshot = currentRecord[storageKeys.latestSnapshot]
+
+  if (!isSnapshotAtLeastAsRecent(snapshot, currentSnapshot)) {
+    return false
+  }
 
   await chrome?.storage?.local?.set?.({
     [storageKeys.latestSnapshot]: snapshot,
   })
   await removeProviderLegacyStorageKeys(snapshot.provider)
+  return true
 }
 
 async function persistSyncStatus(
@@ -367,20 +439,22 @@ export function registerDeterministicExtensionBackground(options: {
     }
 
     void (async () => {
-      if (!(await isExtensionEnabled())) {
-        await persistSyncStatus(options.providerManifest.id, {
-          status: 'paused',
-          updatedAt: new Date().toISOString(),
-          provider: options.providerManifest.id,
-        })
-        return
-      }
+      await runProviderExclusive(options.providerManifest.id, async () => {
+        if (!(await isExtensionEnabled())) {
+          await persistSyncStatus(options.providerManifest.id, {
+            status: 'paused',
+            updatedAt: new Date().toISOString(),
+            provider: options.providerManifest.id,
+          })
+          return
+        }
 
-      await reloadMatchingTabs(
-        options.providerManifest.id,
-        options.providerManifest.matches,
-        alarmName
-      )
+        await reloadMatchingTabs(
+          options.providerManifest.id,
+          options.providerManifest.matches,
+          alarmName
+        )
+      })
     })()
   })
 
@@ -392,39 +466,51 @@ export function registerDeterministicExtensionBackground(options: {
     const snapshot = message.snapshot
 
     void (async () => {
-      if (!(await isExtensionEnabled())) {
-        await persistSyncStatus(snapshot.provider, {
-          status: 'paused',
-          updatedAt: new Date().toISOString(),
-          provider: snapshot.provider,
-        })
+      await runProviderExclusive(snapshot.provider, async () => {
+        if (!(await isExtensionEnabled())) {
+          await persistSyncStatus(snapshot.provider, {
+            status: 'paused',
+            updatedAt: new Date().toISOString(),
+            provider: snapshot.provider,
+          })
+          sendResponse({
+            ok: true,
+            skipped: 'paused',
+          })
+          return
+        }
+
+        const persisted = await persistSnapshot(snapshot)
+
+        if (!persisted) {
+          sendResponse({
+            ok: true,
+            skipped: 'stale',
+          })
+          return
+        }
+
+        try {
+          await ingestSnapshot(serverUrl, options.providerManifest, snapshot)
+          await persistSyncStatus(snapshot.provider, {
+            status: 'success',
+            updatedAt: new Date().toISOString(),
+            provider: snapshot.provider,
+            snapshotCapturedAt: snapshot.capturedAt,
+          })
+        } catch (error) {
+          await persistSyncStatus(snapshot.provider, {
+            status: 'error',
+            updatedAt: new Date().toISOString(),
+            provider: snapshot.provider,
+            snapshotCapturedAt: snapshot.capturedAt,
+            ...serializeError(error, 'unknown error'),
+          })
+        }
+
         sendResponse({
           ok: true,
-          skipped: 'paused',
         })
-        return
-      }
-
-      await persistSnapshot(snapshot)
-
-      try {
-        await ingestSnapshot(serverUrl, options.providerManifest, snapshot)
-        await persistSyncStatus(snapshot.provider, {
-          status: 'success',
-          updatedAt: new Date().toISOString(),
-          provider: snapshot.provider,
-        })
-      } catch (error) {
-        await persistSyncStatus(snapshot.provider, {
-          status: 'error',
-          updatedAt: new Date().toISOString(),
-          provider: snapshot.provider,
-          ...serializeError(error, 'unknown error'),
-        })
-      }
-
-      sendResponse({
-        ok: true,
       })
     })()
 
