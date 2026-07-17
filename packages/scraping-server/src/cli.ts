@@ -19,6 +19,13 @@ Options:
   --help, -h           Show this help message
 `
 
+const REPOSITORY_ROOT = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
+  '..',
+  '..'
+)
+
 class CliUsageError extends Error {
   constructor(message: string) {
     super(message)
@@ -68,13 +75,12 @@ function parseArgs(argv: readonly string[]) {
   return result
 }
 
-function resolveStoreFile(storeFile: string): string {
+export function resolveStoreFile(storeFile: string): string {
   if (path.isAbsolute(storeFile)) {
     return storeFile
   }
 
-  const baseDir = process.env.PWD ?? process.env.INIT_CWD ?? process.cwd()
-  return path.resolve(baseDir, storeFile)
+  return path.resolve(REPOSITORY_ROOT, storeFile)
 }
 
 export async function main(): Promise<void> {
