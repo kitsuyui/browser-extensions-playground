@@ -14,6 +14,7 @@ Unified local HTTP and WebSocket server for browser scraping workflows.
 The snapshot store is backed by SQLite.
 
 - default local path from the repository root: `.tmp/scraping-server/deterministic.sqlite`
+- relative `--store-file` paths are resolved from the repository root, not the invoking shell directory
 - access layer: Prisma
 - retention model: append-only history plus latest-by-provider queries
 
@@ -23,7 +24,7 @@ From this package directory:
 
 ```sh
 bun run build
-bun run start -- --store-file ../../.tmp/scraping-server/deterministic.sqlite
+bun run start -- --store-file .tmp/scraping-server/deterministic.sqlite
 ```
 
 From the repository root:

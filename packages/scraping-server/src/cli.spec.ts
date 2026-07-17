@@ -1,11 +1,21 @@
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { main, runCli } from './cli'
+import { main, resolveStoreFile, runCli } from './cli'
 
 describe('scraping-server CLI', () => {
   let stdoutOutput: string[]
   let stderrOutput: string[]
   const origArgv = process.argv
+  const originalPwd = process.env.PWD
+  const originalInitCwd = process.env.INIT_CWD
+  const repositoryRoot = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '..',
+    '..',
+    '..'
+  )
 
   beforeEach(() => {
     stdoutOutput = []
@@ -22,6 +32,8 @@ describe('scraping-server CLI', () => {
 
   afterEach(() => {
     process.argv = origArgv
+    process.env.PWD = originalPwd
+    process.env.INIT_CWD = originalInitCwd
     vi.restoreAllMocks()
   })
 
@@ -97,5 +109,32 @@ describe('scraping-server CLI', () => {
       'Missing value for --port. Expected an integer between 0 and 65535.\n'
     )
     expect(exit).toHaveBeenCalledWith(1)
+  })
+
+  it('resolves relative store paths from the repository root', () => {
+    process.env.PWD = '/tmp/wrapper-pwd'
+    process.env.INIT_CWD = '/tmp/wrapper-init-cwd'
+
+    expect(resolveStoreFile('.tmp/scraping-server/deterministic.sqlite')).toBe(
+      path.resolve(repositoryRoot, '.tmp/scraping-server/deterministic.sqlite')
+    )
+  })
+
+  it('keeps the same relative store path target even when cwd changes', () => {
+    const originalCwd = process.cwd()
+    process.chdir('packages/scraping-server')
+
+    try {
+      expect(
+        resolveStoreFile('.tmp/scraping-server/deterministic.sqlite')
+      ).toBe(
+        path.resolve(
+          repositoryRoot,
+          '.tmp/scraping-server/deterministic.sqlite'
+        )
+      )
+    } finally {
+      process.chdir(originalCwd)
+    }
   })
 })

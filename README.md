@@ -34,7 +34,7 @@ Start the local scraping server:
 ```sh
 cd packages/scraping-server
 bun run build
-bun run start -- --store-file ../../.tmp/scraping-server/deterministic.sqlite
+bun run start -- --store-file .tmp/scraping-server/deterministic.sqlite
 ```
 
 Build an extension and load its `dist` directory as an unpacked Chrome extension:
