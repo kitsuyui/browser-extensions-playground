@@ -111,35 +111,45 @@
   } as XMLHttpRequest['open']
 
   XMLHttpRequest.prototype.send = function (...args) {
-    this.addEventListener(
-      'load',
-      () => {
-        const requestUrl = toUrlString(
-          (this as XMLHttpRequest & { __quotaOpenAiUrl?: unknown })
-            .__quotaOpenAiUrl
-        )
+    const handleLoad = () => {
+      const requestUrl = toUrlString(
+        (this as XMLHttpRequest & { __quotaOpenAiUrl?: unknown })
+          .__quotaOpenAiUrl
+      )
 
-        if (matchesUsage(requestUrl) && typeof this.responseText === 'string') {
-          try {
-            postPayload(JSON.parse(this.responseText), {
-              transport: 'xhr',
+      if (matchesUsage(requestUrl) && typeof this.responseText === 'string') {
+        try {
+          postPayload(JSON.parse(this.responseText), {
+            transport: 'xhr',
+            url: requestUrl,
+            status: this.status,
+          })
+        } catch (e: unknown) {
+          console.debug(
+            '[quota-openai] failed to parse WHAM usage XHR response as JSON',
+            {
               url: requestUrl,
               status: this.status,
-            })
-          } catch (e: unknown) {
-            console.debug(
-              '[quota-openai] failed to parse WHAM usage XHR response as JSON',
-              {
-                url: requestUrl,
-                status: this.status,
-                error: e,
-              }
-            )
-          }
+              error: e,
+            }
+          )
         }
-      },
-      { once: true }
-    )
+      }
+    }
+
+    const cleanup = () => {
+      this.removeEventListener('load', handleLoad)
+      this.removeEventListener('abort', cleanup)
+      this.removeEventListener('error', cleanup)
+      this.removeEventListener('timeout', cleanup)
+      this.removeEventListener('loadend', cleanup)
+    }
+
+    this.addEventListener('load', handleLoad)
+    this.addEventListener('abort', cleanup, { once: true })
+    this.addEventListener('error', cleanup, { once: true })
+    this.addEventListener('timeout', cleanup, { once: true })
+    this.addEventListener('loadend', cleanup, { once: true })
 
     return originalSend.call(this, ...args)
   }
