@@ -262,4 +262,31 @@ describe('startStdioMcpServer', () => {
 
     expect(response.result).toEqual({})
   })
+
+  it('rejects fractional Content-Length headers and continues afterward', async () => {
+    startServer()
+
+    process.stdin.emit(
+      'data',
+      Buffer.from(
+        'Content-Length: 23.5\r\n\r\n{"jsonrpc":"2.0","id":1}NEXT',
+        'utf8'
+      )
+    )
+    await new Promise((resolvePromise) => setTimeout(resolvePromise, 0))
+
+    const parseError = decodeResponses(written).at(-1)
+    expect(parseError?.error).toEqual({
+      code: -32700,
+      message: 'Parse error.',
+    })
+
+    const response = await sendRequest({
+      jsonrpc: '2.0',
+      id: 7,
+      method: 'ping',
+    })
+
+    expect(response.result).toEqual({})
+  })
 })
