@@ -54,4 +54,28 @@ describe('scraped-data CLI', () => {
     expect(stderrOutput.join('')).toContain('Usage:')
     expect(exit).toHaveBeenCalledWith(1)
   })
+
+  it('prints usage to stderr and exits with code 1 when snapshot provider is missing', async () => {
+    process.argv = ['node', 'cli.mjs', 'snapshot']
+    const exit = vi.spyOn(process, 'exit').mockImplementation((code) => {
+      throw new Error(`process.exit(${code})`)
+    })
+
+    await expect(main()).rejects.toThrow('process.exit(1)')
+    expect(stdoutOutput).toHaveLength(0)
+    expect(stderrOutput.join('')).toContain('snapshot <provider>')
+    expect(exit).toHaveBeenCalledWith(1)
+  })
+
+  it('treats a server URL without a provider as a missing snapshot provider', async () => {
+    process.argv = ['node', 'cli.mjs', 'snapshot', 'http://127.0.0.1:3929']
+    const exit = vi.spyOn(process, 'exit').mockImplementation((code) => {
+      throw new Error(`process.exit(${code})`)
+    })
+
+    await expect(main()).rejects.toThrow('process.exit(1)')
+    expect(stdoutOutput).toHaveLength(0)
+    expect(stderrOutput.join('')).toContain('snapshot <provider>')
+    expect(exit).toHaveBeenCalledWith(1)
+  })
 })
