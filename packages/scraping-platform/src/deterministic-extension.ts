@@ -326,6 +326,20 @@ async function persistSyncStatus(
   await removeProviderLegacyStorageKeys(provider)
 }
 
+async function persistSyncErrorStatus(
+  provider: string,
+  capturedAt: string | undefined,
+  error: unknown
+): Promise<void> {
+  await persistSyncStatus(provider, {
+    status: 'error',
+    updatedAt: new Date().toISOString(),
+    provider,
+    ...(capturedAt ? { snapshotCapturedAt: capturedAt } : {}),
+    ...serializeError(error, 'unknown error'),
+  })
+}
+
 async function isExtensionEnabled(): Promise<boolean> {
   const record = (await chrome?.storage?.local?.get?.(
     DETERMINISTIC_EXTENSION_ENABLED_KEY
@@ -467,30 +481,30 @@ export function registerDeterministicExtensionBackground(options: {
 
     void (async () => {
       await runProviderExclusive(snapshot.provider, async () => {
-        if (!(await isExtensionEnabled())) {
-          await persistSyncStatus(snapshot.provider, {
-            status: 'paused',
-            updatedAt: new Date().toISOString(),
-            provider: snapshot.provider,
-          })
-          sendResponse({
-            ok: true,
-            skipped: 'paused',
-          })
-          return
-        }
-
-        const persisted = await persistSnapshot(snapshot)
-
-        if (!persisted) {
-          sendResponse({
-            ok: true,
-            skipped: 'stale',
-          })
-          return
-        }
-
         try {
+          if (!(await isExtensionEnabled())) {
+            await persistSyncStatus(snapshot.provider, {
+              status: 'paused',
+              updatedAt: new Date().toISOString(),
+              provider: snapshot.provider,
+            })
+            sendResponse({
+              ok: true,
+              skipped: 'paused',
+            })
+            return
+          }
+
+          const persisted = await persistSnapshot(snapshot)
+
+          if (!persisted) {
+            sendResponse({
+              ok: true,
+              skipped: 'stale',
+            })
+            return
+          }
+
           await ingestSnapshot(serverUrl, options.providerManifest, snapshot)
           await persistSyncStatus(snapshot.provider, {
             status: 'success',
@@ -498,19 +512,30 @@ export function registerDeterministicExtensionBackground(options: {
             provider: snapshot.provider,
             snapshotCapturedAt: snapshot.capturedAt,
           })
+          sendResponse({
+            ok: true,
+          })
         } catch (error) {
-          await persistSyncStatus(snapshot.provider, {
-            status: 'error',
-            updatedAt: new Date().toISOString(),
-            provider: snapshot.provider,
-            snapshotCapturedAt: snapshot.capturedAt,
-            ...serializeError(error, 'unknown error'),
+          const serializedError = serializeError(error, 'unknown error')
+
+          try {
+            await persistSyncErrorStatus(
+              snapshot.provider,
+              snapshot.capturedAt,
+              error
+            )
+          } catch (persistError) {
+            console.warn(
+              'snapshot sync: failed to persist error status',
+              persistError
+            )
+          }
+
+          sendResponse({
+            ok: false,
+            ...serializedError,
           })
         }
-
-        sendResponse({
-          ok: true,
-        })
       })
     })()
 
