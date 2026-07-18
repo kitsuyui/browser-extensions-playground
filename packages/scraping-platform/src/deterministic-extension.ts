@@ -204,6 +204,7 @@ async function loadLegacyMigrationRecord(
   const storageKeys = getDeterministicExtensionStorageKeys(provider)
 
   return ((await chrome?.storage?.local?.get?.([
+    DETERMINISTIC_EXTENSION_ENABLED_KEY,
     storageKeys.latestSnapshot,
     storageKeys.syncStatus,
     LEGACY_DETERMINISTIC_EXTENSION_STORAGE_KEYS.latestSnapshot,
