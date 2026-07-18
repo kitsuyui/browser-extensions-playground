@@ -145,6 +145,36 @@ describe('getDeterministicExtensionStorageKeys', () => {
     expect(localSet).not.toHaveBeenCalled()
     expect(localRemove).not.toHaveBeenCalled()
   })
+
+  it('returns disabled when the deterministic extension flag is false', async () => {
+    const localSet = vi.fn().mockResolvedValue(undefined)
+    const localRemove = vi.fn().mockResolvedValue(undefined)
+
+    vi.stubGlobal('chrome', {
+      storage: {
+        local: {
+          get: vi.fn().mockResolvedValue({
+            deterministicExtensionEnabled: false,
+          }),
+          set: localSet,
+          remove: localRemove,
+        },
+      },
+    })
+
+    await expect(
+      loadDeterministicExtensionStorageState('openai')
+    ).resolves.toEqual({
+      enabled: false,
+      record: {
+        deterministicExtensionEnabled: false,
+      },
+      latestSnapshot: null,
+      syncStatus: null,
+    })
+    expect(localSet).not.toHaveBeenCalled()
+    expect(localRemove).not.toHaveBeenCalled()
+  })
 })
 
 describe('registerDeterministicExtensionBackground', () => {
