@@ -10,14 +10,18 @@ type PostedMessage = {
 type FakeXMLHttpRequestInstance = {
   responseText: string
   status: number
+  terminalEvent: string
   open(method: string, url: string | URL): void
   send(): void
+  dispatch(type: string): void
+  listenerCount(type: string): number
 }
 
 function installPageGlobals() {
   class FakeXMLHttpRequest {
     responseText = ''
     status = 200
+    terminalEvent = 'load'
     private readonly listeners = new Map<string, (() => void)[]>()
 
     addEventListener(type: string, listener: () => void): void {
@@ -26,12 +30,31 @@ function installPageGlobals() {
       this.listeners.set(type, listeners)
     }
 
+    removeEventListener(type: string, listener: () => void): void {
+      const listeners = this.listeners.get(type) ?? []
+      this.listeners.set(
+        type,
+        listeners.filter((candidate) => candidate !== listener)
+      )
+    }
+
     open(_method: string, _url: string | URL): void {}
 
     send(): void {
-      for (const listener of this.listeners.get('load') ?? []) {
+      this.dispatch(this.terminalEvent)
+      if (this.terminalEvent !== 'loadend') {
+        this.dispatch('loadend')
+      }
+    }
+
+    dispatch(type: string): void {
+      for (const listener of [...(this.listeners.get(type) ?? [])]) {
         listener()
       }
+    }
+
+    listenerCount(type: string): number {
+      return this.listeners.get(type)?.length ?? 0
     }
   }
 
@@ -134,5 +157,45 @@ describe('page-hook', () => {
     xhr.send()
 
     expect(messages).toEqual([])
+  })
+
+  it('removes XHR listeners when the request aborts before load', async () => {
+    installPageGlobals()
+    await loadHook()
+
+    const xhr = new XMLHttpRequest() as unknown as FakeXMLHttpRequestInstance
+    xhr.open(
+      'GET',
+      new URL('/backend-api/wham/usage?source=abort', 'https://chatgpt.com')
+    )
+    xhr.terminalEvent = 'abort'
+
+    XMLHttpRequest.prototype.send.call(xhr)
+
+    expect(xhr.listenerCount('load')).toBe(0)
+    expect(xhr.listenerCount('abort')).toBe(0)
+    expect(xhr.listenerCount('error')).toBe(0)
+    expect(xhr.listenerCount('timeout')).toBe(0)
+    expect(xhr.listenerCount('loadend')).toBe(0)
+  })
+
+  it('removes XHR listeners when the request errors before load', async () => {
+    installPageGlobals()
+    await loadHook()
+
+    const xhr = new XMLHttpRequest() as unknown as FakeXMLHttpRequestInstance
+    xhr.open(
+      'GET',
+      new URL('/backend-api/wham/usage?source=error', 'https://chatgpt.com')
+    )
+    xhr.terminalEvent = 'error'
+
+    XMLHttpRequest.prototype.send.call(xhr)
+
+    expect(xhr.listenerCount('load')).toBe(0)
+    expect(xhr.listenerCount('abort')).toBe(0)
+    expect(xhr.listenerCount('error')).toBe(0)
+    expect(xhr.listenerCount('timeout')).toBe(0)
+    expect(xhr.listenerCount('loadend')).toBe(0)
   })
 })
