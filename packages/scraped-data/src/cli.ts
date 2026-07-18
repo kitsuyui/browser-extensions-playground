@@ -49,7 +49,12 @@ export async function main(): Promise<void> {
   }
 
   if (command === 'snapshot') {
-    const provider = args[0]
+    const provider =
+      args[0] && !args[0].startsWith('http') ? args[0] : undefined
+    if (!provider) {
+      process.stderr.write(USAGE)
+      process.exit(1)
+    }
     process.stdout.write(
       `${JSON.stringify(await tools.getLatestSnapshot(provider), null, 2)}\n`
     )
