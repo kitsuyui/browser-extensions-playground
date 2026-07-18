@@ -8,6 +8,7 @@ import {
 } from './model'
 
 export * from './deterministic-extension'
+export * from './extension-logger'
 export * from './model'
 export * from './server-config'
 export * from './time'

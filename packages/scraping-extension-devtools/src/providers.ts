@@ -1,3 +1,5 @@
+import { logExtensionWarning } from '@kitsuyui/browser-extensions-scraping-platform'
+
 export const SUPPORTED_PROVIDER_MATCH_PATTERNS = [
   'https://example.com/*',
   'https://chatgpt.com/*',
@@ -46,7 +48,13 @@ export function inferProviderId(url: string): string {
 
   try {
     return new URL(url).hostname
-  } catch {
+  } catch (error: unknown) {
+    logExtensionWarning(
+      'scraping-extension-devtools',
+      'failed to infer provider ID from URL',
+      error,
+      { url }
+    )
     return 'unknown'
   }
 }
