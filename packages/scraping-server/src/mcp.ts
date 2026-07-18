@@ -92,7 +92,11 @@ function tryExtractMessage(
 
   const contentLength = Number(contentLengthHeader.split(':')[1]?.trim())
 
-  if (!Number.isFinite(contentLength) || contentLength < 0) {
+  if (
+    !Number.isFinite(contentLength) ||
+    !Number.isInteger(contentLength) ||
+    contentLength < 0
+  ) {
     throw new Error('Invalid Content-Length header.')
   }
 
