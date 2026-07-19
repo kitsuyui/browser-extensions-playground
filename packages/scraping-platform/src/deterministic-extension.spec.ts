@@ -392,4 +392,141 @@ describe('registerDeterministicExtensionBackground', () => {
       snapshotCapturedAt: newerSnapshot.capturedAt,
     })
   })
+
+  it('responds and records an error when persisting a snapshot fails', async () => {
+    const record: Record<string, unknown> = {}
+    const runtimeHarness = createRuntimeListenerHarness()
+    const snapshot = createSnapshot('2026-07-10T00:00:00.000Z')
+    const storageKeys = getDeterministicExtensionStorageKeys('openai')
+    const localRemove = vi.fn().mockResolvedValue(undefined)
+    const localGet = vi
+      .fn()
+      .mockImplementation(async (keys: string[] | string) => {
+        const keyList = Array.isArray(keys) ? keys : [keys]
+
+        return Object.fromEntries(
+          keyList
+            .filter((key) => key in record)
+            .map((key) => [key, record[key]])
+        )
+      })
+    const localSet = vi
+      .fn()
+      .mockImplementation(async (items: Record<string, unknown>) => {
+        if (storageKeys.latestSnapshot in items) {
+          throw new Error('snapshot write failed')
+        }
+
+        Object.assign(record, items)
+      })
+
+    vi.stubGlobal('fetch', vi.fn())
+    vi.stubGlobal('chrome', {
+      runtime: runtimeHarness.runtime,
+      alarms: runtimeHarness.alarms,
+      storage: {
+        local: {
+          get: localGet,
+          set: localSet,
+          remove: localRemove,
+        },
+      },
+    })
+
+    registerDeterministicExtensionBackground({
+      providerManifest: {
+        id: 'openai',
+        displayName: 'OpenAI',
+        matches: ['https://example.com/*'],
+        capabilities: ['usage'],
+        debugSelectors: [],
+      },
+    })
+
+    const listener = runtimeHarness.getMessageListener()
+
+    await expect(
+      dispatchSnapshotMessage(listener, snapshot)
+    ).resolves.toMatchObject({
+      ok: false,
+      error: 'snapshot write failed',
+    })
+    expect(record[storageKeys.syncStatus]).toMatchObject({
+      provider: 'openai',
+      status: 'error',
+      snapshotCapturedAt: snapshot.capturedAt,
+      error: 'snapshot write failed',
+    })
+  })
+
+  it('responds when paused status persistence fails', async () => {
+    const record: Record<string, unknown> = {
+      deterministicExtensionEnabled: false,
+    }
+    const runtimeHarness = createRuntimeListenerHarness()
+    const snapshot = createSnapshot('2026-07-10T00:00:00.000Z')
+    const storageKeys = getDeterministicExtensionStorageKeys('openai')
+    const localRemove = vi.fn().mockResolvedValue(undefined)
+    let syncStatusWriteAttempts = 0
+    const localSet = vi
+      .fn()
+      .mockImplementation(async (items: Record<string, unknown>) => {
+        if (storageKeys.syncStatus in items) {
+          syncStatusWriteAttempts += 1
+
+          if (syncStatusWriteAttempts === 1) {
+            throw new Error('paused status write failed')
+          }
+        }
+
+        Object.assign(record, items)
+      })
+
+    vi.stubGlobal('fetch', vi.fn())
+    vi.stubGlobal('chrome', {
+      runtime: runtimeHarness.runtime,
+      alarms: runtimeHarness.alarms,
+      storage: {
+        local: {
+          get: vi.fn().mockImplementation(async (keys: string[] | string) => {
+            const keyList = Array.isArray(keys) ? keys : [keys]
+
+            return Object.fromEntries(
+              keyList
+                .filter((key) => key in record)
+                .map((key) => [key, record[key]])
+            )
+          }),
+          set: localSet,
+          remove: localRemove,
+        },
+      },
+    })
+
+    registerDeterministicExtensionBackground({
+      providerManifest: {
+        id: 'openai',
+        displayName: 'OpenAI',
+        matches: ['https://example.com/*'],
+        capabilities: ['usage'],
+        debugSelectors: [],
+      },
+    })
+
+    const listener = runtimeHarness.getMessageListener()
+
+    await expect(
+      dispatchSnapshotMessage(listener, snapshot)
+    ).resolves.toMatchObject({
+      ok: false,
+      error: 'paused status write failed',
+    })
+    expect(syncStatusWriteAttempts).toBe(2)
+    expect(record[storageKeys.syncStatus]).toMatchObject({
+      provider: 'openai',
+      status: 'error',
+      snapshotCapturedAt: snapshot.capturedAt,
+      error: 'paused status write failed',
+    })
+  })
 })
