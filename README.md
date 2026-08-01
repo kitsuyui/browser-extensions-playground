@@ -89,7 +89,7 @@ bunx lefthook install
 | Typecheck | `bun run typecheck` |
 | Unit tests | `bun run test` |
 
-Playwright / end-to-end tests are intentionally excluded from hooks because they require a browser environment; CI still runs the full suite.
+Playwright / end-to-end tests are intentionally excluded from hooks and from CI because they require a browser environment. Run them locally with `bun run playwright:test` before merging changes that touch extension build output or runtime behaviour.
 
 ## License
 
