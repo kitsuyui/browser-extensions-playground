@@ -11,15 +11,9 @@ import type {
   DevCommandResult,
 } from '@kitsuyui/browser-extensions-scraping-server'
 import { providerExtractor as exampleComProviderExtractor } from '../../example-com/src/index'
-import { providerExtractor as anthropicProviderExtractor } from '../../quota-anthropic/src/index'
-import { providerExtractor as githubCopilotProviderExtractor } from '../../quota-github-copilot/src/index'
-import { providerExtractor as openAiProviderExtractor } from '../../quota-openai/src/index'
 import { inferProviderId } from './providers'
 
 const KNOWN_PROVIDER_EXTRACTORS: readonly ProviderExtractor[] = [
-  openAiProviderExtractor,
-  anthropicProviderExtractor,
-  githubCopilotProviderExtractor,
   exampleComProviderExtractor,
 ]
 

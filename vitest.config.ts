@@ -26,18 +26,6 @@ const aliasEntries = [
     '@kitsuyui/browser-extensions-scraped-data',
     './packages/scraped-data/src/index.ts',
   ],
-  [
-    '@kitsuyui/browser-extensions-quota-openai',
-    './packages/quota-openai/src/index.ts',
-  ],
-  [
-    '@kitsuyui/browser-extensions-quota-anthropic',
-    './packages/quota-anthropic/src/index.ts',
-  ],
-  [
-    '@kitsuyui/browser-extensions-quota-github-copilot',
-    './packages/quota-github-copilot/src/index.ts',
-  ],
   ['@kitsuyui/browser-extensions-hello', './packages/hello/src/index.ts'],
 ] as const
 

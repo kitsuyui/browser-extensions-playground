@@ -17,9 +17,6 @@ This workspace centers on a single local scraping server.
 - [packages/example-com](./packages/example-com/README.md): deterministic example.com extension used for automated end-to-end testing
 - [packages/scraped-data](./packages/scraped-data/README.md): generic read-only accessors over server API
 - [packages/scraping-devtools](./packages/scraping-devtools/README.md): CLI/MCP client for the server-side devtools control API
-- [packages/quota-openai](./packages/quota-openai/README.md): OpenAI quota extension
-- [packages/quota-anthropic](./packages/quota-anthropic/README.md): Anthropic quota extension
-- [packages/quota-github-copilot](./packages/quota-github-copilot/README.md): GitHub Copilot quota extension
 
 ## Quick Start
 
@@ -40,7 +37,7 @@ bun run start -- --store-file .tmp/scraping-server/deterministic.sqlite
 Build an extension and load its `dist` directory as an unpacked Chrome extension:
 
 ```sh
-cd packages/quota-openai
+cd packages/scraping-extension-devtools
 bun run build
 ```
 
