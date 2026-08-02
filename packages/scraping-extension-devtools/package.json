@@ -36,9 +36,6 @@
   ],
   "dependencies": {
     "@kitsuyui/browser-extensions-example-com": "workspace:*",
-    "@kitsuyui/browser-extensions-quota-anthropic": "workspace:*",
-    "@kitsuyui/browser-extensions-quota-github-copilot": "workspace:*",
-    "@kitsuyui/browser-extensions-quota-openai": "workspace:*",
     "@kitsuyui/browser-extensions-scraping-platform": "workspace:*"
   },
   "devDependencies": {

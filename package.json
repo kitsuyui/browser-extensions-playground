@@ -14,7 +14,7 @@
     "format": "biome check --write ./",
     "lint": "biome check ./",
     "prisma:generate": "cd packages/scraping-server && bunx prisma generate",
-    "playwright:test": "bun run --filter @kitsuyui/browser-extensions-scraping-extension-devtools build && bun run --filter @kitsuyui/browser-extensions-quota-openai build && bun run --filter @kitsuyui/browser-extensions-example-com build && playwright test",
+    "playwright:test": "bun run --filter @kitsuyui/browser-extensions-scraping-extension-devtools build && bun run --filter @kitsuyui/browser-extensions-example-com build && playwright test",
     "check-module-isolation": "find packages -type d -name src -print -exec bunx ts-module-isolation -- {} +",
     "test": "bun run prisma:generate && vitest run --coverage",
     "validate": "bun run --workspaces --if-present --sequential validate",

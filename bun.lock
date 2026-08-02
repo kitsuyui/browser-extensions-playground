@@ -39,27 +39,6 @@
       "name": "@kitsuyui/browser-extensions-hello",
       "version": "0.0.0",
     },
-    "packages/quota-anthropic": {
-      "name": "@kitsuyui/browser-extensions-quota-anthropic",
-      "version": "0.0.0",
-      "dependencies": {
-        "@kitsuyui/browser-extensions-scraping-platform": "workspace:*",
-      },
-    },
-    "packages/quota-github-copilot": {
-      "name": "@kitsuyui/browser-extensions-quota-github-copilot",
-      "version": "0.0.0",
-      "dependencies": {
-        "@kitsuyui/browser-extensions-scraping-platform": "workspace:*",
-      },
-    },
-    "packages/quota-openai": {
-      "name": "@kitsuyui/browser-extensions-quota-openai",
-      "version": "0.0.0",
-      "dependencies": {
-        "@kitsuyui/browser-extensions-scraping-platform": "workspace:*",
-      },
-    },
     "packages/scraped-data": {
       "name": "@kitsuyui/browser-extensions-scraped-data",
       "version": "0.0.0",
@@ -87,9 +66,6 @@
       "version": "0.0.0",
       "dependencies": {
         "@kitsuyui/browser-extensions-example-com": "workspace:*",
-        "@kitsuyui/browser-extensions-quota-anthropic": "workspace:*",
-        "@kitsuyui/browser-extensions-quota-github-copilot": "workspace:*",
-        "@kitsuyui/browser-extensions-quota-openai": "workspace:*",
         "@kitsuyui/browser-extensions-scraping-platform": "workspace:*",
       },
       "devDependencies": {
@@ -230,12 +206,6 @@
     "@kitsuyui/browser-extensions-example-com": ["@kitsuyui/browser-extensions-example-com@workspace:packages/example-com"],
 
     "@kitsuyui/browser-extensions-hello": ["@kitsuyui/browser-extensions-hello@workspace:packages/hello"],
-
-    "@kitsuyui/browser-extensions-quota-anthropic": ["@kitsuyui/browser-extensions-quota-anthropic@workspace:packages/quota-anthropic"],
-
-    "@kitsuyui/browser-extensions-quota-github-copilot": ["@kitsuyui/browser-extensions-quota-github-copilot@workspace:packages/quota-github-copilot"],
-
-    "@kitsuyui/browser-extensions-quota-openai": ["@kitsuyui/browser-extensions-quota-openai@workspace:packages/quota-openai"],
 
     "@kitsuyui/browser-extensions-scraped-data": ["@kitsuyui/browser-extensions-scraped-data@workspace:packages/scraped-data"],
 
