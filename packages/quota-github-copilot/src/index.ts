@@ -72,12 +72,23 @@ function parseNumber(value: string | undefined): number | undefined {
   return Number(value.replaceAll(',', ''))
 }
 
+/**
+ * Rounding scale for one-decimal-place percent precision, e.g.
+ * `Math.round(x * PERCENT_SCALE * ONE_DECIMAL_PLACE_SCALE) / ONE_DECIMAL_PLACE_SCALE`
+ * rounds `8.66...%` to `8.7%`.
+ */
+const PERCENT_SCALE = 100
+const ONE_DECIMAL_PLACE_SCALE = 10
+
 function toUsedPercent(used: number, limit: number): number | undefined {
   if (!Number.isFinite(used) || !Number.isFinite(limit) || limit <= 0) {
     return undefined
   }
 
-  return Math.round((used / limit) * 1_000) / 10
+  return (
+    Math.round((used / limit) * PERCENT_SCALE * ONE_DECIMAL_PLACE_SCALE) /
+    ONE_DECIMAL_PLACE_SCALE
+  )
 }
 
 function createSnapshotMetrics(pageText: string): {
@@ -110,6 +121,10 @@ function createSnapshotMetrics(pageText: string): {
     metrics.push({
       key: 'premium_requests_used_percent',
       label: 'Premium used',
+      // For `unit: 'percent'` metrics, `remaining` stores the used
+      // percentage/utilization value by shared-model convention (see
+      // `SnapshotMetric.remaining` in @kitsuyui/browser-extensions-scraping-platform),
+      // matching every other provider in this monorepo.
       remaining: inferredUsedPercent,
       limit: 100,
       unit: 'percent',
