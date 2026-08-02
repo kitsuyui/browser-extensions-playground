@@ -17,6 +17,7 @@
     "playwright:test": "bun run --filter @kitsuyui/browser-extensions-scraping-extension-devtools build && bun run --filter @kitsuyui/browser-extensions-quota-openai build && bun run --filter @kitsuyui/browser-extensions-example-com build && playwright test",
     "check-module-isolation": "find packages -type d -name src -print -exec bunx ts-module-isolation -- {} +",
     "test": "bun run prisma:generate && vitest run --coverage",
+    "test:ci": "bun run prisma:generate && vitest run",
     "validate": "bun run --workspaces --if-present --sequential validate",
     "typecheck": "bun run prisma:generate && tsc --strict -p tsconfig.json --noEmit --skipLibCheck --downlevelIteration",
     "typedoc": "bun run prisma:generate && typedoc --out build/typedocs --treatValidationWarningsAsErrors --treatWarningsAsErrors",
