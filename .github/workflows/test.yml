@@ -78,7 +78,7 @@ jobs:
         run: bun run validate
 
       - name: Test
-        run: bun run test
+        run: bun run ${{ matrix.node-version == '24.x' && 'test' || 'test:ci' }}
 
       # See also: https://github.com/k1LoW/octocov-action
       - name: Report coverage with octocov
