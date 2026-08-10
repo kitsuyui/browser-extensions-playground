@@ -15,6 +15,20 @@ describe('createExtensionManifest', () => {
     )
     expect(createExtensionManifest().permissions).toContain('tabs')
   })
+
+  it('accepts a normalized manifest version and preserves prerelease text', () => {
+    expect(
+      createExtensionManifest({
+        version: '3.5.8',
+        version_name: '3.5.8-rc.2',
+      })
+    ).toEqual(
+      expect.objectContaining({
+        version: '3.5.8',
+        version_name: '3.5.8-rc.2',
+      })
+    )
+  })
 })
 
 describe('createPopupHtml', () => {

@@ -36,6 +36,20 @@ describe('createExtensionManifest', () => {
       'tabs',
     ])
   })
+
+  it('accepts a normalized manifest version and preserves prerelease text', () => {
+    expect(
+      createExtensionManifest({
+        version: '2.4.6',
+        version_name: '2.4.6-rc.9',
+      })
+    ).toEqual(
+      expect.objectContaining({
+        version: '2.4.6',
+        version_name: '2.4.6-rc.9',
+      })
+    )
+  })
 })
 
 describe('createPopupHtml', () => {

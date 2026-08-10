@@ -102,11 +102,18 @@ export function createDeterministicExtensionManifest(options: {
   readonly name: string
   readonly description: string
   readonly matches: readonly string[]
+  readonly version?: string
+  readonly version_name?: string
 }) {
   return {
     manifest_version: 3 as const,
     name: options.name,
-    version: '0.0.0',
+    version: options.version ?? '0.0.0',
+    ...(options.version_name
+      ? {
+          version_name: options.version_name,
+        }
+      : {}),
     description: options.description,
     permissions: ['alarms', 'storage', 'tabs'],
     host_permissions: [...options.matches, LOCAL_SERVER_HTTP_MATCH_PATTERN],
