@@ -46,32 +46,38 @@ jobs:
           bun run build
           bun run validate
 
-      - name: Set tag rc
-        if: github.event_name == 'pull_request'
+      - name: verify checked-in package versions
         run: |
-          git config user.email "dummy@dummy"
-          git config user.name "dummy"
-          # dummy tag for dry-run
-          git tag "v0.0.0-rc.${GITHUB_RUN_NUMBER}"
+          set -eu
+          EXPECTED_VERSION=""
+          ACTUAL_VERSION=""
 
-      - name: set git tag version
-        run: |
-          git config user.email "dummy@dummy"
-          git config user.name "dummy"
-          VERSION="$(git describe --tags --abbrev=0 2>/dev/null || echo v0.0.0)"
-          VERSION="${VERSION#v}"
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            VERSION="0.0.0-rc.${GITHUB_RUN_NUMBER}"
+          if [ "${{ github.event_name }}" = "release" ]; then
+            EXPECTED_VERSION="${{ github.event.release.tag_name }}"
+            EXPECTED_VERSION="${EXPECTED_VERSION#v}"
           fi
+
           for dir in packages/*; do
             if [ -f "$dir/package.json" ]; then
-              (
-                cd "$dir"
-                bun pm pkg set version="$VERSION"
-              )
+              VERSION="$(jq -r '.version' "$dir/package.json")"
+              if [ "$VERSION" = "0.0.0" ]; then
+                echo "::error file=$dir/package.json::checked-in package versions must be bumped before release validation or publish dry-runs"
+                exit 1
+              fi
+
+              if [ -z "$ACTUAL_VERSION" ]; then
+                ACTUAL_VERSION="$VERSION"
+              elif [ "$VERSION" != "$ACTUAL_VERSION" ]; then
+                echo "::error file=$dir/package.json::package version $VERSION does not match workspace release version $ACTUAL_VERSION"
+                exit 1
+              fi
+
+              if [ -n "$EXPECTED_VERSION" ] && [ "$VERSION" != "$EXPECTED_VERSION" ]; then
+                echo "::error file=$dir/package.json::package version $VERSION does not match release tag $EXPECTED_VERSION"
+                exit 1
+              fi
             fi
           done
-          bun run format
 
       - name: deploy
         # https://docs.npmjs.com/generating-provenance-statements

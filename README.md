@@ -88,6 +88,15 @@ bunx lefthook install
 
 Playwright / end-to-end tests are intentionally excluded from hooks and from CI because they require a browser environment. Run them locally with `bun run playwright:test` before merging changes that touch extension build output or runtime behaviour.
 
+## Release Versioning
+
+Checked-in `packages/*/package.json` versions are the release source of truth.
+Before creating a GitHub release, bump the package versions in the same pull
+request that prepares the release. The release workflow verifies that every
+workspace package shares the same committed version and, for `release` events,
+that the version matches the release tag. It does not rewrite package manifests
+during CI.
+
 ## License
 
 MIT
