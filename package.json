@@ -48,7 +48,9 @@
     "@biomejs/biome": "2.4.5",
     "tar": "7.5.22",
     "brace-expansion": "5.0.9",
-    "postcss": "8.5.18",
-    "linkify-it": "5.0.2"
+    "postcss": "8.5.26",
+    "linkify-it": "5.0.2",
+    "undici": "6.28.0",
+    "ip-address": "10.5.0"
   }
 }
