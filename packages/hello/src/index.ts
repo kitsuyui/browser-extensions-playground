@@ -4,12 +4,14 @@
 export type BrowserExtensionInfo = {
   readonly name: string
   readonly version: string
+  readonly versionName?: string
 }
 
 export type BrowserExtensionManifest = {
   readonly manifest_version: 3
   readonly name: string
   readonly version: string
+  readonly version_name?: string
   readonly description: string
   readonly action: {
     readonly default_title: 'Hello, World!'
@@ -25,10 +27,14 @@ export type BrowserExtensionManifest = {
 /**
  * Returns the default metadata used by the starter package.
  */
-export function createBrowserExtensionInfo(): BrowserExtensionInfo {
+export function createBrowserExtensionInfo(options?: {
+  readonly version?: string
+  readonly versionName?: string
+}): BrowserExtensionInfo {
   return {
     name: 'Browser Extension Hello',
-    version: '0.0.0',
+    version: options?.version ?? '0.0.0',
+    versionName: options?.versionName,
   }
 }
 
@@ -42,13 +48,24 @@ export function createHelloWorldMessage(): string {
 /**
  * Creates a Manifest V3 definition for the demo extension.
  */
-export function createExtensionManifest(): BrowserExtensionManifest {
-  const info = createBrowserExtensionInfo()
+export function createExtensionManifest(options?: {
+  readonly version?: string
+  readonly version_name?: string
+}): BrowserExtensionManifest {
+  const info = createBrowserExtensionInfo({
+    version: options?.version,
+    versionName: options?.version_name,
+  })
 
   return {
     manifest_version: 3,
     name: info.name,
     version: info.version,
+    ...(info.versionName
+      ? {
+          version_name: info.versionName,
+        }
+      : {}),
     description: 'A minimal browser extension that shows Hello, World!.',
     action: {
       default_title: 'Hello, World!',

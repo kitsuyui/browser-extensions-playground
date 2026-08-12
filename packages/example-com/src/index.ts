@@ -93,12 +93,17 @@ export const providerExtractor: ProviderExtractor = {
   extractSnapshot,
 }
 
-export function createExtensionManifest() {
+export function createExtensionManifest(options?: {
+  readonly version?: string
+  readonly version_name?: string
+}) {
   return createDeterministicExtensionManifest({
     name: 'Example.com Data',
     description:
       'Example.com extension used for automated snapshot scraping tests.',
     matches: providerManifest.matches,
+    version: options?.version,
+    version_name: options?.version_name,
   })
 }
 

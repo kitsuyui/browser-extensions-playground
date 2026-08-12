@@ -1,11 +1,19 @@
 import { LOCAL_SERVER_HTTP_MATCH_PATTERN } from '@kitsuyui/browser-extensions-scraping-platform'
 import { SUPPORTED_PROVIDER_MATCH_PATTERNS } from './providers'
 
-export function createExtensionManifest() {
+export function createExtensionManifest(options?: {
+  readonly version?: string
+  readonly version_name?: string
+}) {
   return {
     manifest_version: 3 as const,
     name: 'Scraping Devtools',
-    version: '0.0.0',
+    version: options?.version ?? '0.0.0',
+    ...(options?.version_name
+      ? {
+          version_name: options.version_name,
+        }
+      : {}),
     description:
       'Dangerous developer extension for remote browser inspection and scripted control.',
     permissions: ['storage', 'tabs'],
