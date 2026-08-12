@@ -40,11 +40,9 @@ jobs:
           node-version: '24.x'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: install and build
+      - name: install dependencies
         run: |
           bun install --frozen-lockfile
-          bun run build
-          bun run validate
 
       - name: verify checked-in package versions
         run: |
@@ -78,6 +76,11 @@ jobs:
               fi
             fi
           done
+
+      - name: build and validate
+        run: |
+          bun run build
+          bun run validate
 
       - name: deploy
         # https://docs.npmjs.com/generating-provenance-statements

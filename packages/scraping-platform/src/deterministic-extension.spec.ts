@@ -35,6 +35,19 @@ describe('createDeterministicExtensionManifest', () => {
       },
     ])
   })
+
+  it('preserves prerelease text via version_name when given a browser-safe version', () => {
+    const manifest = createDeterministicExtensionManifest({
+      name: 'Quota Example',
+      description: 'Example deterministic extension',
+      matches: ['https://example.com/*'],
+      version: '1.2.3',
+      version_name: '1.2.3-rc.5',
+    })
+
+    expect(manifest.version).toBe('1.2.3')
+    expect(manifest.version_name).toBe('1.2.3-rc.5')
+  })
 })
 
 describe('DEFAULT_PERIODIC_CAPTURE_INTERVAL_MINUTES', () => {
