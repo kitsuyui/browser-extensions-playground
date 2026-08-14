@@ -2,7 +2,7 @@
   "name": "@kitsuyui/browser-extensions-scraping-extension-devtools",
   "private": true,
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "license": "MIT",
   "author": "Yui Kitsu <kitsuyui@kitsuyui.com>",
   "description": "Developer-oriented scraping extension with DOM capture and remote control",

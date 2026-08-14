@@ -2,7 +2,7 @@
   "name": "@kitsuyui/browser-extensions-scraping-platform",
   "private": true,
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "license": "MIT",
   "author": "Yui Kitsu <kitsuyui@kitsuyui.com>",
   "description": "Shared scraping types and helpers for browser extensions",

@@ -26,7 +26,7 @@
     },
     "packages/example-com": {
       "name": "@kitsuyui/browser-extensions-example-com",
-      "version": "0.0.0",
+      "version": "0.1.0",
       "dependencies": {
         "@kitsuyui/browser-extensions-scraping-platform": "workspace:*",
       },
@@ -37,11 +37,11 @@
     },
     "packages/hello": {
       "name": "@kitsuyui/browser-extensions-hello",
-      "version": "0.0.0",
+      "version": "0.1.0",
     },
     "packages/scraped-data": {
       "name": "@kitsuyui/browser-extensions-scraped-data",
-      "version": "0.0.0",
+      "version": "0.1.0",
       "bin": {
         "scraped-data-mcp": "./dist/mcp.mjs",
       },
@@ -52,7 +52,7 @@
     },
     "packages/scraping-devtools": {
       "name": "@kitsuyui/browser-extensions-scraping-devtools",
-      "version": "0.0.0",
+      "version": "0.1.0",
       "bin": {
         "scraping-devtools-mcp": "./dist/mcp.mjs",
       },
@@ -63,7 +63,7 @@
     },
     "packages/scraping-extension-devtools": {
       "name": "@kitsuyui/browser-extensions-scraping-extension-devtools",
-      "version": "0.0.0",
+      "version": "0.1.0",
       "dependencies": {
         "@kitsuyui/browser-extensions-example-com": "workspace:*",
         "@kitsuyui/browser-extensions-scraping-platform": "workspace:*",
@@ -74,11 +74,11 @@
     },
     "packages/scraping-platform": {
       "name": "@kitsuyui/browser-extensions-scraping-platform",
-      "version": "0.0.0",
+      "version": "0.1.0",
     },
     "packages/scraping-server": {
       "name": "@kitsuyui/browser-extensions-scraping-server",
-      "version": "0.0.0",
+      "version": "0.1.0",
       "dependencies": {
         "@kitsuyui/browser-extensions-scraping-platform": "workspace:*",
         "@prisma/client": "^6.16.3",
