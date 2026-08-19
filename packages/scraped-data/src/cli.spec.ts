@@ -78,4 +78,34 @@ describe('scraped-data CLI', () => {
     expect(stderrOutput.join('')).toContain('snapshot <provider>')
     expect(exit).toHaveBeenCalledWith(1)
   })
+
+  it('lists describe in usage output', async () => {
+    process.argv = ['node', 'cli.mjs', '--help']
+    await main()
+    expect(stdoutOutput.join('')).toContain('describe <provider>')
+  })
+
+  it('prints usage to stderr and exits with code 1 when describe provider is missing', async () => {
+    process.argv = ['node', 'cli.mjs', 'describe']
+    const exit = vi.spyOn(process, 'exit').mockImplementation((code) => {
+      throw new Error(`process.exit(${code})`)
+    })
+
+    await expect(main()).rejects.toThrow('process.exit(1)')
+    expect(stdoutOutput).toHaveLength(0)
+    expect(stderrOutput.join('')).toContain('describe <provider>')
+    expect(exit).toHaveBeenCalledWith(1)
+  })
+
+  it('treats a server URL without a provider as a missing describe provider', async () => {
+    process.argv = ['node', 'cli.mjs', 'describe', 'http://127.0.0.1:3929']
+    const exit = vi.spyOn(process, 'exit').mockImplementation((code) => {
+      throw new Error(`process.exit(${code})`)
+    })
+
+    await expect(main()).rejects.toThrow('process.exit(1)')
+    expect(stdoutOutput).toHaveLength(0)
+    expect(stderrOutput.join('')).toContain('describe <provider>')
+    expect(exit).toHaveBeenCalledWith(1)
+  })
 })

@@ -25,6 +25,7 @@ bun run inspect -- status
 bun run inspect -- providers
 bun run inspect -- snapshot openai
 bun run inspect -- history openai http://127.0.0.1:3929
+bun run inspect -- describe openai
 ```
 
 ## MCP
