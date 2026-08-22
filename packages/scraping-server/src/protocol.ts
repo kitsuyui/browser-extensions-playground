@@ -9,6 +9,7 @@ export {
   DEFAULT_SERVER_HTTP_URL,
   DEFAULT_SERVER_PORT,
   DEFAULT_SERVER_WS_URL,
+  DEVTOOLS_PROTOCOL_VERSION,
   type DeterministicIngestRequest,
   LOCAL_SERVER_DEVTOOLS_WS_URL,
   LOCAL_SERVER_HOST,
@@ -86,4 +87,26 @@ export type DevCommandResult = {
   readonly error?: string
   readonly errorName?: string
   readonly errorStack?: string
+}
+
+export type DevtoolsHelloMessage = {
+  readonly type: 'hello'
+  readonly protocolVersion?: string
+  readonly extensionName?: string
+  readonly extensionVersion?: string
+}
+
+export type DevtoolsWelcomeMessage = {
+  readonly type: 'welcome'
+  readonly clientId: string
+  readonly protocolVersion: string
+  readonly warning: string
+}
+
+export type DevtoolsProtocolErrorMessage = {
+  readonly type: 'protocol-error'
+  readonly code: 'protocol-version-mismatch'
+  readonly expectedProtocolVersion: string
+  readonly receivedProtocolVersion?: string
+  readonly message: string
 }

@@ -1,4 +1,7 @@
-import { LOCAL_SERVER_DEVTOOLS_WS_URL } from '@kitsuyui/browser-extensions-scraping-platform'
+import {
+  DEVTOOLS_PROTOCOL_VERSION,
+  LOCAL_SERVER_DEVTOOLS_WS_URL,
+} from '@kitsuyui/browser-extensions-scraping-platform'
 import type {
   DevCommandEnvelope,
   DevCommandResult,
@@ -47,7 +50,15 @@ type ServerMessage =
   | {
       readonly type: 'welcome'
       readonly clientId: string
+      readonly protocolVersion?: string
       readonly warning: string
+    }
+  | {
+      readonly type: 'protocol-error'
+      readonly code: 'protocol-version-mismatch'
+      readonly expectedProtocolVersion: string
+      readonly receivedProtocolVersion?: string
+      readonly message: string
     }
   | ({
       readonly type: 'run-command'
@@ -58,6 +69,7 @@ const RECONNECT_INITIAL_DELAY_MS = 1_000
 const RECONNECT_MAX_DELAY_MS = 30_000
 const RECONNECT_JITTER_MS = 500
 const HEARTBEAT_INTERVAL_MS = 15_000
+const DEVTOOLS_PROTOCOL_CLOSE_CODE = 1002
 
 let reconnectDelayMs = RECONNECT_INITIAL_DELAY_MS
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null
@@ -114,6 +126,17 @@ function startHeartbeat(connectedSocket: WebSocket): void {
 function stopHeartbeat(): void {
   clearIntervalIfNeeded(heartbeatTimer)
   heartbeatTimer = null
+}
+
+async function persistProtocolMismatch(details: {
+  readonly expectedProtocolVersion: string
+  readonly receivedProtocolVersion?: string
+  readonly message: string
+}): Promise<void> {
+  await persistState({
+    devtoolsConnectionState: 'disconnected',
+    devtoolsProtocolError: details,
+  })
 }
 
 function disconnectSocket(): void {
@@ -226,12 +249,10 @@ async function connect(): Promise<void> {
       reconnectDelayMs = RECONNECT_INITIAL_DELAY_MS
       clearTimeoutIfNeeded(reconnectTimer)
       startHeartbeat(nextSocket)
-      void persistState({
-        devtoolsConnectionState: 'connected',
-      })
       nextSocket.send(
         JSON.stringify({
           type: 'hello',
+          protocolVersion: DEVTOOLS_PROTOCOL_VERSION,
           extensionName: 'Scraping Devtools',
           extensionVersion: '0.0.0',
         })
@@ -271,9 +292,37 @@ async function connect(): Promise<void> {
     nextSocket.addEventListener('message', (event) => {
       const message = JSON.parse(String(event.data)) as ServerMessage
 
+      if (message.type === 'protocol-error') {
+        void persistProtocolMismatch({
+          expectedProtocolVersion: message.expectedProtocolVersion,
+          receivedProtocolVersion: message.receivedProtocolVersion,
+          message: message.message,
+        })
+        nextSocket.close(
+          DEVTOOLS_PROTOCOL_CLOSE_CODE,
+          'Unsupported devtools protocol version.'
+        )
+        return
+      }
+
       if (message.type === 'welcome') {
+        if (message.protocolVersion !== DEVTOOLS_PROTOCOL_VERSION) {
+          void persistProtocolMismatch({
+            expectedProtocolVersion: DEVTOOLS_PROTOCOL_VERSION,
+            receivedProtocolVersion: message.protocolVersion,
+            message: `Expected devtools protocol version ${DEVTOOLS_PROTOCOL_VERSION}, received ${message.protocolVersion ?? 'none'}.`,
+          })
+          nextSocket.close(
+            DEVTOOLS_PROTOCOL_CLOSE_CODE,
+            'Unsupported devtools protocol version.'
+          )
+          return
+        }
+
         void persistState({
+          devtoolsConnectionState: 'connected',
           devtoolsWelcomeWarning: message.warning,
+          devtoolsProtocolVersion: message.protocolVersion,
         })
         return
       }

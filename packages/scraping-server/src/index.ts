@@ -17,6 +17,7 @@ import { ZodError } from 'zod'
 import {
   DEFAULT_SERVER_HOST,
   DEFAULT_SERVER_PORT,
+  DEVTOOLS_PROTOCOL_VERSION,
   type DeterministicHistoryQuery,
   type DeterministicIngestRequest,
   type DeterministicLatestQuery,
@@ -25,6 +26,7 @@ import {
   type DevCommandEnvelope,
   type DevCommandRequest,
   type DevCommandResult,
+  type DevtoolsHelloMessage,
   type ProviderDescription,
   type RegisteredProviderInfo,
   type RiskLevel,
@@ -55,6 +57,7 @@ type PendingCommand = {
 }
 
 const MAX_BODY_BYTES = 10 * 1024 * 1024 // 10 MB
+const DEVTOOLS_PROTOCOL_CLOSE_CODE = 1002
 
 function getErrorMessage(error: unknown, fallback: string): string {
   if (error instanceof Error) {
@@ -524,6 +527,31 @@ function parseDevtoolsMessage(buffer: RawData, logger: ScrapingServerLogger) {
     })
     return null
   }
+}
+
+function isCompatibleDevtoolsProtocol(
+  message: DevtoolsHelloMessage
+): message is DevtoolsHelloMessage & { readonly protocolVersion: string } {
+  return message.protocolVersion === DEVTOOLS_PROTOCOL_VERSION
+}
+
+function sendProtocolMismatchAndClose(
+  socket: WebSocket,
+  receivedProtocolVersion: string | undefined
+): void {
+  socket.send(
+    JSON.stringify({
+      type: 'protocol-error',
+      code: 'protocol-version-mismatch',
+      expectedProtocolVersion: DEVTOOLS_PROTOCOL_VERSION,
+      receivedProtocolVersion,
+      message: `Expected devtools protocol version ${DEVTOOLS_PROTOCOL_VERSION}, received ${receivedProtocolVersion ?? 'none'}.`,
+    })
+  )
+  socket.close(
+    DEVTOOLS_PROTOCOL_CLOSE_CODE,
+    'Unsupported devtools protocol version.'
+  )
 }
 
 function hasJsonContentType(contentTypeHeader: string | undefined): boolean {
@@ -1063,6 +1091,17 @@ export function createScrapingServer(options: {
       }
 
       if (message.type === 'hello') {
+        if (!isCompatibleDevtoolsProtocol(message)) {
+          logger.warn('[scraping-server] rejected devtools client protocol', {
+            expectedProtocolVersion: DEVTOOLS_PROTOCOL_VERSION,
+            receivedProtocolVersion: message.protocolVersion,
+            extensionName: message.extensionName,
+            extensionVersion: message.extensionVersion,
+          })
+          sendProtocolMismatchAndClose(socket, message.protocolVersion)
+          return
+        }
+
         clientId = randomUUID()
         const client: DevClientConnection = {
           clientId,
@@ -1081,6 +1120,7 @@ export function createScrapingServer(options: {
           JSON.stringify({
             type: 'welcome',
             clientId,
+            protocolVersion: DEVTOOLS_PROTOCOL_VERSION,
             warning:
               'Remote browser control is active while this devtools connection remains open.',
           })

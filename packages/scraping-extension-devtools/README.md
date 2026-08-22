@@ -49,3 +49,11 @@ Load `dist` as an unpacked Chrome extension.
 
 - [scraping-server](../scraping-server/README.md): receives WebSocket connections and commands
 - [scraping-devtools](../scraping-devtools/README.md): CLI and MCP client for this extension
+
+## Protocol Contract
+
+The extension identifies itself with devtools WebSocket protocol version `1`
+during the initial `hello` handshake and expects the server to echo the same
+version in `welcome`. If the server reports a different version, the extension
+closes the socket and records the mismatch instead of continuing with an
+unsupported command schema.

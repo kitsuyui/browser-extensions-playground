@@ -104,6 +104,7 @@ const devCommandResultSchema = z.object({
 
 const devtoolsHelloMessageSchema = z.object({
   type: z.literal('hello'),
+  protocolVersion: z.string().optional(),
   extensionName: z.string().optional(),
   extensionVersion: z.string().optional(),
 })
@@ -152,6 +153,7 @@ export function parseDevtoolsInboundMessage(body: unknown):
     }
   | {
       readonly type: 'hello'
+      readonly protocolVersion?: string
       readonly extensionName?: string
       readonly extensionVersion?: string
     }
