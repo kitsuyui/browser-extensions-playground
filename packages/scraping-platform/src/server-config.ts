@@ -2,6 +2,7 @@ import type { ProviderManifest, ProviderSnapshot } from './model'
 
 export const LOCAL_SERVER_HOST = '127.0.0.1'
 export const LOCAL_SERVER_PORT = 3929
+export const DEVTOOLS_PROTOCOL_VERSION = '1'
 export const LOCAL_SERVER_HTTP_MATCH_PATTERN = `http://${LOCAL_SERVER_HOST}/*`
 export const LOCAL_SERVER_HTTP_ORIGIN = `http://${LOCAL_SERVER_HOST}:${LOCAL_SERVER_PORT}`
 export const LOCAL_SERVER_DEVTOOLS_WS_URL = `ws://${LOCAL_SERVER_HOST}:${LOCAL_SERVER_PORT}/ws/dev`

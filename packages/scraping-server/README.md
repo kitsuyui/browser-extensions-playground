@@ -50,6 +50,11 @@ bun run --filter @kitsuyui/browser-extensions-scraping-server start -- --store-f
 
 - `ws://127.0.0.1:3929/ws/dev`
 
+Clients must send `{"type":"hello","protocolVersion":"1",...}` and the server
+replies with `{"type":"welcome","protocolVersion":"1",...}`. When versions do
+not match, the server sends a `protocol-error` message and closes the socket
+instead of silently accepting an incompatible peer.
+
 Used by [scraping-extension-devtools](../scraping-extension-devtools/README.md).
 
 ## Dev Command Boundary

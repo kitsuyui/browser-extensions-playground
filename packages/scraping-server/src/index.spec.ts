@@ -343,6 +343,7 @@ describe('createScrapingServer', () => {
         client.send(
           JSON.stringify({
             type: 'hello',
+            protocolVersion: '1',
             extensionName: 'Scraping Devtools',
             extensionVersion: '0.0.0',
           })
@@ -592,6 +593,7 @@ describe('createScrapingServer', () => {
         client.send(
           JSON.stringify({
             type: 'hello',
+            protocolVersion: '1',
             extensionName: 'Scraping Devtools',
             extensionVersion: '0.0.0',
           })
@@ -645,6 +647,9 @@ describe('createScrapingServer', () => {
       client.on('message', (buffer) => {
         const message = JSON.parse(buffer.toString()) as { type?: string }
         if (message.type === 'welcome') {
+          expect(message).toMatchObject({
+            protocolVersion: '1',
+          })
           resolvePromise()
         }
       })
@@ -652,6 +657,7 @@ describe('createScrapingServer', () => {
         client.send(
           JSON.stringify({
             type: 'hello',
+            protocolVersion: '1',
             extensionName: 'Scraping Devtools',
             extensionVersion: '0.0.0',
           })
@@ -680,6 +686,67 @@ describe('createScrapingServer', () => {
     } finally {
       await rm(resource.tempDir, { recursive: true, force: true })
     }
+  })
+
+  it('rejects devtools clients with a missing protocol version', async () => {
+    const logger = createLoggerSpy()
+    const { listening } = await createServerForTest(logger)
+    const client = new WebSocket(
+      `${listening.url.replace('http://', 'ws://')}/ws/dev`
+    )
+
+    const protocolError = new Promise<{
+      readonly type?: string
+      readonly code?: string
+      readonly expectedProtocolVersion?: string
+      readonly receivedProtocolVersion?: string
+    }>((resolvePromise) => {
+      client.on('message', (buffer) => {
+        resolvePromise(
+          JSON.parse(buffer.toString()) as {
+            readonly type?: string
+            readonly code?: string
+            readonly expectedProtocolVersion?: string
+            readonly receivedProtocolVersion?: string
+          }
+        )
+      })
+    })
+
+    const closed = new Promise<{ readonly code: number }>((resolvePromise) => {
+      client.on('close', (code) => {
+        resolvePromise({ code })
+      })
+    })
+
+    await new Promise<void>((resolvePromise) => {
+      client.once('open', () => {
+        client.send(
+          JSON.stringify({
+            type: 'hello',
+            extensionName: 'Old Devtools',
+            extensionVersion: '0.0.0',
+          })
+        )
+        resolvePromise()
+      })
+    })
+
+    await expect(protocolError).resolves.toMatchObject({
+      type: 'protocol-error',
+      code: 'protocol-version-mismatch',
+      expectedProtocolVersion: '1',
+    })
+    await expect(closed).resolves.toMatchObject({
+      code: 1002,
+    })
+    expect(logger.warn).toHaveBeenCalledWith(
+      '[scraping-server] rejected devtools client protocol',
+      expect.objectContaining({
+        expectedProtocolVersion: '1',
+        receivedProtocolVersion: undefined,
+      })
+    )
   })
 
   it('closes the store when WebSocket shutdown fails', async () => {
