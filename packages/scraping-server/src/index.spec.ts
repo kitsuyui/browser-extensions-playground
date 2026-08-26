@@ -399,6 +399,63 @@ describe('createScrapingServer', () => {
     client.close()
   })
 
+  it('clears the pending command timer when the devtools send throws synchronously', async () => {
+    const { listening } = await createServerForTest()
+    const client = new WebSocket(
+      `${listening.url.replace('http://', 'ws://')}/ws/dev`
+    )
+
+    await new Promise<void>((resolvePromise) => {
+      client.once('open', () => {
+        client.send(
+          JSON.stringify({
+            type: 'hello',
+            protocolVersion: '1',
+            extensionName: 'Scraping Devtools',
+            extensionVersion: '0.0.0',
+          })
+        )
+        resolvePromise()
+      })
+    })
+    await new Promise((resolvePromise) => setTimeout(resolvePromise, 10))
+
+    const sendSpy = vi
+      .spyOn(WebSocket.prototype, 'send')
+      .mockImplementation(() => {
+        throw new Error('WebSocket is not open: readyState 0 (CONNECTING)')
+      })
+
+    const pendingTimeoutIds: NodeJS.Timeout[] = []
+    const actualSetTimeout = globalThis.setTimeout
+    const setTimeoutSpy = vi
+      .spyOn(globalThis, 'setTimeout')
+      .mockImplementation((handler, timeout, ...args) => {
+        const id = actualSetTimeout(handler as () => void, timeout, ...args)
+        if (timeout === 10_000) {
+          pendingTimeoutIds.push(id)
+        }
+        return id
+      })
+    const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout')
+
+    const commandResponse = await fetch(`${listening.url}/api/dev/commands`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ command: { type: 'capture-page' } }),
+    })
+
+    expect(commandResponse.status).toBe(200)
+    expect(await commandResponse.json()).toMatchObject({ ok: false })
+    expect(pendingTimeoutIds).toHaveLength(1)
+    expect(clearTimeoutSpy).toHaveBeenCalledWith(pendingTimeoutIds[0])
+
+    sendSpy.mockRestore()
+    setTimeoutSpy.mockRestore()
+    clearTimeoutSpy.mockRestore()
+    client.close()
+  })
+
   it('logs malformed devtools messages with error details', async () => {
     const logger = createLoggerSpy()
     const { listening } = await createServerForTest(logger)

@@ -775,19 +775,25 @@ async function executeDevCommand(
       rejectResult(new Error('Timed out waiting for dev command result.'))
     }, 10_000)
 
+    try {
+      target.socket.send(
+        JSON.stringify({
+          type: 'run-command',
+          ...envelope,
+        })
+      )
+    } catch (error) {
+      clearTimeout(timeoutId)
+      rejectResult(error)
+      return
+    }
+
     pendingCommands.set(commandId, {
       clientId: target.clientId,
       resolve: resolveResult,
       reject: rejectResult,
       timeoutId,
     })
-
-    target.socket.send(
-      JSON.stringify({
-        type: 'run-command',
-        ...envelope,
-      })
-    )
   }).catch((error) => ({
     commandId,
     ok: false,
