@@ -782,12 +782,18 @@ async function executeDevCommand(
       timeoutId,
     })
 
-    target.socket.send(
-      JSON.stringify({
-        type: 'run-command',
-        ...envelope,
-      })
-    )
+    try {
+      target.socket.send(
+        JSON.stringify({
+          type: 'run-command',
+          ...envelope,
+        })
+      )
+    } catch (error) {
+      clearTimeout(timeoutId)
+      pendingCommands.delete(commandId)
+      rejectResult(error)
+    }
   }).catch((error) => ({
     commandId,
     ok: false,
