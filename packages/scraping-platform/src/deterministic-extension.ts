@@ -4,6 +4,7 @@ import {
   LOCAL_SERVER_HTTP_MATCH_PATTERN,
   LOCAL_SERVER_HTTP_ORIGIN,
 } from './server-config'
+import { resolveIsoTimestampClock } from './time'
 
 declare const chrome:
   | {
@@ -341,7 +342,7 @@ async function persistSyncErrorStatus(
 ): Promise<void> {
   await persistSyncStatus(provider, {
     status: 'error',
-    updatedAt: new Date().toISOString(),
+    updatedAt: resolveIsoTimestampClock().nowIso(),
     provider,
     ...(capturedAt ? { snapshotCapturedAt: capturedAt } : {}),
     ...serializeError(error, 'unknown error'),
@@ -420,7 +421,7 @@ async function reloadMatchingTabs(
         Promise.resolve(chrome?.tabs?.reload?.(tab.id)).catch(async (error) => {
           await persistSyncStatus(provider, {
             status: 'error',
-            updatedAt: new Date().toISOString(),
+            updatedAt: resolveIsoTimestampClock().nowIso(),
             provider,
             alarmName,
             ...serializeError(error, 'unknown reload error'),
@@ -465,7 +466,7 @@ export function registerDeterministicExtensionBackground(options: {
         if (!(await isExtensionEnabled())) {
           await persistSyncStatus(options.providerManifest.id, {
             status: 'paused',
-            updatedAt: new Date().toISOString(),
+            updatedAt: resolveIsoTimestampClock().nowIso(),
             provider: options.providerManifest.id,
           })
           return
@@ -493,7 +494,7 @@ export function registerDeterministicExtensionBackground(options: {
           if (!(await isExtensionEnabled())) {
             await persistSyncStatus(snapshot.provider, {
               status: 'paused',
-              updatedAt: new Date().toISOString(),
+              updatedAt: resolveIsoTimestampClock().nowIso(),
               provider: snapshot.provider,
             })
             sendResponse({
@@ -516,7 +517,7 @@ export function registerDeterministicExtensionBackground(options: {
           await ingestSnapshot(serverUrl, options.providerManifest, snapshot)
           await persistSyncStatus(snapshot.provider, {
             status: 'success',
-            updatedAt: new Date().toISOString(),
+            updatedAt: resolveIsoTimestampClock().nowIso(),
             provider: snapshot.provider,
             snapshotCapturedAt: snapshot.capturedAt,
           })
