@@ -36,7 +36,7 @@
     "package.json"
   ],
   "dependencies": {
-    "@prisma/client": "^6.16.3",
+    "@prisma/client": "^7.10.1",
     "@kitsuyui/browser-extensions-scraping-platform": "workspace:*",
     "ws": "^8.20.0",
     "zod": "^4.6.7"
