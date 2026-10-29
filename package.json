@@ -37,7 +37,7 @@
     "typescript": "^5.9.3",
     "validate-package-exports": "^0.18.0",
     "vite": "8.3.5",
-    "vitest": "^4.1.12"
+    "vitest": "^5.0.5"
   },
   "packageManager": "bun@1.3.11",
   "dependencies": {
