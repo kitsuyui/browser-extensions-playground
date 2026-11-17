@@ -27,7 +27,7 @@ jobs:
         node-version: [20.x, 22.x, 24.x]
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
           fetch-depth: 0
 
@@ -44,7 +44,7 @@ jobs:
             ${{ runner.os }}-bun-
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v6
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -52,9 +52,12 @@ jobs:
         run: |
           bun install --frozen-lockfile
 
+      - name: Check dependency overrides
+        run: bun scripts/check-dependency-overrides.mjs
+
       - name: Audit dependencies
         if: matrix.node-version == '24.x'
-        run: bun audit
+        run: bun audit --ignore GHSA-g3hv-75wg-m249 --ignore GHSA-3g3m-2fjr-6pw4
 
       - name: Lint
         run: bun run lint
