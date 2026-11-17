@@ -11,7 +11,7 @@ import type {
   ProviderManifest,
   ProviderSnapshot,
 } from '@kitsuyui/browser-extensions-scraping-platform'
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
+import { PrismaLibSql } from '@prisma/adapter-libsql'
 import { PrismaClient } from '@prisma/client'
 import { type RawData, type WebSocket, WebSocketServer } from 'ws'
 import { ZodError } from 'zod'
@@ -165,9 +165,7 @@ export class PrismaScrapedDataStore {
   private readonly prisma: PrismaClient
 
   constructor(private readonly databaseFile: string) {
-    const adapter = new PrismaBetterSqlite3({
-      url: `file:${this.databaseFile}`,
-    })
+    const adapter = new PrismaLibSql({ url: `file:${this.databaseFile}` })
     this.prisma = new PrismaClient({ adapter })
   }
 
