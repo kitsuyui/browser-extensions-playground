@@ -77,6 +77,9 @@ jobs:
             fi
           done
 
+      - name: Test package selection
+        run: bash tests/is-public-package.sh
+
       - name: build and validate
         run: |
           bun run build
@@ -87,7 +90,7 @@ jobs:
         run: |
           set -eu
           for dir in packages/*; do
-            if [ "$(jq -r '.private // true' "$dir/package.json")" = "true" ]; then
+            if ! bash scripts/is-public-package.sh "$dir/package.json"; then
               continue
             fi
             (
@@ -103,7 +106,7 @@ jobs:
         run: |
           set -eu
           for dir in packages/*; do
-            if [ "$(jq -r '.private // true' "$dir/package.json")" = "true" ]; then
+            if ! bash scripts/is-public-package.sh "$dir/package.json"; then
               continue
             fi
             (
