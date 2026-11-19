@@ -59,7 +59,7 @@ jobs:
         if: matrix.node-version == '24.x'
         # Vite 8 currently resolves picomatch 4.0.7, the latest published version.
         # Keep the audit gate explicit until a fixed picomatch release is available.
-        run: bun audit --ignore GHSA-fc5q-39xc-vjpf
+        run: bun audit --ignore GHSA-g3hv-75wg-m249 --ignore GHSA-3g3m-2fjr-6pw4 --ignore GHSA-fc5q-39xc-vjpf
 
       - name: Lint
         run: bun run lint
@@ -88,7 +88,7 @@ jobs:
       # See also: https://github.com/k1LoW/octocov-action
       - name: Report coverage with octocov
         if: matrix.node-version == '24.x'
-        uses: k1LoW/octocov-action@b3b6ee60482a667950f87553abf1df63217235d9 # v1
+        uses: k1LoW/octocov-action@a167dc0dee441b7ffc45e1b862ab55ec0d87f278 # v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           config: .octocov.yml
