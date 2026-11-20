@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { createExtensionManifest } from './index'
 import { inferProviderId, SUPPORTED_PROVIDER_MATCH_PATTERNS } from './providers'
 import { createPopupHtml } from './runtime'
-import { isCurrentOpenSocket } from './socket'
+import { isCurrentOpenSocket, isCurrentSocket } from './socket'
 
 describe('createExtensionManifest', () => {
   it('includes localhost and websocket permissions for server integration', () => {
@@ -55,6 +55,17 @@ describe('isCurrentOpenSocket', () => {
     expect(isCurrentOpenSocket(null, openSocket)).toBe(false)
     expect(isCurrentOpenSocket(openSocket, closedSocket)).toBe(false)
     expect(isCurrentOpenSocket(closedSocket, closedSocket)).toBe(false)
+  })
+})
+
+describe('isCurrentSocket', () => {
+  it('rejects a stale socket regardless of its ready state', () => {
+    const currentSocket = { readyState: 1 } as WebSocket
+    const staleSocket = { readyState: 3 } as WebSocket
+
+    expect(isCurrentSocket(currentSocket, currentSocket)).toBe(true)
+    expect(isCurrentSocket(currentSocket, staleSocket)).toBe(false)
+    expect(isCurrentSocket(null, staleSocket)).toBe(false)
   })
 })
 
