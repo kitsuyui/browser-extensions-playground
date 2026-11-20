@@ -41,6 +41,7 @@
   },
   "packageManager": "bun@1.3.11",
   "dependencies": {
+    "markdown-it": "14.3.3",
     "ws": "^8.22.1"
   },
   "overrides": {
@@ -53,7 +54,9 @@
     "postcss": "8.5.26",
     "undici": "6.29.1",
     "linkify-it": "5.0.2",
+    "markdown-it": "14.3.3",
     "deepmerge-ts": "8.0.1",
+    "effect": "3.22.5",
     "http-cache-semantics": "4.3.0",
     "postcss-selector-parser": "7.1.7",
     "source-map-js": "1.2.2",
