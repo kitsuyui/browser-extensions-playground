@@ -53,6 +53,7 @@
     "postcss": "8.5.26",
     "undici": "6.28.0",
     "linkify-it": "5.0.2",
-    "deepmerge-ts": "8.0.1"
+    "deepmerge-ts": "8.0.1",
+    "effect": "3.22.5"
   }
 }
