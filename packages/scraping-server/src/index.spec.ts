@@ -399,6 +399,69 @@ describe('createScrapingServer', () => {
     client.close()
   })
 
+  it('clears the pending command timer and returns ok:false when the devtools send throws synchronously', async () => {
+    const { listening } = await createServerForTest()
+    const client = new WebSocket(
+      `${listening.url.replace('http://', 'ws://')}/ws/dev`
+    )
+
+    await new Promise<void>((resolvePromise) => {
+      client.once('open', () => {
+        client.send(
+          JSON.stringify({
+            type: 'hello',
+            protocolVersion: '1',
+            extensionName: 'Scraping Devtools',
+            extensionVersion: '0.0.0',
+          })
+        )
+        resolvePromise()
+      })
+    })
+
+    const originalSend = WebSocket.prototype.send
+    const sendSpy = vi
+      .spyOn(WebSocket.prototype, 'send')
+      .mockImplementation(function mockSend(
+        this: WebSocket,
+        ...args: Parameters<WebSocket['send']>
+      ) {
+        const [data] = args
+        const parsed =
+          typeof data === 'string'
+            ? (JSON.parse(data) as { readonly type?: string })
+            : undefined
+
+        if (parsed?.type === 'run-command') {
+          throw new Error('socket is not open')
+        }
+
+        return originalSend.apply(this, args)
+      })
+    const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout')
+
+    try {
+      const commandResponse = await fetch(`${listening.url}/api/dev/commands`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          command: {
+            type: 'capture-page',
+          },
+        }),
+      })
+
+      expect(await commandResponse.json()).toMatchObject({ ok: false })
+      expect(clearTimeoutSpy).toHaveBeenCalled()
+    } finally {
+      sendSpy.mockRestore()
+      clearTimeoutSpy.mockRestore()
+      client.close()
+    }
+  })
+
   it('logs malformed devtools messages with error details', async () => {
     const logger = createLoggerSpy()
     const { listening } = await createServerForTest(logger)

@@ -9,6 +9,7 @@ import {
   loadDeterministicExtensionStorageState,
   registerDeterministicExtensionBackground,
 } from './deterministic-extension'
+import { isoTimestampClockGlobalKey } from './time'
 
 afterEach(() => {
   vi.unstubAllGlobals()
@@ -334,6 +335,54 @@ describe('registerDeterministicExtensionBackground', () => {
       snapshotCapturedAt: newerSnapshot.capturedAt,
     })
     expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('freezes syncStatus.updatedAt via the injected IsoTimestampClock', async () => {
+    const record: Record<string, unknown> = {}
+    const storageLocal = createStorageLocal(record)
+    const runtimeHarness = createRuntimeListenerHarness()
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      headers: { get: () => 'application/json' },
+    })
+    const frozenNowIso = '2026-07-11T00:00:00.000Z'
+
+    vi.stubGlobal(isoTimestampClockGlobalKey, {
+      nowIso: () => frozenNowIso,
+    })
+    vi.stubGlobal('fetch', fetchMock)
+    vi.stubGlobal('chrome', {
+      runtime: runtimeHarness.runtime,
+      alarms: runtimeHarness.alarms,
+      storage: {
+        local: storageLocal,
+      },
+    })
+
+    registerDeterministicExtensionBackground({
+      providerManifest: {
+        id: 'openai',
+        displayName: 'OpenAI',
+        matches: ['https://example.com/*'],
+        capabilities: ['usage'],
+        debugSelectors: [],
+      },
+    })
+
+    const listener = runtimeHarness.getMessageListener()
+    const snapshot = createSnapshot('2026-07-10T00:00:00.000Z')
+
+    await expect(dispatchSnapshotMessage(listener, snapshot)).resolves.toEqual({
+      ok: true,
+    })
+
+    const storageKeys = getDeterministicExtensionStorageKeys('openai')
+
+    expect(record[storageKeys.syncStatus]).toMatchObject({
+      provider: 'openai',
+      status: 'success',
+      updatedAt: frozenNowIso,
+    })
   })
 
   it('keeps the newest snapshot after concurrent messages complete', async () => {
