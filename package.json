@@ -24,7 +24,7 @@
     "typedoc:server": "python3 -m http.server --directory build/typedocs"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.3.2",
+    "@biomejs/biome": "^2.6.8",
     "@playwright/test": "^1.65.1",
     "@swc/core": "^1.13.5",
     "@types/node": "^26.6.5",
