@@ -56,6 +56,7 @@ function createResult(
 }
 
 function getPageText(doc: Document): string {
+  // biome-ignore lint/performance/useDomNodeTextContent: Devtools capture must use rendered, user-visible text.
   return (doc.body?.innerText ?? '').trim().slice(0, 20_000)
 }
 
