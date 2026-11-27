@@ -10,7 +10,7 @@ import {
   isSupportedProviderUrl,
   SUPPORTED_PROVIDER_MATCH_PATTERNS,
 } from './providers'
-import { isCurrentOpenSocket } from './socket'
+import { isCurrentOpenSocket, isCurrentSocket } from './socket'
 
 declare const chrome:
   | {
@@ -167,6 +167,23 @@ function scheduleReconnect(): void {
   reconnectDelayMs = Math.min(reconnectDelayMs * 2, RECONNECT_MAX_DELAY_MS)
 }
 
+function handleSocketTermination(terminatedSocket: WebSocket): void {
+  if (!isCurrentSocket(socket, terminatedSocket)) {
+    return
+  }
+
+  stopHeartbeat()
+  socket = null
+  void persistState({
+    devtoolsConnectionState: 'disconnected',
+  })
+  void isExtensionEnabled().then((enabled) => {
+    if (enabled) {
+      scheduleReconnect()
+    }
+  })
+}
+
 async function pickTargetTabId(): Promise<number | null> {
   const tabs =
     (await chrome?.tabs?.query?.({
@@ -260,33 +277,11 @@ async function connect(): Promise<void> {
     })
 
     nextSocket.addEventListener('close', () => {
-      stopHeartbeat()
-      if (socket === nextSocket) {
-        socket = null
-        void persistState({
-          devtoolsConnectionState: 'disconnected',
-        })
-      }
-      void isExtensionEnabled().then((enabled) => {
-        if (enabled) {
-          scheduleReconnect()
-        }
-      })
+      handleSocketTermination(nextSocket)
     })
 
     nextSocket.addEventListener('error', () => {
-      stopHeartbeat()
-      if (socket === nextSocket) {
-        socket = null
-        void persistState({
-          devtoolsConnectionState: 'disconnected',
-        })
-      }
-      void isExtensionEnabled().then((enabled) => {
-        if (enabled) {
-          scheduleReconnect()
-        }
-      })
+      handleSocketTermination(nextSocket)
     })
 
     nextSocket.addEventListener('message', (event) => {
