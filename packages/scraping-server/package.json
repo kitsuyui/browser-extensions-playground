@@ -36,12 +36,14 @@
     "package.json"
   ],
   "dependencies": {
-    "@prisma/client": "^6.16.3",
     "@kitsuyui/browser-extensions-scraping-platform": "workspace:*",
+    "@libsql/client": "^0.18.0",
+    "@prisma/adapter-libsql": "^7.10.1",
+    "@prisma/client": "^7.10.1",
     "ws": "^8.22.1",
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "prisma": "^6.16.3"
+    "prisma": "^7.10.1"
   }
 }

@@ -7,6 +7,7 @@ import type {
   ProviderManifest,
   ProviderSnapshot,
 } from '@kitsuyui/browser-extensions-scraping-platform'
+import { PrismaLibSql } from '@prisma/adapter-libsql'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { WebSocket, WebSocketServer } from 'ws'
 
@@ -1045,11 +1046,7 @@ describe('createScrapingServer', () => {
 
     const fallbackStoreFile = path.join(fallbackTempDir, 'fallback.sqlite')
     const prisma = new (await import('@prisma/client')).PrismaClient({
-      datasources: {
-        db: {
-          url: `file:${fallbackStoreFile}`,
-        },
-      },
+      adapter: new PrismaLibSql({ url: `file:${fallbackStoreFile}` }),
     })
 
     await prisma.deterministicSnapshotRecord.create({
