@@ -490,9 +490,13 @@ describe('createScrapingServer', () => {
         error: expect.any(Error),
       })
     )
-    expect((payload?.error as Error).stack).toContain(
-      (payload?.error as Error).message
-    )
+    const error = payload?.error
+    if (!(error instanceof Error)) {
+      throw new Error(
+        'Expected malformed-message log payload to contain an Error'
+      )
+    }
+    expect(error.stack).toContain(error.message)
 
     client.close()
   })
@@ -526,9 +530,13 @@ describe('createScrapingServer', () => {
         error: expect.any(Error),
       })
     )
-    expect((payload?.error as Error).stack).toContain(
-      'Request body must be valid JSON.'
-    )
+    const error = payload?.error
+    if (!(error instanceof Error)) {
+      throw new Error(
+        'Expected request-failure log payload to contain an Error'
+      )
+    }
+    expect(error.stack).toContain('Request body must be valid JSON.')
   })
 
   it('returns 404 when targetClientId is provided but the client is not connected', async () => {
