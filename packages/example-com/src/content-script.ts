@@ -11,6 +11,7 @@ declare const chrome:
 async function emitSnapshot(): Promise<void> {
   const snapshot = extractSnapshot({
     url: window.location.href,
+    // biome-ignore lint/performance/useDomNodeTextContent: Snapshots require rendered, user-visible page text.
     pageText: document.body?.innerText?.trim().slice(0, 20_000) ?? '',
   })
 

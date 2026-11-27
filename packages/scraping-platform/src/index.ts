@@ -32,6 +32,7 @@ export function collectDomProbeMatches(
 
     if (
       !element ||
+      // biome-ignore lint/performance/useDomNodeTextContent: Probe output intentionally captures rendered text.
       typeof (element as { innerText?: unknown }).innerText !== 'string' ||
       typeof (element as { outerHTML?: unknown }).outerHTML !== 'string'
     ) {
@@ -46,6 +47,7 @@ export function collectDomProbeMatches(
     return [
       {
         ...probe,
+        // biome-ignore lint/performance/useDomNodeTextContent: Probe output intentionally captures rendered text.
         text: sliceSafe(elementLike.innerText.trim(), 1_000),
         htmlSnippet: sliceSafe(elementLike.outerHTML.trim(), 1_000),
       },
@@ -54,6 +56,7 @@ export function collectDomProbeMatches(
 }
 
 function getPageText(doc: Document): string {
+  // biome-ignore lint/performance/useDomNodeTextContent: Extension capture requires rendered, user-visible text.
   return sliceSafe((doc.body?.innerText ?? '').trim(), 20_000)
 }
 
