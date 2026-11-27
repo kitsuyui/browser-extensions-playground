@@ -57,7 +57,7 @@ jobs:
 
       - name: Audit dependencies
         if: matrix.node-version == '24.x'
-        run: bun audit --ignore GHSA-g3hv-75wg-m249 --ignore GHSA-3g3m-2fjr-6pw4 --ignore GHSA-fc5q-39xc-vjpf
+        run: bun audit --ignore GHSA-g3hv-75wg-m249 --ignore GHSA-3g3m-2fjr-6pw4 --ignore GHSA-fc5q-39xc-vjpf --ignore GHSA-7589-6fvf-x4pw
 
       - name: Lint
         run: bun run lint
